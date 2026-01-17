@@ -1,1 +1,1 @@
-# Pingloo"
+# Pingloo - Visual Database Editor
