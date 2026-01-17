@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.CanvasController">
+   <top>
+      <ToolBar fx:id="toolBar" prefWidth="1280.0" BorderPane.alignment="CENTER">
+        <items>
+          <Button mnemonicParsing="false" onAction="#openFile" style="-fx-background-color: #3b82f6;" text="📂 Ouvrir" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#exportFile" style="-fx-background-color: #10b981;" text="💾 Sauvegarder" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="btnUndo" disable="true" mnemonicParsing="false" onAction="#undo" text="↶ Undo" />
+            <Button fx:id="btnRedo" disable="true" mnemonicParsing="false" onAction="#redo" text="↷ Redo" />
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="btnTheme" mnemonicParsing="false" onAction="#changeTheme" text="theme" />
+            <Separator orientation="VERTICAL" />
+            <Label text="Zoom: Ctrl + Molette">
+               <font>
+                  <Font size="11.0" />
+               </font>
+            </Label>
+            <Region fx:id="spacer" prefWidth="100.0" />
+            <Label text="Visual Database Editor">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+        </items>
+      </ToolBar>
+   </top>
+   <center>
+      <Pane fx:id="pane" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>
