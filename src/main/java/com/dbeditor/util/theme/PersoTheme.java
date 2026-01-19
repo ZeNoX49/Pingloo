@@ -1,57 +1,57 @@
 package com.dbeditor.util.theme;
 
-public class PersoTheme implements Theme {
-    private String backgroundColor = "#333333";
-    private String cardColor = "#333333";
-    private String borderColor = "#333333";
-    private String selectionBorderColor = "#333333";
-    private String headerColor = "#333333";
-    private String textColor = "#333333";
-    private String secondaryTextColor = "#333333";
-    private String toolbarColor = "#333333";
-    private String toolbarBorderColor = "#333333";
-    
-    public void loadColor() {
-        // TODO: ouvrir fichier
+import java.util.Map;
 
-        this.backgroundColor = "#333333";
-        this.cardColor = "#333333";
-        this.borderColor = "#333333";
-        this.selectionBorderColor = "#333333";
-        this.headerColor = "#333333";
-        this.textColor = "#333333";
-        this.secondaryTextColor = "#333333";
-        this.toolbarColor = "#333333";
-        this.toolbarBorderColor = "#333333";
+public class PersoTheme implements Theme {
+    private static String backgroundColor = "#333333";
+    private static String cardColor = "#333333";
+    private static String borderColor = "#333333";
+    private static String selectionBorderColor = "#333333";
+    private static String headerColor = "#333333";
+    private static String textColor = "#333333";
+    private static String secondaryTextColor = "#333333";
+    private static String toolbarColor = "#333333";
+    private static String toolbarBorderColor = "#333333";
+    
+    public static void loadColor(Map<String, String> theme) {
+        backgroundColor = theme.get("background_color");
+        cardColor = theme.get("card_color");
+        borderColor = theme.get("border_color");
+        selectionBorderColor = theme.get("selection_border_color");
+        headerColor = theme.get("header_color");
+        textColor = theme.get("text_color");
+        secondaryTextColor = theme.get("secondary_text_color");
+        toolbarColor = theme.get("toolbar_color");
+        toolbarBorderColor = theme.get("toolbar_border_color");
     }
 
     @Override
     public String getName() { return "Perso"; }
 
     @Override
-    public String getBackgroundColor() { return this.backgroundColor; }
+    public String getBackgroundColor() { return backgroundColor; }
     
     @Override
-    public String getCardColor() { return this.cardColor; }
+    public String getCardColor() { return cardColor; }
     
     @Override
-    public String getBorderColor() { return this.borderColor; }
+    public String getBorderColor() { return borderColor; }
 
     @Override
-    public String getSelectionBorderColor() { return this.selectionBorderColor; }
+    public String getSelectionBorderColor() { return selectionBorderColor; }
     
     @Override
-    public String getHeaderColor() { return this.headerColor; }
+    public String getHeaderColor() { return headerColor; }
     
     @Override
-    public String getTextColor() { return this.textColor; }
+    public String getTextColor() { return textColor; }
     
     @Override
-    public String getSecondaryTextColor() { return this.secondaryTextColor; }
+    public String getSecondaryTextColor() { return secondaryTextColor; }
     
     @Override
-    public String getToolbarColor() { return this.toolbarColor; }
+    public String getToolbarColor() { return toolbarColor; }
     
     @Override
-    public String getToolbarBorderColor() { return this.toolbarBorderColor; }
+    public String getToolbarBorderColor() { return toolbarBorderColor; }
 }
