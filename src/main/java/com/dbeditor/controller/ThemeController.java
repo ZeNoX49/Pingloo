@@ -2,6 +2,7 @@ package com.dbeditor.controller;
 
 import java.io.IOException;
 
+import com.dbeditor.util.ThemeManager;
 import com.dbeditor.util.theme.PersoTheme;
 
 import javafx.fxml.FXML;
@@ -13,6 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 public class ThemeController {
+    private ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private AnchorPane pane;
     @FXML private Label labelBackgroundColor, labelBorderColor, labelCardColor, labelHeaderColor, labelSecondaryTextColor, labelSelectionBorderColor, labelTextColor, labelToolbarBorderColor, labelToolbarColor;
@@ -27,7 +29,7 @@ public class ThemeController {
 
     @FXML
     private void initialize() throws IOException {
-        this.perso = new PersoTheme();
+        this.perso = T_M.getPersoTheme();
         
         this.createListener();
 

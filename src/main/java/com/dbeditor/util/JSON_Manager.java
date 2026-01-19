@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.smartcardio.Card;
-
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class JSON_Manager {
     private static JSON_Manager instance;
@@ -26,6 +23,8 @@ public class JSON_Manager {
     private JSON_Manager() {}
 
     /* ================================================== */
+
+    private ThemeManager T_M = ThemeManager.getInstance();
 
     private final static Path PATH_TO_FILE_USER_DATA = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "userData.json");
 
@@ -41,47 +40,46 @@ public class JSON_Manager {
             file = PATH_TO_FILE_USER_DATA.toFile();
         }
 
-        
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        Map<String, Object> root = mapper.readValue(
+            file, Map.class
+        );
+
+        FileManager.setLastUsedDirectory((String) root.get("last_used_directory"));
+        T_M.changeTheme((int) root.get("id_theme"));
+
+        Map<String, String> theme = (Map<String, String>) root.get("perso_theme");
+        T_M.getPersoTheme().loadColor(theme);
     }
 
     /**
      * Sauvegarder toutes les préférences de l'utilisateur au fermement de l'application
      */
     public void save() {
-        // ObjectMapper objectMapper = new ObjectMapper();
-        // objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        // CollectionPOJO collectionPOJO = new CollectionPOJO();
-        // List<DeckPOJO> deckList = new ArrayList<>();
+        Map<String, Object> root = new HashMap<>();
+        root.put("last_used_directory", FileManager.getLastUserDirectory());
+        root.put("id_theme", T_M.getThemeId());
 
-        // for (Deck deck : Collection.getDecks()) {
-        //     DeckPOJO deckPOJO = new DeckPOJO();
-        //     deckPOJO.title = deck.getTitle();
-        //     deckPOJO.imageUrl = deck.getImageUrl();
-
-        //     List<CardPOJO> cardList = new ArrayList<>();
-
-        //     for(Card card : deck.getCards()) {
-        //         CardPOJO cardPOJO = new CardPOJO();
-
-        //         cardPOJO.title = card.getTitle();
-        //         cardPOJO.description = card.getDescription();
-        //         cardPOJO.date = card.getDate();
-        //         cardPOJO.imageUrl = card.getImageUrl();
-
-        //         cardList.add(cardPOJO);
-        //     }
-
-        //     deckPOJO.cards = cardList.toArray(CardPOJO[]::new);
-        //     deckList.add(deckPOJO);
-        // }
-
-        // collectionPOJO.decks = deckList.toArray(DeckPOJO[]::new);
+        Map<String, String> themes = new HashMap<>();
+        themes.put("background_color", T_M.getPersoTheme().getBackgroundColor());
+        themes.put("card_color", T_M.getPersoTheme().getCardColor());
+        themes.put("border_color", T_M.getPersoTheme().getBorderColor());
+        themes.put("selection_border_color", T_M.getPersoTheme().getSelectionBorderColor());
+        themes.put("header_color", T_M.getPersoTheme().getHeaderColor());
+        themes.put("text_color", T_M.getPersoTheme().getTextColor());
+        themes.put("secondary_text_color", T_M.getPersoTheme().getSecondaryTextColor());
+        themes.put("toolbar_color", T_M.getPersoTheme().getToolbarColor());
+        themes.put("toolbar_border_color", T_M.getPersoTheme().getToolbarBorderColor());
+        root.put("perso_theme", themes);
 
         try {
-            File file = PATH_TO_FILE_USER_DATA.toFile();
-            objectMapper.writeValue(file, collectionPOJO);
-            System.out.println("Sauvegarde JSON réussie vers " + PATH);
+            mapper.writeValue(PATH_TO_FILE_USER_DATA.toFile(), root);
+            System.out.println("Sauvegarde JSON réussie vers " + PATH_TO_FILE_USER_DATA);
         } catch (IOException e) {
             System.err.println("Erreur lors de l'écriture du fichier JSON : " + e.getMessage());
             e.printStackTrace();
@@ -91,9 +89,10 @@ public class JSON_Manager {
     /**
      * Permet de créer le fichier s'il n'existe pas
      */
-    private void createUserData() throws IOException {
+    private void createUserData() {
         ObjectMapper mapper = new ObjectMapper();
-        
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
         Map<String, Object> root = new HashMap<>();
         root.put("last_used_directory", System.getProperty("user.dir"));
         root.put("id_theme", 2);
@@ -110,8 +109,13 @@ public class JSON_Manager {
         themes.put("toolbar_border_color", "#333333");
         root.put("perso_theme", themes);
 
-        mapper.writeValue(PATH_TO_FILE_USER_DATA.toFile(), root);
-
+        try {
+            mapper.writeValue(PATH_TO_FILE_USER_DATA.toFile(), root);
+            System.out.println("Sauvegarde JSON réussie vers " + PATH_TO_FILE_USER_DATA);
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'écriture du fichier JSON : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
 }

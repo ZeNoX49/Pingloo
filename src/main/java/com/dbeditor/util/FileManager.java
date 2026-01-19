@@ -29,6 +29,7 @@ public class FileManager {
 
     private static File lastUsedDirectory;
     public static void setLastUsedDirectory(String dir) { lastUsedDirectory = new File(dir); }
+    public static String getLastUserDirectory() { return lastUsedDirectory.toString(); }
     
     /* ================================================== */
     

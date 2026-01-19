@@ -26,6 +26,7 @@ public class ThemeManager {
 
     /* ================================================== */
 
+    private int id;
     private Map<Integer, Theme> themes;
     private Theme theme = new DarkTheme();
 
@@ -34,10 +35,13 @@ public class ThemeManager {
     }
 
     public void changeTheme(int id) {
+        this.id = id;
         this.theme = this.themes.get(id);
     }
 
     public PersoTheme getPersoTheme() {
         return (PersoTheme) this.themes.get(3);
     }
+
+    public int getThemeId() { return this.id; }
 }
