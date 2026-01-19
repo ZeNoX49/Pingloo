@@ -12,6 +12,7 @@ import com.dbeditor.model.Table;
 import com.dbeditor.util.FileManager;
 import com.dbeditor.util.ThemeManager;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -122,27 +123,26 @@ public class CanvasController {
         });
 
         pane.addEventFilter(MouseEvent.MOUSE_DRAGGED, e -> {
-            if (middleMouseDown && e.getButton() == MouseButton.MIDDLE) {
-                double dx = e.getSceneX() - lastMouseX;
-                double dy = e.getSceneY() - lastMouseY;
+            if (this.middleMouseDown && e.getButton() == MouseButton.MIDDLE) {
+                double dx = e.getSceneX() - this.lastMouseX;
+                double dy = e.getSceneY() - this.lastMouseY;
 
+                // applique le déplacement libre pendant le drag (pas de clamp ici)
                 contentGroup.setTranslateX(contentGroup.getTranslateX() + dx);
                 contentGroup.setTranslateY(contentGroup.getTranslateY() + dy);
 
-                // contraindre la position
-                clampContentPosition();
-
-                lastMouseX = e.getSceneX();
-                lastMouseY = e.getSceneY();
+                this.lastMouseX = e.getSceneX();
+                this.lastMouseY = e.getSceneY();
                 e.consume();
             }
         });
 
         pane.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
-            if (middleMouseDown && e.getButton() == MouseButton.MIDDLE) {
-                middleMouseDown = false;
+            if (this.middleMouseDown && e.getButton() == MouseButton.MIDDLE) {
+                this.middleMouseDown = false;
                 pane.setCursor(Cursor.DEFAULT);
                 e.consume();
+                this.clampContentPosition();
             }
         });
 
@@ -255,7 +255,7 @@ public class CanvasController {
             this.contentGroup.setTranslateY(this.contentGroup.getTranslateY() - dy);
 
             // clamp après ajustement (NE RECENTRE PAS si contenu plus petit)
-            clampContentPosition();
+            Platform.runLater(() -> clampContentPosition());
         });
     }
 
@@ -509,39 +509,45 @@ public class CanvasController {
      * afin de préserver le focal point du zoom.
      */
     private void clampContentPosition() {
-        if (this.contentGroup == null || this.scale == null || this.pane == null) return;
+        if (contentGroup == null || pane == null) return;
 
-        Bounds lb = this.contentGroup.getLayoutBounds(); // bounds en coordonnées locales
-        double scaledW = lb.getWidth() * scale.getX();
-        double scaledH = lb.getHeight() * scale.getY();
-
+        // bounds réels du contenu rendu (inclut scale & translate)
+        Bounds b = contentGroup.getBoundsInParent();
         double paneW = pane.getWidth();
         double paneH = pane.getHeight();
 
-        double tx = this.contentGroup.getTranslateX();
-        double ty = this.contentGroup.getTranslateY();
+        double tx = contentGroup.getTranslateX();
+        double ty = contentGroup.getTranslateY();
 
-        // X axis
-        if (scaledW > paneW) {
-            double minTx = paneW - scaledW; // négatif
-            double maxTx = 0;
-            tx = clamp(tx, minTx, maxTx);
-        } else {
-            // si contenu plus petit que viewport : ne pas recentrer (laisser la translate telle quelle)
-            // (on évite d'écraser la compensation de zoom qui fixe la souris)
+        // marge minimale visible du contenu (en pixels)
+        final double minVisible = 40.0;
+
+        // si tout le contenu est complètement à gauche de la vue -> le ramener pour qu'au moins minVisible soit visible
+        if (b.getMaxX() < minVisible) {
+            // décaler de la différence
+            tx += (minVisible - b.getMaxX());
+        }
+        // si tout le contenu est complètement à droite de la vue
+        if (b.getMinX() > paneW - minVisible) {
+            tx -= (b.getMinX() - (paneW - minVisible));
         }
 
-        // Y axis
-        if (scaledH > paneH) {
-            double minTy = paneH - scaledH;
-            double maxTy = 0;
-            ty = clamp(ty, minTy, maxTy);
-        } else {
-            // idem : ne pas recentrer verticalement
+        // vertical : si tout en haut
+        if (b.getMaxY() < minVisible) {
+            ty += (minVisible - b.getMaxY());
+        }
+        // vertical : si tout en bas
+        if (b.getMinY() > paneH - minVisible) {
+            ty -= (b.getMinY() - (paneH - minVisible));
         }
 
-        contentGroup.setTranslateX(tx);
-        contentGroup.setTranslateY(ty);
+        // n'appliquer que si différence notable (évite repaint inutile)
+        if (Math.abs(tx - contentGroup.getTranslateX()) > 0.1) {
+            contentGroup.setTranslateX(tx);
+        }
+        if (Math.abs(ty - contentGroup.getTranslateY()) > 0.1) {
+            contentGroup.setTranslateY(ty);
+        }
     }
 
     @FXML

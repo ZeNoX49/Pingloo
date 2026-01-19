@@ -39,9 +39,6 @@ public class TableController {
         this.table = table;
         createUI();
         setupDragHandlers();
-
-        this.hName.setTranslateX(1);
-        this.hName.setTranslateY(1);
     }
     
     private void createUI() {
@@ -55,14 +52,23 @@ public class TableController {
 
         for (int i = 0; i < this.table.getColumns().size(); i++) {
             Column col = this.table.getColumns().get(i);
-            
+
             Label colName = new Label(col.getName());
-            colName.setFont(Font.font("System", FontWeight.BOLD, 12));
+            if(col.isPrimaryKey() || col.isUnique()) {
+                colName.setFont(Font.font("System", FontWeight.BOLD, 12));
+                colName.setUnderline(true);
+            } else {
+                colName.setFont(Font.font("System", 12));
+            }
             this.grid.add(colName, 0, i);
             GridPane.setMargin(colName, new Insets(1, 1, 1, 3));
             
             Label colType = new Label(col.getType());
-            colType.setFont(Font.font("System", 11));
+            if(col.isPrimaryKey() || col.isNotNull()) {
+                colType.setFont(Font.font("System", FontWeight.BOLD, 11));
+            } else {
+                colType.setFont(Font.font("System", 11));
+            }
             this.grid.add(colType, 1, i);
             GridPane.setMargin(colType, new Insets(1, 3, 1, 1));
         }
