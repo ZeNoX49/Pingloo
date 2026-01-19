@@ -2,7 +2,7 @@ package com.dbeditor.util.theme;
 
 public class DarkTheme implements Theme {
     @Override
-    public String getName() { return "🌙"; }
+    public int getId() { return 2; }
     
     @Override
     public String getBackgroundColor() { return "#1e293b"; }

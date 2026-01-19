@@ -39,7 +39,7 @@ public class CanvasController {
     private final FileManager F_M = FileManager.getInstance();
 
     @FXML ToolBar toolBar;
-    @FXML private Button btnRedo, btnUndo, btnTheme;
+    @FXML private Button btnRedo, btnUndo;
     @FXML private Region spacer;
     @FXML private Pane pane;
     private Group contentGroup; 
@@ -465,8 +465,6 @@ public class CanvasController {
         this.toolBar.setStyle("-fx-background-color: " + T_M.getTheme().getToolbarColor() + 
                         "; -fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + 
                         "; -fx-border-width: 0 0 1 0;");
-
-        this.btnTheme.setText(T_M.getTheme().getName());
 
         for(TableController table : this.tableNodes) {
             table.updateStyle();

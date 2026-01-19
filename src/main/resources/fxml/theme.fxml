@@ -5,10 +5,14 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.ThemeController">
    <children>
@@ -72,10 +76,77 @@
                   </VBox>
                </children>
             </VBox>
-            <Pane>
+            <Pane prefWidth="250.0">
                <children>
-                  <ToolBar fx:id="toolBar" prefHeight="35.0" prefWidth="500.0" />
-                  <StackPane fx:id="spTable" prefHeight="503.0" prefWidth="500.0" />
+                  <ToolBar fx:id="toolBar" prefHeight="35.0" prefWidth="250.0" />
+                  <StackPane layoutY="125.0" prefHeight="250.0" prefWidth="250.0">
+                     <children>
+                        <AnchorPane fx:id="tablePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" style="-fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);">
+                           <children>
+                              <VBox alignment="TOP_CENTER">
+                                 <children>
+                                    <HBox fx:id="hName" alignment="CENTER" style="-fx-background-radius: 8 8 0 0;">
+                                       <children>
+                                          <Label fx:id="name" alignment="CENTER" text="EXAMPLE" textAlignment="CENTER" textFill="WHITE">
+                                             <font>
+                                                <Font name="System Bold" size="20.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <GridPane alignment="CENTER_LEFT">
+                                       <columnConstraints>
+                                          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
+                                          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
+                                          <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
+                                       </rowConstraints>
+                                       <children>
+                                          <Label fx:id="l1" text="int_ex">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                             <padding>
+                                                <Insets bottom="1.0" left="3.0" right="1.0" top="1.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="sl1" text="INT(32)" GridPane.columnIndex="1">
+                                             <font>
+                                                <Font size="11.0" />
+                                             </font>
+                                             <padding>
+                                                <Insets bottom="1.0" left="1.0" right="3.0" top="1.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="l2" text="varchar_ex" GridPane.rowIndex="1">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                             <padding>
+                                                <Insets bottom="1.0" left="3.0" right="1.0" top="1.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="sl2" text="VARCHAR(100)" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                             <font>
+                                                <Font size="11.0" />
+                                             </font>
+                                             <padding>
+                                                <Insets bottom="1.0" left="1.0" right="3.0" top="1.0" />
+                                             </padding>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                       </padding>
+                                    </GridPane>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </StackPane>
                </children>
             </Pane>
          </children>

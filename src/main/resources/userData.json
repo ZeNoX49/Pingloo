@@ -1,0 +1,15 @@
+{
+    "last_used_directory" : null,
+    "id_theme" : 2,
+    "perso_theme" : {
+        "background_color" : "#333333",
+        "card_color" : "#333333",
+        "border_color" : "#333333",
+        "selection_border_color" : "#333333",
+        "header_color" : "#333333",
+        "text_color" : "#333333",
+        "secondary_text_color" : "#333333",
+        "toolbar_color" : "#333333",
+        "toolbar_border_color" : "#333333"
+    }
+}

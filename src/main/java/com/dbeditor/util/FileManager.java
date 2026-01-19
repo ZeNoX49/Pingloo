@@ -27,9 +27,12 @@ public class FileManager {
     private static Stage stage;
     public static void setStage(Stage s) { stage = s; }
 
+    // private static File lastUsedDirectory = new File(System.getProperty("user.dir"));
+    private static File lastUsedDirectory;
+    public static void setLastUsedDirectory(String dir) { lastUsedDirectory = new File(dir); }
+    
     /* ================================================== */
     
-    private File lastUsedDirectory = new File(System.getProperty("user.dir"));
     private SQL_Exporter exporter;
     private SQL_Parser parser;
  
@@ -43,11 +46,11 @@ public class FileManager {
         );
 
         // Définir le répertoire en mémoire
-        fileChooser.setInitialDirectory(this.lastUsedDirectory);
+        fileChooser.setInitialDirectory(lastUsedDirectory);
 
         File fileDir = fileChooser.showOpenDialog(stage);
         if (fileDir != null) {
-            this.lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
+            lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
             
             this.parser = new MYSQL_Parser();
             DatabaseSchema schema = this.parser.loadFromFile(fileDir.getAbsolutePath());
@@ -73,7 +76,7 @@ public class FileManager {
         fileChooser.setInitialFileName("export.sql");
         
         // Définir le répertoire en mémoire
-        fileChooser.setInitialDirectory(this.lastUsedDirectory);
+        fileChooser.setInitialDirectory(lastUsedDirectory);
 
         File file = fileChooser.showSaveDialog(stage);
         this.exporter = new MYSQL_Exporter();

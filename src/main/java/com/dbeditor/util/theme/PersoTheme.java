@@ -2,6 +2,8 @@ package com.dbeditor.util.theme;
 
 import java.util.Map;
 
+import javafx.scene.paint.Color;
+
 public class PersoTheme implements Theme {
     private static String backgroundColor = "#333333";
     private static String cardColor = "#333333";
@@ -25,8 +27,20 @@ public class PersoTheme implements Theme {
         toolbarBorderColor = theme.get("toolbar_border_color");
     }
 
+    public void setBackgroundColor(String bc) { backgroundColor = bc; }
+    public void setCardColor(String cc) { cardColor = cc; }
+    public void setBorderColor(String bc) { borderColor = bc; }
+    public void setSelectionBorderColor(String sbc) { selectionBorderColor = sbc; }
+    public void setHeaderColor(String hc) { headerColor = hc; }
+    public void setTextColor(String tc) { textColor = tc; }
+    public void setSecondaryTextColor(String stc) { secondaryTextColor = stc; }
+    public void setToolbarColor(String tbc) { toolbarColor = tbc; }
+    public void setToolbarBorderColor(String tbdc) { toolbarBorderColor = tbdc; }
+
+    /* ==================================================================================================== */
+
     @Override
-    public String getName() { return "Perso"; }
+    public int getId() { return 3; }
 
     @Override
     public String getBackgroundColor() { return backgroundColor; }

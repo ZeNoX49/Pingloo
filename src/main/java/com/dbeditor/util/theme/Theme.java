@@ -1,7 +1,7 @@
 package com.dbeditor.util.theme;
 
 public interface Theme {
-    public abstract String getName();
+    public abstract int getId();
     public abstract String getBackgroundColor();
     public abstract String getCardColor();
     public abstract String getBorderColor();
