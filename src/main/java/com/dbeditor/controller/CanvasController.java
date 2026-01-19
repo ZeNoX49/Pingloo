@@ -455,7 +455,7 @@ public class CanvasController {
 
     @FXML
     void changeTheme(ActionEvent event) {
-        T_M.changeTheme();
+        // T_M.changeTheme();
         this.updateStyle();
     }
 
@@ -509,17 +509,17 @@ public class CanvasController {
      * afin de préserver le focal point du zoom.
      */
     private void clampContentPosition() {
-        if (contentGroup == null || scale == null || pane == null) return;
+        if (this.contentGroup == null || this.scale == null || this.pane == null) return;
 
-        Bounds lb = contentGroup.getLayoutBounds(); // bounds en coordonnées locales
+        Bounds lb = this.contentGroup.getLayoutBounds(); // bounds en coordonnées locales
         double scaledW = lb.getWidth() * scale.getX();
         double scaledH = lb.getHeight() * scale.getY();
 
         double paneW = pane.getWidth();
         double paneH = pane.getHeight();
 
-        double tx = contentGroup.getTranslateX();
-        double ty = contentGroup.getTranslateY();
+        double tx = this.contentGroup.getTranslateX();
+        double ty = this.contentGroup.getTranslateY();
 
         // X axis
         if (scaledW > paneW) {
@@ -546,13 +546,13 @@ public class CanvasController {
 
     @FXML
     void undo(ActionEvent event) {
-        // TODO: implémenter l'annulation réelle
-        System.out.println("Undo action triggered");
+        // TODO
+        System.out.println("Undo a implementer");
     }
 
     @FXML
     void redo(ActionEvent event) {
-        // TODO: implémenter le redo réel
-        System.out.println("Redo action triggered");
+        // TODO
+        System.out.println("Redo a implementer");
     }
 }

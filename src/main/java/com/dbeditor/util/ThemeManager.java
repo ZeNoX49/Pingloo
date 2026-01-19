@@ -1,7 +1,11 @@
 package com.dbeditor.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.dbeditor.util.theme.DarkTheme;
 import com.dbeditor.util.theme.LightTheme;
+import com.dbeditor.util.theme.PersoTheme;
 import com.dbeditor.util.theme.Theme;
 
 public class ThemeManager {
@@ -13,33 +17,27 @@ public class ThemeManager {
         return instance;
     }
 
-    private ThemeManager() {}
+    private ThemeManager() {
+        this.themes = new HashMap<>();
+        this.themes.put(1, new LightTheme());
+        this.themes.put(2, new DarkTheme());
+        this.themes.put(3, new PersoTheme());
+    }
 
     /* ================================================== */
 
+    private Map<Integer, Theme> themes;
     private Theme theme = new DarkTheme();
 
     public Theme getTheme() {
         return this.theme;
     }
 
-    public void changeTheme() {
-        if(this.theme instanceof DarkTheme) {
-            this.theme = new LightTheme();
-        } else {
-            this.theme = new DarkTheme();
-        }
+    public void changeTheme(int id) {
+        this.theme = this.themes.get(id);
+    }
 
-        // switch (tName) {
-        //     case "Dark" :
-        //         if (!(this.theme instanceof DarkTheme)) this.theme = new DarkTheme();
-        //         break;
-        //     case "Light" :
-        //         if (!(this.theme instanceof LightTheme)) this.theme = new LightTheme();
-        //         break;
-        //     case "Perso" :
-        //         if (!(this.theme instanceof PersoTheme)) this.theme = new PersoTheme();
-        //         break;
-        // }
+    public PersoTheme getPersoTheme() {
+        return (PersoTheme) this.themes.get(3);
     }
 }

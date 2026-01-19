@@ -27,7 +27,6 @@ public class FileManager {
     private static Stage stage;
     public static void setStage(Stage s) { stage = s; }
 
-    // private static File lastUsedDirectory = new File(System.getProperty("user.dir"));
     private static File lastUsedDirectory;
     public static void setLastUsedDirectory(String dir) { lastUsedDirectory = new File(dir); }
     

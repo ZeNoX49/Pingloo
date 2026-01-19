@@ -2,8 +2,6 @@ package com.dbeditor.controller;
 
 import java.io.IOException;
 
-import com.dbeditor.model.Column;
-import com.dbeditor.model.Table;
 import com.dbeditor.util.theme.PersoTheme;
 
 import javafx.fxml.FXML;
@@ -74,7 +72,7 @@ public class ThemeController {
             this.perso.setSelectionBorderColor(this.colorToHex(newColor));
             this.tablePane.setStyle(
                 this.tablePane.getStyle() +
-                "-fx-border-color: " + this.perso.getBorderSelectionColor() + ";"
+                "-fx-border-color: " + this.perso.getSelectionBorderColor() + ";"
             );
         });
         
