@@ -72,10 +72,11 @@ public class MYSQL_Parser implements SQL_Parser {
      */
     private Table getTable(CreateTable createTable) {
         Table table = new Table(createTable.getTable().getName());
-
+        System.out.println("\n" + createTable.getTable().getName());
         /* ---- Columns ---- */
         if (createTable.getColumnDefinitions() != null) {
             for (ColumnDefinition col : createTable.getColumnDefinitions()) {
+                System.out.println("\t- " + col.getColumnName() + " -> " + col.getColumnSpecs());
                 table.addColumn(
                     new Column(
                         col.getColumnName(),

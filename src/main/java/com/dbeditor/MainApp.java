@@ -27,7 +27,7 @@ public class MainApp extends Application {
 
 			FileManager.setStage(stage);
 
-			stage.setOnCloseRequest(_ -> J_M.save());
+			stage.setOnCloseRequest(e -> J_M.save());
 	    } catch (IOException e) {
 			e.printStackTrace();
 			throw new Error("Erreur de chargement de la scène : /fxml/canvas.fxml");

@@ -46,13 +46,13 @@ public class ThemeController {
 
     private void createListener() {
         // background color
-        this.cpBackgroundColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpBackgroundColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setBackgroundColor(this.colorToHex(newColor));
             this.pane.setStyle("-fx-background-color: " + this.perso.getBackgroundColor() + ";");
         });
         
         // card color
-        this.cpCardColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpCardColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setCardColor(this.colorToHex(newColor));
             this.tablePane.setStyle(
                 this.tablePane.getStyle() +
@@ -61,7 +61,7 @@ public class ThemeController {
         });
         
         // border color
-        this.cpBorderColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpBorderColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setBorderColor(this.colorToHex(newColor));
             this.tablePane.setStyle(
                 this.tablePane.getStyle() +
@@ -70,7 +70,7 @@ public class ThemeController {
         });
 
         // selection border color
-        this.cpSelectionBorderColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpSelectionBorderColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setSelectionBorderColor(this.colorToHex(newColor));
             this.tablePane.setStyle(
                 this.tablePane.getStyle() +
@@ -79,7 +79,7 @@ public class ThemeController {
         });
         
         // header color
-        this.cpHeaderColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpHeaderColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setHeaderColor(this.colorToHex(newColor));
             this.hName.setStyle(
                 this.hName.getStyle() +
@@ -88,21 +88,21 @@ public class ThemeController {
         });
         
         // text color
-        this.cpTextColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpTextColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setTextColor(this.colorToHex(newColor));
             this.l1.setStyle("-fx-text-fill: " + this.perso.getTextColor() + ";");
             this.l2.setStyle("-fx-text-fill: " + this.perso.getTextColor() + ";");
         });
         
         // secondary text color
-        this.cpSecondaryTextColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpSecondaryTextColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setSecondaryTextColor(this.colorToHex(newColor));
             this.sl1.setStyle("-fx-text-fill: " + this.perso.getSecondaryTextColor() + ";");
             this.sl2.setStyle("-fx-text-fill: " + this.perso.getSecondaryTextColor() + ";");
         });
         
         // toolbar color
-        this.cpToolbarColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpToolbarColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setToolbarColor(this.colorToHex(newColor));
             this.toolBar.setStyle(
                 this.toolBar.getStyle() +
@@ -111,7 +111,7 @@ public class ThemeController {
         });
         
         // toolbar border color
-        this.cpToolbarBorderColor.valueProperty().addListener((_, _, newColor) -> {
+        this.cpToolbarBorderColor.valueProperty().addListener((e1, e2, newColor) -> {
             this.perso.setToolbarBorderColor(this.colorToHex(newColor));
             this.toolBar.setStyle(
                 this.toolBar.getStyle() +
