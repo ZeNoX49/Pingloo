@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.sql.exporter.MYSQL_Exporter;
-import com.dbeditor.sql.exporter.SQL_Exporter;
-import com.dbeditor.sql.parser.MYSQL_Parser;
-import com.dbeditor.sql.parser.SQL_Parser;
+import com.dbeditor.sql.exporter.file.MYSQL_Exporter;
+import com.dbeditor.sql.exporter.file.SQL_Exporter;
+import com.dbeditor.sql.parser.file.MYSQL_Parser;
+import com.dbeditor.sql.parser.file.SQL_Parser;
 
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
@@ -24,14 +24,10 @@ public class FileManager {
 
     private FileManager() {}
 
-    private static Stage stage;
-    public static void setStage(Stage s) { stage = s; }
-
-    private static File lastUsedDirectory;
-    public static void setLastUsedDirectory(String dir) { lastUsedDirectory = new File(dir); }
-    public static String getLastUserDirectory() { return lastUsedDirectory.toString(); }
-    
     /* ================================================== */
+
+    private Stage stage;
+    private File lastUsedDirectory;
     
     private SQL_Exporter exporter;
     private SQL_Parser parser;
@@ -98,4 +94,9 @@ public class FileManager {
             }
         }
     }
+
+    public void setStage(Stage s) { stage = s; }
+    public void setLastUsedDirectory(String dir) { lastUsedDirectory = new File(dir); }
+    public String getLastUserDirectory() { return lastUsedDirectory.toString(); }
+    
 }

@@ -551,14 +551,22 @@ public class CanvasController {
     }
 
     @FXML
-    void undo(ActionEvent event) {
-        // TODO
-        System.out.println("Undo a implementer");
+    void openDbMYSQL(ActionEvent event) {
+        System.out.println("openDbMYSQL");
     }
 
     @FXML
-    void redo(ActionEvent event) {
-        // TODO
-        System.out.println("Redo a implementer");
+    void openFileMYSQL(ActionEvent event) {
+        System.out.println("openFileMYSQL");
+    }
+
+    @FXML
+    void saveDbMYSQL(ActionEvent event) {
+        System.out.println("saveDbMYSQL");
+    }
+
+    @FXML
+    void saveFileMYSQL(ActionEvent event) {
+        System.out.println("saveFileMYSQL");
     }
 }

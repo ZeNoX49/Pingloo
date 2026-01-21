@@ -2,6 +2,10 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
@@ -13,27 +17,74 @@
    <top>
       <ToolBar fx:id="toolBar" prefWidth="1280.0" BorderPane.alignment="CENTER">
         <items>
-          <Button mnemonicParsing="false" onAction="#openFile" style="-fx-background-color: #3b82f6;" text="📂 Ouvrir" textFill="WHITE">
+            <MenuBar>
+              <menus>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <MenuButton mnemonicParsing="false" style="-fx-background-color: #3b82f6;" text="📂 Ouvrir" textFill="WHITE">
+              <items>
+                  <Menu mnemonicParsing="false" text="Fichier">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#openFileMYSQL" text="MYSQL" />
+                        <MenuItem mnemonicParsing="false" text="MSSQL" />
+                        <MenuItem mnemonicParsing="false" text="..." />
+                     </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="BDD">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#openDbMYSQL" text="MYSQL" />
+                        <MenuItem mnemonicParsing="false" text="MSSQL" />
+                        <MenuItem mnemonicParsing="false" text="..." />
+                     </items>
+                  </Menu>
+                  <MenuItem mnemonicParsing="false" text="DF (.txt)" />
+              </items>
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#exportFile" style="-fx-background-color: #10b981;" text="💾 Sauvegarder" textFill="WHITE">
+            </MenuButton>
+            <MenuButton mnemonicParsing="false" style="-fx-background-color: #10b981;" text="💾 Sauvegarder" textFill="WHITE">
+               <items>
+                  <MenuItem mnemonicParsing="false">
+                     <graphic>
+                        <MenuButton mnemonicParsing="false" text="Fichier">
+                           <items>
+                              <MenuItem mnemonicParsing="false" onAction="#saveFileMYSQL" text="MYSQL" />
+                              <MenuItem mnemonicParsing="false" text="MSSQL" />
+                              <MenuItem mnemonicParsing="false" text="..." />
+                           </items>
+                        </MenuButton>
+                     </graphic>
+                  </MenuItem>
+                  <MenuItem mnemonicParsing="false">
+                     <graphic>
+                        <MenuButton mnemonicParsing="false" text="bdd">
+                           <items>
+                              <MenuItem mnemonicParsing="false" onAction="#saveDbMYSQL" text="MYSQL" />
+                              <MenuItem mnemonicParsing="false" text="MSSQL" />
+                              <MenuItem mnemonicParsing="false" text="..." />
+                           </items>
+                        </MenuButton>
+                     </graphic>
+                  </MenuItem>
+                  <MenuItem mnemonicParsing="false" text="DF (.txt)" />
+               </items>
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
-            </Button>
-            <Separator orientation="VERTICAL" />
-            <Button fx:id="btnUndo" disable="true" mnemonicParsing="false" onAction="#undo" text="↶ Undo" />
-            <Button fx:id="btnRedo" disable="true" mnemonicParsing="false" onAction="#redo" text="↷ Redo" />
+            </MenuButton>
             <Separator orientation="VERTICAL" />
             <Button mnemonicParsing="false" onAction="#changeTheme" text="theme" />
-            <Separator orientation="VERTICAL" />
-            <Label text="Zoom: Ctrl + Molette">
-               <font>
-                  <Font size="11.0" />
-               </font>
-            </Label>
             <Region fx:id="spacer" prefWidth="100.0" />
             <Label text="Visual Database Editor">
                <font>

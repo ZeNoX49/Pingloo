@@ -15,8 +15,8 @@ module com.dbeditor {
     exports com.dbeditor;
     exports com.dbeditor.controller;
     exports com.dbeditor.model;
-    exports com.dbeditor.sql.exporter;
-    exports com.dbeditor.sql.parser;
+    exports com.dbeditor.sql.exporter.file;
+    exports com.dbeditor.sql.parser.file;
     exports com.dbeditor.util;
     exports com.dbeditor.util.theme;
     // exports com.dbeditor.commands;

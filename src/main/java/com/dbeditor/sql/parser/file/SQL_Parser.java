@@ -1,4 +1,4 @@
-package com.dbeditor.sql.parser;
+package com.dbeditor.sql.parser.file;
 
 import com.dbeditor.model.DatabaseSchema;
 

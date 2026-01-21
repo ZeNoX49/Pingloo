@@ -1,4 +1,4 @@
-package com.dbeditor.sql.exporter;
+package com.dbeditor.sql.exporter.file;
 
 import java.io.IOException;
 import java.util.ArrayList;
