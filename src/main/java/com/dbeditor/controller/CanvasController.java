@@ -22,6 +22,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -43,6 +44,7 @@ public class CanvasController {
     @FXML private Button btnRedo, btnUndo;
     @FXML private Region spacer;
     @FXML private Pane pane;
+    @FXML private MenuItem miLT, miDT, miPT;
     private Group contentGroup; 
     
     private DatabaseSchema schema;
@@ -68,6 +70,10 @@ public class CanvasController {
     private void initialize() throws IOException {
         this.schema = new DatabaseSchema();
         this.tableNodes = new ArrayList<>();
+
+        this.miLT.setOnAction(e -> this.changeTheme(1));
+        this.miDT.setOnAction(e -> this.changeTheme(2));
+        this.miPT.setOnAction(e -> this.changeTheme(3));
 
         HBox.setHgrow(this.spacer, Priority.ALWAYS);
 
@@ -453,9 +459,8 @@ public class CanvasController {
         e.consume();
     }
 
-    @FXML
-    void changeTheme(ActionEvent event) {
-        // T_M.changeTheme();
+    private void changeTheme(int idTheme) {
+        T_M.changeTheme(idTheme);
         this.updateStyle();
     }
 
@@ -548,6 +553,11 @@ public class CanvasController {
         if (Math.abs(ty - contentGroup.getTranslateY()) > 0.1) {
             contentGroup.setTranslateY(ty);
         }
+    }
+
+    @FXML
+    void openPersoThemeParameter(ActionEvent event) {
+        // TODO
     }
 
     @FXML

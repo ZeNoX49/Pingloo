@@ -25,6 +25,7 @@ public class JSON_Manager {
     /* ================================================== */
 
     private ThemeManager T_M = ThemeManager.getInstance();
+    private FileManager F_M = FileManager.getInstance();
 
     private final static Path PATH_TO_FILE_USER_DATA = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "userData.json");
 
@@ -47,7 +48,7 @@ public class JSON_Manager {
             file, Map.class
         );
 
-        FileManager.setLastUsedDirectory((String) root.get("last_used_directory"));
+        F_M.setLastUsedDirectory((String) root.get("last_used_directory"));
         T_M.changeTheme((int) root.get("id_theme"));
 
         Map<String, String> theme = (Map<String, String>) root.get("perso_theme");
@@ -62,7 +63,7 @@ public class JSON_Manager {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         Map<String, Object> root = new HashMap<>();
-        root.put("last_used_directory", FileManager.getLastUserDirectory());
+        root.put("last_used_directory", F_M.getLastUserDirectory());
         root.put("id_theme", T_M.getThemeId());
 
         Map<String, String> themes = new HashMap<>();

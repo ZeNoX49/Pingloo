@@ -15,6 +15,7 @@ public class MainApp extends Application {
     @Override
 	public void start(Stage stage) throws IOException {
 		JSON_Manager J_M = JSON_Manager.getInstance();
+		FileManager F_M = FileManager.getInstance();
         try {
 			J_M.load();
 
@@ -25,7 +26,7 @@ public class MainApp extends Application {
 	        stage.setScene(scene);
 	        stage.show();
 
-			FileManager.setStage(stage);
+			F_M.setStage(stage);
 
 			stage.setOnCloseRequest(e -> J_M.save());
 	    } catch (IOException e) {
