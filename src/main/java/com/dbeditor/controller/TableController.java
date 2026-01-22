@@ -45,7 +45,7 @@ public class TableController {
         this.hName.setPadding(new Insets(2));
 
         this.name.setText(this.table.getName());
-        this.name.setFont(Font.font("System", FontWeight.BOLD, 20));
+        this.name.setFont(Font.font("System", FontWeight.BOLD, 24));
         this.name.setTextFill(Color.WHITE);
 
         this.grid.setPadding(new Insets(2));
@@ -56,7 +56,8 @@ public class TableController {
             Label colName = new Label(col.getName());
             if(col.isPrimaryKey() || col.isUnique()) {
                 colName.setFont(Font.font("System", FontWeight.BOLD, 12));
-                colName.setUnderline(true);
+                // uniquement pour les clés primaire
+                if(!col.isUnique()) colName.setUnderline(true);
             } else {
                 colName.setFont(Font.font("System", 12));
             }
@@ -83,7 +84,8 @@ public class TableController {
                 "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);");
 
         this.hName.setStyle("-fx-background-color: " + T_M.getTheme().getHeaderColor() + 
-                       "; -fx-background-radius: 8 8 0 0;");
+                    "; -fx-background-radius: 8 8 0 0;" + 
+                    "-fx-translate-x: 1px; -fx-translate-y: 1px;");
 
         for (Node node : grid.getChildren()) {
             if (node instanceof Label label) {

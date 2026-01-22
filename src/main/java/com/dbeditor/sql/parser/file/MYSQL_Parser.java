@@ -72,17 +72,47 @@ public class MYSQL_Parser implements SQL_Parser {
      */
     private Table getTable(CreateTable createTable) {
         Table table = new Table(createTable.getTable().getName());
-        System.out.println("\n" + createTable.getTable().getName());
         /* ---- Columns ---- */
         if (createTable.getColumnDefinitions() != null) {
             for (ColumnDefinition col : createTable.getColumnDefinitions()) {
-                System.out.println("\t- " + col.getColumnName() + " -> " + col.getColumnSpecs());
-                table.addColumn(
-                    new Column(
-                        col.getColumnName(),
-                        col.getColDataType().getDataType()
-                    )
+                Column column = new Column(
+                    col.getColumnName(),
+                    col.getColDataType().getDataType()
                 );
+
+                // si la colonne n'a pas de specs
+                if(col.getColumnSpecs() == null || col.getColumnSpecs().isEmpty()) {
+                    table.addColumn(column);
+                    continue;
+                }
+
+                System.out.println(col.getColumnSpecs());
+
+                if(col.getColumnSpecs().contains("PRIMARY") && col.getColumnSpecs().contains("KEY")) {
+                    column.setPrimaryKey(true);
+                }
+
+                if(col.getColumnSpecs().contains("AUTO_INCREMENT")) {
+                    column.setAutoIncrementing(true);
+                }
+
+                if(col.getColumnSpecs().contains("NOT") && col.getColumnSpecs().contains("NULL")) {
+                    column.setNotNull(true);
+                }
+
+                if(col.getColumnSpecs().contains("UNIQUE")) {
+                    column.setUnique(true);
+                }
+
+                // if(col.getColumnSpecs().contains("DEFAULT")) {
+                //     column.
+                // }
+
+                // if(col.getColumnSpecs().contains("CHECK")) {
+                //     column.
+                // }
+
+                table.addColumn(column);
             }
         }
 

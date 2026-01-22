@@ -28,11 +28,8 @@ public class FileManager {
 
     private Stage stage;
     private File lastUsedDirectory;
-    
-    private SQL_Exporter exporter;
-    private SQL_Parser parser;
  
-    public DatabaseSchema openDatabase() {
+    public DatabaseSchema openDatabase(SQL_Parser parser) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Ouvrir une base de données");
 
@@ -48,8 +45,8 @@ public class FileManager {
         if (fileDir != null) {
             lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
             
-            this.parser = new MYSQL_Parser();
-            DatabaseSchema schema = this.parser.loadFromFile(fileDir.getAbsolutePath());
+            parser = new MYSQL_Parser();
+            DatabaseSchema schema = parser.loadFromFile(fileDir.getAbsolutePath());
             if (schema != null && !schema.getTables().isEmpty()) {
                 return schema;
             } else {
@@ -62,23 +59,23 @@ public class FileManager {
         return null;
     }
     
-    public void exportSQL(DatabaseSchema schema) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Exporter en SQL");
+    public void exportSQL(FileChooser fileChooser, DatabaseSchema schema, SQL_Exporter exporter) {
+        // FileChooser fileChooser = new FileChooser();
+        // fileChooser.setTitle("Exporter en SQL");
 
-        fileChooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Fichiers SQL", "*.sql")
-        );
-        fileChooser.setInitialFileName("export.sql");
+        // fileChooser.getExtensionFilters().add(
+        //     new FileChooser.ExtensionFilter("Fichiers SQL", "*.sql")
+        // );
+        // fileChooser.setInitialFileName("export.sql");
         
         // Définir le répertoire en mémoire
         fileChooser.setInitialDirectory(lastUsedDirectory);
 
         File file = fileChooser.showSaveDialog(stage);
-        this.exporter = new MYSQL_Exporter();
+        exporter = new MYSQL_Exporter();
         if (file != null) {
             try {
-                this.exporter.exportToSQL(schema, file.getAbsolutePath());
+                exporter.exportToSQL(schema, file.getAbsolutePath());
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Export réussi");

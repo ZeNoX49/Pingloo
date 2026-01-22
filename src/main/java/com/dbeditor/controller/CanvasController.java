@@ -9,6 +9,8 @@ import java.util.Map;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.sql.exporter.file.MYSQL_Exporter;
+import com.dbeditor.sql.parser.file.MYSQL_Parser;
 import com.dbeditor.util.FileManager;
 import com.dbeditor.util.ThemeManager;
 
@@ -35,6 +37,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
+import javafx.stage.FileChooser;
 
 public class CanvasController {
     private final ThemeManager T_M = ThemeManager.getInstance();
@@ -476,38 +479,6 @@ public class CanvasController {
         }
     }
 
-    @FXML
-    void openFile(ActionEvent event) throws IOException {
-        DatabaseSchema dbS = this.F_M.openDatabase();
-        
-        if(dbS != null) {
-            this.tableNodes.clear();
-
-            // Ne pas supprimer le selectionRect
-            this.contentGroup.getChildren().removeIf(node -> node != this.selectionRect);
-
-            this.schema = dbS;
-
-            createTableNodes();
-            drawConnections();
-
-            if (this.selectionRect != null) this.selectionRect.toFront();
-            clampContentPosition();
-        }
-    }
-
-    @FXML
-    void exportFile(ActionEvent event) {
-        this.F_M.exportSQL(this.schema);
-    }
-
-    // helper clamp si nécessaire
-    private double clamp(double value, double min, double max) {
-        if (value < min) return min;
-        if (value > max) return max;
-        return value;
-    }
-
     /**
      * Contrainte pour que le contenu reste dans la vue.
      * IMPORTANT: ne recentre PAS automatiquement si le contenu est plus petit que le viewport,
@@ -566,8 +537,23 @@ public class CanvasController {
     }
 
     @FXML
-    void openFileMYSQL(ActionEvent event) {
-        System.out.println("openFileMYSQL");
+    void openFileMYSQL(ActionEvent event) throws IOException {
+        DatabaseSchema dbS = this.F_M.openDatabase(new MYSQL_Parser());
+        
+        if(dbS != null) {
+            this.tableNodes.clear();
+
+            // Ne pas supprimer le selectionRect
+            this.contentGroup.getChildren().removeIf(node -> node != this.selectionRect);
+
+            this.schema = dbS;
+
+            createTableNodes();
+            drawConnections();
+
+            if (this.selectionRect != null) this.selectionRect.toFront();
+            clampContentPosition();
+        }
     }
 
     @FXML
@@ -577,6 +563,14 @@ public class CanvasController {
 
     @FXML
     void saveFileMYSQL(ActionEvent event) {
-        System.out.println("saveFileMYSQL");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exporter en SQL");
+
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Fichiers SQL", "*.sql")
+        );
+        fileChooser.setInitialFileName("export.sql");
+
+        this.F_M.exportSQL(fileChooser, this.schema, new MYSQL_Exporter());
     }
 }

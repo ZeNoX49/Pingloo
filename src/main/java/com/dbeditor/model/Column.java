@@ -6,6 +6,7 @@ public class Column {
     private boolean isPrimaryKey;
     private boolean isNotNull;
     private boolean isUnique;
+    private boolean isAutoIncrementing;
     
     public Column(String name, String type) {
         this.name = name;
@@ -18,17 +19,23 @@ public class Column {
         this.isPrimaryKey = other.isPrimaryKey;
         this.isNotNull = other.isNotNull;
         this.isUnique = other.isUnique;
+        this.isAutoIncrementing = other.isAutoIncrementing;
     }
     
     public String getName() { return name; }
     public String getType() { return type; }
-    public boolean isPrimaryKey() { return isPrimaryKey; }
-    public boolean isNotNull() { return isNotNull; }
-    public boolean isUnique() { return isUnique; }
-    
+
     public void setName(String name) { this.name = name; }
     public void setType(String type) { this.type = type; }
-    public void setPrimaryKey(boolean isPrimaryKey) { this.isPrimaryKey = isPrimaryKey; }
-    public void setNotNull(boolean isNotNull) { this.isNotNull = isNotNull; }
-    public void setUnique(boolean isUnique) { this.isUnique = isUnique; }
+
+
+    public boolean isPrimaryKey() { return this.isPrimaryKey; }
+    public boolean isNotNull() { return this.isNotNull; }
+    public boolean isUnique() { return this.isUnique; }
+    public boolean isAutoIncrementing() { return this.isAutoIncrementing; }
+
+    public void setPrimaryKey(boolean bool) { this.isPrimaryKey = bool; }
+    public void setNotNull(boolean bool) { this.isNotNull = bool; }
+    public void setUnique(boolean bool) { this.isUnique = bool; }
+    public void setAutoIncrementing(boolean bool) { this.isAutoIncrementing = bool; }
 }

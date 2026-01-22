@@ -46,9 +46,9 @@
 
 ### Autres
 
-- [ ] style des page comme blender
+- [ ] style des pages comme blender (pour les vues)
 - [ ] les types de données
 - [ ] contraintes de tables
 - [ ] foreign keys
-- [ ] cardinalités -> à partie de MCD
+- [ ] cardinalités -> à partir de MCD
 - [ ] liens visuelles entre les tables (fk) (flèches)
