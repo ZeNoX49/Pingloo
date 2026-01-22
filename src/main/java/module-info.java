@@ -4,9 +4,7 @@ module com.dbeditor {
     requires javafx.graphics;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
-    // Module SQLite JDBC
-    // requires java.sql;
-    // requires org.xerial.sqlitejdbc;
+    
     requires net.sf.jsqlparser;
     
     opens com.dbeditor to javafx.fxml;

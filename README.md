@@ -34,7 +34,7 @@
 - [ ] exporter un dictionnaire des données et ses dépendances fonctionnelles
 
 ### Personnalisation
-- [ ] Choisir un thème (couleur)
+- [X] Choisir un thème (couleur)
 - [ ] Pouvoir modifier le thème perso
 
 ### Vues
@@ -45,7 +45,6 @@
 - [ ] visualisation des données des tables + modification
 
 ### Autres
-
 - [ ] style des pages comme blender (pour les vues)
 - [ ] les types de données
 - [ ] contraintes de tables

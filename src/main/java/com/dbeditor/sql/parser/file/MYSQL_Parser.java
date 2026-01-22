@@ -86,8 +86,6 @@ public class MYSQL_Parser implements SQL_Parser {
                     continue;
                 }
 
-                System.out.println(col.getColumnSpecs());
-
                 if(col.getColumnSpecs().contains("PRIMARY") && col.getColumnSpecs().contains("KEY")) {
                     column.setPrimaryKey(true);
                 }

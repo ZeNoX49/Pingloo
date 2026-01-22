@@ -10,7 +10,8 @@ public class Column {
     
     public Column(String name, String type) {
         this.name = name;
-        this.type = type;
+        this.type = type.replace(" ", "");
+        System.out.println(this.type + " | " + type);
     }
     
     public Column(Column other) {

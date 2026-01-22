@@ -70,7 +70,6 @@ public class CanvasController {
     private Rectangle selectionRect;
     private Point2D selectionStart;
 
-
     @FXML
     private void initialize() throws IOException {
         this.schema = new DatabaseSchema();
@@ -80,7 +79,7 @@ public class CanvasController {
         this.miDT.setOnAction(e -> this.changeTheme(2));
         this.miPT.setOnAction(e -> this.changeTheme(3));
         this.tfDbName.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && this.schema == null) {
+            if (!isFocused && this.schema != null) {
                 this.schema.setName(this.tfDbName.getText());
             }
         });
