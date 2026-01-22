@@ -28,6 +28,7 @@ public class MYSQL_Exporter extends SQL_Exporter {
                 sql.append("\t%s %s".formatted(col.getName(), col.getType()));
                 
                 if (col.isPrimaryKey()) sql.append(" PRIMARY KEY");
+                if (col.isAutoIncrementing()) sql.append(" AUTO_INCREMENT");
                 if (col.isNotNull()) sql.append(" NOT NULL");
                 if (col.isUnique()) sql.append(" UNIQUE");
                 

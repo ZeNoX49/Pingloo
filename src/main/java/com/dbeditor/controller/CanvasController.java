@@ -25,6 +25,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -45,7 +46,8 @@ public class CanvasController {
 
     @FXML ToolBar toolBar;
     @FXML private Button btnRedo, btnUndo;
-    @FXML private Region spacer;
+    @FXML private TextField tfDbName;
+    @FXML private Region spacer1, spacer2;
     @FXML private Pane pane;
     @FXML private MenuItem miLT, miDT, miPT;
     private Group contentGroup; 
@@ -77,8 +79,14 @@ public class CanvasController {
         this.miLT.setOnAction(e -> this.changeTheme(1));
         this.miDT.setOnAction(e -> this.changeTheme(2));
         this.miPT.setOnAction(e -> this.changeTheme(3));
+        this.tfDbName.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused && this.schema == null) {
+                this.schema.setName(this.tfDbName.getText());
+            }
+        });
 
-        HBox.setHgrow(this.spacer, Priority.ALWAYS);
+        HBox.setHgrow(this.spacer1, Priority.ALWAYS);
+        HBox.setHgrow(this.spacer2, Priority.ALWAYS);
 
         // clip pour éviter que le contenu déborde la zone centrale (ex: toolbar)
         Rectangle clip = new Rectangle();
@@ -547,6 +555,7 @@ public class CanvasController {
             this.contentGroup.getChildren().removeIf(node -> node != this.selectionRect);
 
             this.schema = dbS;
+            this.tfDbName.setText(dbS.getName());
 
             createTableNodes();
             drawConnections();

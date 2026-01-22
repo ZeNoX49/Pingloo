@@ -27,7 +27,7 @@ public class JSON_Manager {
     private ThemeManager T_M = ThemeManager.getInstance();
     private FileManager F_M = FileManager.getInstance();
 
-    private final static Path PATH_TO_FILE_USER_DATA = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "userData.json");
+    private final static Path PATH_TO_FILE_USER_DATA = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "userPreferences.json");
 
     /**
      * Charge toutes les préférences de l'utilisateur au lancement de l'application.
