@@ -1,4 +1,4 @@
-src/main/resources/userData.json
+src/main/resources/userPreferences.json
 .vscode/
 __temp__/
 target/
