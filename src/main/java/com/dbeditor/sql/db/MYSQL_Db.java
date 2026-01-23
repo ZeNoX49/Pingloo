@@ -69,12 +69,10 @@ public class MYSQL_Db implements SQL_Db {
         
         List<Map<String, Object>> list = this.queryForList("SHOW TABLES;");
         System.out.println(list);
-        for(Map<String, Object> data : list) {
-            System.out.println(data + " -> key : " + data.keySet() + " | values : " + data.values());
-            // System.out.println("Table_in_" + this.db_name + "  -> " + data.get("Table_in_" + this.db_name));
-            schema.addTable(this.getTable(dbName, (String) data.get("Table_in_" + dbName)));
+        for (Map<String, Object> data : list) {
+            String tableName = data.values().iterator().next().toString();
+            schema.addTable(this.getTable(dbName, tableName));
         }
-
 
         this.deconnect();
 
@@ -92,7 +90,7 @@ public class MYSQL_Db implements SQL_Db {
         String query = "SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, EXTRA " +
                        "FROM INFORMATION_SCHEMA.COLUMNS " +
                        "WHERE TABLE_SCHEMA = '" + dbName + "' AND TABLE_NAME LIKE '" + tName +"' " +
-                       "ORDER BY ORDINALdPOSITION;";
+                       "ORDER BY ORDINAL_POSITION;";
 
         List<Map<String, Object>> list = this.queryForList(query);
 

@@ -91,6 +91,18 @@ public class CanvasController {
         HBox.setHgrow(this.spacer1, Priority.ALWAYS);
         HBox.setHgrow(this.spacer2, Priority.ALWAYS);
 
+        for(String tableName : D_M.getMysqlDbTables()) {
+            MenuItem mi = new MenuItem(tableName);
+            mi.setOnAction(e -> {
+                try {
+                    this.openDbMYSQL(tableName);
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            });
+            this.menuOpenDbMYSQL.getItems().add(mi);
+        }
+
         // clip pour éviter que le contenu déborde la zone centrale (ex: toolbar)
         Rectangle clip = new Rectangle();
         clip.widthProperty().bind(pane.widthProperty());

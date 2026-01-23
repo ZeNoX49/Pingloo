@@ -25,6 +25,7 @@ public class DbManager {
 
     private DbManager() {
         this.db = new HashMap<>();
+        this.tables = new HashMap<>();
     }
 
     public void setMysqlDbData(Map<String, Object> data) {
