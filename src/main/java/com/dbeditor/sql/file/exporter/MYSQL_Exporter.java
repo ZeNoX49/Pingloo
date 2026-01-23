@@ -1,4 +1,4 @@
-package com.dbeditor.sql.exporter.file;
+package com.dbeditor.sql.file.exporter;
 
 import java.io.FileWriter;
 import java.io.IOException;

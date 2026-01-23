@@ -74,7 +74,7 @@ public class TableController {
             GridPane.setMargin(colType, new Insets(1, 3, 1, 1));
         }
 
-        updateStyle();
+        this.updateStyle();
     }
     
     public void updateStyle() {

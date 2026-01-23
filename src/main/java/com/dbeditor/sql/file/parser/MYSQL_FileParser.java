@@ -1,4 +1,4 @@
-package com.dbeditor.sql.parser.file;
+package com.dbeditor.sql.file.parser;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +17,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
 
-public class MYSQL_Parser implements SQL_Parser {
+public class MYSQL_FileParser implements SQL_FileParser {
     
     @Override
     public DatabaseSchema loadFromFile(String filePath) {

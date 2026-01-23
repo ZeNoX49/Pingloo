@@ -6,16 +6,19 @@ module com.dbeditor {
     requires com.fasterxml.jackson.databind;
     
     requires net.sf.jsqlparser;
+    requires java.sql;
     
     opens com.dbeditor to javafx.fxml;
     opens com.dbeditor.controller to javafx.fxml;
 
     exports com.dbeditor;
     exports com.dbeditor.controller;
+    // exports com.dbeditor.controller.view;
     exports com.dbeditor.model;
-    exports com.dbeditor.sql.exporter.file;
-    exports com.dbeditor.sql.parser.file;
+    exports com.dbeditor.sql.db;
+    exports com.dbeditor.sql.file.parser;
+    exports com.dbeditor.sql.file.exporter;
+    exports com.dbeditor.theme;
     exports com.dbeditor.util;
-    exports com.dbeditor.util.theme;
     // exports com.dbeditor.commands;
 }

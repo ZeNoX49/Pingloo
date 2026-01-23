@@ -3,7 +3,7 @@
 ## TODO
 
 ### Système de base
-- [ ] Pouvoir nommer et modifier le nom de la bdd
+- [X] Pouvoir nommer et modifier le nom de la bdd
 - [ ] Créer une table
 - [ ] Créer les attributs d'une table
 

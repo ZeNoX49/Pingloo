@@ -1,8 +1,8 @@
-package com.dbeditor.sql.parser.file;
+package com.dbeditor.sql.file.parser;
 
 import com.dbeditor.model.DatabaseSchema;
 
-public interface SQL_Parser {
+public interface SQL_FileParser {
 
     /**
      * fonction pour récupérer une bdd

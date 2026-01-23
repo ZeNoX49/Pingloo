@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.sql.exporter.file.MYSQL_Exporter;
-import com.dbeditor.sql.exporter.file.SQL_Exporter;
-import com.dbeditor.sql.parser.file.MYSQL_Parser;
-import com.dbeditor.sql.parser.file.SQL_Parser;
+import com.dbeditor.sql.file.exporter.MYSQL_Exporter;
+import com.dbeditor.sql.file.exporter.SQL_Exporter;
+import com.dbeditor.sql.file.parser.MYSQL_FileParser;
+import com.dbeditor.sql.file.parser.SQL_FileParser;
 
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
@@ -29,23 +29,14 @@ public class FileManager {
     private Stage stage;
     private File lastUsedDirectory;
  
-    public DatabaseSchema openDatabase(SQL_Parser parser) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Ouvrir une base de données");
+    public DatabaseSchema openDatabase(FileChooser fileChooser, SQL_FileParser parser) {
+        fileChooser.setInitialDirectory(this.lastUsedDirectory);
 
-        fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Fichiers MYSQL", "*.sql"),
-            new FileChooser.ExtensionFilter("Fichiers MSSQL", "*.sql")
-        );
-
-        // Définir le répertoire en mémoire
-        fileChooser.setInitialDirectory(lastUsedDirectory);
-
-        File fileDir = fileChooser.showOpenDialog(stage);
+        File fileDir = fileChooser.showOpenDialog(this.stage);
         if (fileDir != null) {
-            lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
+            this.lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
             
-            parser = new MYSQL_Parser();
+            parser = new MYSQL_FileParser();
             DatabaseSchema schema = parser.loadFromFile(fileDir.getAbsolutePath());
             if (schema != null && !schema.getTables().isEmpty()) {
                 return schema;
@@ -60,18 +51,9 @@ public class FileManager {
     }
     
     public void exportSQL(FileChooser fileChooser, DatabaseSchema schema, SQL_Exporter exporter) {
-        // FileChooser fileChooser = new FileChooser();
-        // fileChooser.setTitle("Exporter en SQL");
+        fileChooser.setInitialDirectory(this.lastUsedDirectory);
 
-        // fileChooser.getExtensionFilters().add(
-        //     new FileChooser.ExtensionFilter("Fichiers SQL", "*.sql")
-        // );
-        // fileChooser.setInitialFileName("export.sql");
-        
-        // Définir le répertoire en mémoire
-        fileChooser.setInitialDirectory(lastUsedDirectory);
-
-        File file = fileChooser.showSaveDialog(stage);
+        File file = fileChooser.showSaveDialog(this.stage);
         exporter = new MYSQL_Exporter();
         if (file != null) {
             try {
@@ -92,8 +74,8 @@ public class FileManager {
         }
     }
 
-    public void setStage(Stage s) { stage = s; }
-    public void setLastUsedDirectory(String dir) { lastUsedDirectory = new File(dir); }
-    public String getLastUserDirectory() { return lastUsedDirectory.toString(); }
+    public void setStage(Stage s) { this.stage = s; }
+    public void setLastUsedDirectory(String dir) { this.lastUsedDirectory = new File(dir); }
+    public String getLastUserDirectory() { return this.lastUsedDirectory.toString(); }
     
 }

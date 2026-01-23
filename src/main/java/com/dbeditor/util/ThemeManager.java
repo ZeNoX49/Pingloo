@@ -3,10 +3,10 @@ package com.dbeditor.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.dbeditor.util.theme.DarkTheme;
-import com.dbeditor.util.theme.LightTheme;
-import com.dbeditor.util.theme.PersoTheme;
-import com.dbeditor.util.theme.Theme;
+import com.dbeditor.theme.DarkTheme;
+import com.dbeditor.theme.LightTheme;
+import com.dbeditor.theme.PersoTheme;
+import com.dbeditor.theme.Theme;
 
 public class ThemeManager {
     private static ThemeManager instance;
@@ -35,8 +35,14 @@ public class ThemeManager {
     }
 
     public void changeTheme(int id) {
-        this.id = id;
-        this.theme = this.themes.get(id);
+        if(this.themes.containsKey(id)) {
+            this.id = id;
+            this.theme = this.themes.get(id);
+        }
+        else {
+            System.err.println("L'id du thème est incorrect");
+            this.changeTheme(1);
+        }
     }
 
     public PersoTheme getPersoTheme() {

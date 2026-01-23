@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.CanvasController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.CanvasController">
    <top>
       <ToolBar fx:id="toolBar" prefWidth="1280.0" BorderPane.alignment="CENTER">
         <items>
@@ -30,7 +30,11 @@
                   </Menu>
                   <Menu mnemonicParsing="false" text="BDD">
                      <items>
-                        <MenuItem mnemonicParsing="false" onAction="#openDbMYSQL" text="MYSQL" />
+                        <Menu fx:id="menuOpenDbMYSQL" mnemonicParsing="false" text="MYSQL">
+                           <items>
+                              <MenuItem mnemonicParsing="false" />
+                           </items>
+                        </Menu>
                         <MenuItem mnemonicParsing="false" text="MSSQL" />
                         <MenuItem mnemonicParsing="false" text="..." />
                      </items>
@@ -45,7 +49,11 @@
                <items>
                   <Menu mnemonicParsing="false" text="Fichier">
                      <items>
-                        <MenuItem mnemonicParsing="false" onAction="#saveFileMYSQL" text="MYSQL" />
+                        <Menu fx:id="menuSaveDbMYSQL" mnemonicParsing="false" text="MYSQL">
+                           <items>
+                              <MenuItem mnemonicParsing="false" />
+                           </items>
+                        </Menu>
                         <MenuItem mnemonicParsing="false" text="MSSQL" />
                         <MenuItem mnemonicParsing="false" text="..." />
                      </items>

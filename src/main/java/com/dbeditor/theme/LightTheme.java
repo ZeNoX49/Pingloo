@@ -1,4 +1,4 @@
-package com.dbeditor.util.theme;
+package com.dbeditor.theme;
 
 public class LightTheme implements Theme {
     @Override

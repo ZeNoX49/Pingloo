@@ -2,8 +2,8 @@ package com.dbeditor.controller;
 
 import java.io.IOException;
 
+import com.dbeditor.theme.PersoTheme;
 import com.dbeditor.util.ThemeManager;
-import com.dbeditor.util.theme.PersoTheme;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ColorPicker;

@@ -9,8 +9,9 @@ import java.util.Map;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
-import com.dbeditor.sql.exporter.file.MYSQL_Exporter;
-import com.dbeditor.sql.parser.file.MYSQL_Parser;
+import com.dbeditor.sql.file.exporter.MYSQL_Exporter;
+import com.dbeditor.sql.file.parser.MYSQL_FileParser;
+import com.dbeditor.util.DbManager;
 import com.dbeditor.util.FileManager;
 import com.dbeditor.util.ThemeManager;
 
@@ -24,6 +25,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
@@ -41,6 +43,7 @@ import javafx.scene.transform.Scale;
 import javafx.stage.FileChooser;
 
 public class CanvasController {
+    private final DbManager D_M = DbManager.getInstance();
     private final ThemeManager T_M = ThemeManager.getInstance();
     private final FileManager F_M = FileManager.getInstance();
 
@@ -49,6 +52,7 @@ public class CanvasController {
     @FXML private TextField tfDbName;
     @FXML private Region spacer1, spacer2;
     @FXML private Pane pane;
+    @FXML private Menu menuOpenDbMYSQL, menuSaveDbMYSQL;
     @FXML private MenuItem miLT, miDT, miPT;
     private Group contentGroup; 
     
@@ -538,15 +542,23 @@ public class CanvasController {
         // TODO
     }
 
-    @FXML
-    void openDbMYSQL(ActionEvent event) {
-        System.out.println("openDbMYSQL");
+    void openDbMYSQL(String dbName) throws IOException {
+        this.open(this.D_M.getMysqlDb().loadDb(dbName));
     }
 
     @FXML
     void openFileMYSQL(ActionEvent event) throws IOException {
-        DatabaseSchema dbS = this.F_M.openDatabase(new MYSQL_Parser());
-        
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Ouvrir une base de données");
+
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Fichiers MYSQL", "*.sql")
+        );
+
+        this.open(this.F_M.openDatabase(fileChooser, new MYSQL_FileParser()));
+    }
+
+    private void open(DatabaseSchema dbS) throws IOException {
         if(dbS != null) {
             this.tableNodes.clear();
 

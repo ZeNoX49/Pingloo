@@ -3,7 +3,7 @@ package com.dbeditor;
 import java.io.IOException;
 
 import com.dbeditor.util.FileManager;
-import com.dbeditor.util.JSON_Manager;
+import com.dbeditor.util.JsonManager;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -14,7 +14,7 @@ public class MainApp extends Application {
     
     @Override
 	public void start(Stage stage) throws IOException {
-		JSON_Manager J_M = JSON_Manager.getInstance();
+		JsonManager J_M = JsonManager.getInstance();
 		FileManager F_M = FileManager.getInstance();
         try {
 			J_M.load();

@@ -1,4 +1,4 @@
-package com.dbeditor.util.theme;
+package com.dbeditor.theme;
 
 import java.util.Map;
 
