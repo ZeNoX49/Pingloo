@@ -10,10 +10,11 @@ module com.dbeditor {
     
     opens com.dbeditor to javafx.fxml;
     opens com.dbeditor.controller to javafx.fxml;
+    opens com.dbeditor.controller.view to javafx.fxml;
 
     exports com.dbeditor;
     exports com.dbeditor.controller;
-    // exports com.dbeditor.controller.view;
+    exports com.dbeditor.controller.view;
     exports com.dbeditor.model;
     exports com.dbeditor.sql.db;
     exports com.dbeditor.sql.file.parser;

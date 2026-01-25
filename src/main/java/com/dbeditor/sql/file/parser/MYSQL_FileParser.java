@@ -21,7 +21,7 @@ public class MYSQL_FileParser implements SQL_FileParser {
     
     @Override
     public DatabaseSchema loadFromFile(String filePath) {
-        DatabaseSchema schema = new DatabaseSchema();
+        DatabaseSchema schema = new DatabaseSchema("");
 
         try {
             String sql = Files.readString(Path.of(filePath));

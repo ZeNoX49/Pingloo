@@ -2,6 +2,7 @@ package com.dbeditor;
 
 import java.io.IOException;
 
+import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.util.FileManager;
 import com.dbeditor.util.JsonManager;
 
@@ -20,7 +21,7 @@ public class MainApp extends Application {
 			J_M.load();
 
 	        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/canvas.fxml"));
-	        Scene scene = new Scene(loader.load());
+	        Scene scene = new Scene(loader.load(), 1280, 720);
 
 	        stage.setTitle("Pingloo - Visual Database Editor");
 	        stage.setScene(scene);
@@ -35,4 +36,9 @@ public class MainApp extends Application {
 	    }
 	} public static void main(String[] args) { launch(args); }
 
+	/* ==================================================================================================== */
+
+	private static DatabaseSchema schema;
+	public static void setSchema(DatabaseSchema schema) { MainApp.schema = schema; }
+	public static DatabaseSchema getSchema() { return MainApp.schema; }
 }

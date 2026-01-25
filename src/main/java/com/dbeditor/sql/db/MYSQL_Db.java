@@ -65,10 +65,9 @@ public class MYSQL_Db implements SQL_Db {
     public DatabaseSchema loadDb(String dbName) {
         this.connect(dbName);
 
-        DatabaseSchema schema = new DatabaseSchema();
+        DatabaseSchema schema = new DatabaseSchema(dbName);
         
         List<Map<String, Object>> list = this.queryForList("SHOW TABLES;");
-        System.out.println(list);
         for (Map<String, Object> data : list) {
             String tableName = data.values().iterator().next().toString();
             schema.addTable(this.getTable(dbName, tableName));
@@ -93,8 +92,6 @@ public class MYSQL_Db implements SQL_Db {
                        "ORDER BY ORDINAL_POSITION;";
 
         List<Map<String, Object>> list = this.queryForList(query);
-
-        System.out.println("\t- " + list);
         
         for(Map<String, Object> data : list) {
             Column column = new Column(
