@@ -27,11 +27,7 @@
                   </Menu>
                   <Menu mnemonicParsing="false" text="BDD">
                      <items>
-                        <Menu fx:id="menuOpenDbMYSQL" mnemonicParsing="false" text="MYSQL">
-                           <items>
-                              <MenuItem mnemonicParsing="false" />
-                           </items>
-                        </Menu>
+                        <Menu fx:id="menuOpenDbMYSQL" mnemonicParsing="false" text="MYSQL" />
                      </items>
                   </Menu>
               </items>

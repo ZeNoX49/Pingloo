@@ -108,6 +108,16 @@ public class MldController extends View {
     public void open(DatabaseSchema dbS) throws IOException {
         this.tableNodes.clear();
 
+        // Unbind ancien contenu
+        for (Node node : this.group.getChildren()) {
+            if (node instanceof Line line) {
+                line.startXProperty().unbind();
+                line.startYProperty().unbind();
+                line.endXProperty().unbind();
+                line.endYProperty().unbind();
+            }
+        }
+
         // Ne pas supprimer le selectionRect
         this.group.getChildren().removeIf(node -> node != this.selectionRect);
 

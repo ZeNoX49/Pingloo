@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 
 public class MYSQL_Db implements SQL_Db {
@@ -67,11 +68,16 @@ public class MYSQL_Db implements SQL_Db {
 
         DatabaseSchema schema = new DatabaseSchema(dbName);
         
-        List<Map<String, Object>> list = this.queryForList("SHOW TABLES;");
+        List<Map<String, Object>> list = this.queryForList("SELECT TABLE_NAME " +
+                                                           "FROM INFORMATION_SCHEMA.TABLES " +
+                                                           "WHERE TABLE_SCHEMA = '" + dbName + "' " +
+                                                           "AND TABLE_TYPE = 'BASE TABLE';");
         for (Map<String, Object> data : list) {
-            String tableName = data.values().iterator().next().toString();
+            String tableName = this.getString(data, "TABLE_NAME");
             schema.addTable(this.getTable(dbName, tableName));
         }
+
+        this.setupFk(schema);
 
         this.deconnect();
 
@@ -82,7 +88,7 @@ public class MYSQL_Db implements SQL_Db {
      * permet de créer une table avec tout ce qu'elle possède
      * @param dbName le nom de la bdd
      * @param tName le nom de la table
-     * @return la table créer
+     * @return la table créer et les foreign key
      */
     private Table getTable(String dbName, String tName) {
         Table table = new Table(tName);
@@ -93,30 +99,61 @@ public class MYSQL_Db implements SQL_Db {
 
         List<Map<String, Object>> list = this.queryForList(query);
         
+        boolean hasFk = false;
+
         for(Map<String, Object> data : list) {
             Column column = new Column(
-                (String) data.get("COLUMN_NAME"),
-                (String) data.get("COLUMN_TYPE")
+                this.getString(data, "COLUMN_NAME"), 
+                this.getString(data, "COLUMN_TYPE")
             );
 
-            if(((String) data.get("COLUMN_NAME")).equals("NO")) {
+            if("NO".equals(this.getString(data, "IS_NULLABLE"))) {
                 column.setNotNull(true);
             }
 
-            if(((String) data.get("COLUMN_KEY")).equals("MUL")) {
+            if("PRI".equals(this.getString(data, "COLUMN_KEY"))) {
                 column.setPrimaryKey(true);
             }
 
-            if(((String) data.get("EXTRA")) != null) {
-                if(((String) data.get("EXTRA")).equals("auto_increment")) {
-                    column.setAutoIncrementing(true);
-                }
+            if("auto_increment".equals(this.getString(data, "EXTRA"))) {
+                column.setAutoIncrementing(true);
             }
 
             table.addColumn(column);
         }
 
         return table;
+    }
+
+    private String getString(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        return value != null ? value.toString() : "";
+    }
+
+    private void setupFk(DatabaseSchema dbS) {
+        for(Table t : dbS.getTables().values()) {
+            String query = "SELECT " +
+                "    TABLE_NAME" +
+                "    COLUMN_NAME, " +
+                "    CONSTRAINT_NAME, " +
+                "    REFERENCED_TABLE_NAME, " +
+                "    REFERENCED_COLUMN_NAME " +
+                "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE " +
+                "WHERE TABLE_SCHEMA = '" + dbS.getName() + "' " +
+                "AND TABLE_NAME = '" + t.getName() + "' " +
+                "AND REFERENCED_TABLE_NAME IS NOT NULL;";
+
+            List<Map<String, Object>> list = this.queryForList(query);
+
+            for(Map<String, Object> data : list) {
+                t.addForeignKey(new ForeignKey(
+                    this.getString(data, "CONSTRAINT_NAME"),
+                    this.getString(data, "COLUMN_NAME"),
+                    this.getString(data, "REFERENCED_TABLE_NAME"),
+                    this.getString(data, "REFERENCED_COLUMN_NAME")
+                ));
+            }
+        }
     }
 
     /**

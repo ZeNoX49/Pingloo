@@ -8,8 +8,10 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.util.DbManager;
 
 public class MYSQL_Exporter extends SQL_Exporter {
+    DbManager D_M = DbManager.getInstance();
     
     @Override
     public void exportToSQL(DatabaseSchema schema, String filepath) throws IOException {
@@ -19,7 +21,7 @@ public class MYSQL_Exporter extends SQL_Exporter {
         sql.append("CREATE DATABASE %s;\n".formatted(schema.getName())); 
         sql.append("USE %s;\n\n".formatted(schema.getName()));
 
-        List<Table> orderedTables = super.sortTables(schema.getTables().values());
+        List<Table> orderedTables = D_M.sortTables(schema.getTables().values());
         for (Table table : orderedTables) {
             sql.append("CREATE TABLE %s (\n".formatted(table.getName()));
             

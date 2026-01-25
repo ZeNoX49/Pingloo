@@ -1,6 +1,7 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.function.Consumer;
 
 import com.dbeditor.MainApp;
@@ -272,31 +273,87 @@ public abstract class View {
     }
 
     public void setupCombobowView(ComboBox<String> cb, String value) {
+        // liste des vues disponibles
+        cb.getItems().clear();
         cb.getItems().addAll(
-            View.MLD
-            // View.MCD
-            // View.DF,
-            // View.DD,
-            // View.SDF,
-            // View.VALUE
+            View.MLD,
+            // View.MCD,
+            View.DF
+            // ajouter d'autres si besoin
         );
 
-        cb.setValue(value);
+        // affichage initial
+        if (value != null && cb.getItems().contains(value)) {
+            cb.setValue(value);
+        } else if (!cb.getItems().isEmpty()) {
+            cb.setValue(cb.getItems().get(0));
+        }
 
-        // cb.valueProperty().addListener((obs, oldValue, newValue) -> {
-        //     try {
-        //         if(newValue.equals(View.MLD)) {
-        //             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
+        cb.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue == null || newValue.equals(oldValue)) return;
 
-        //             this.parent.getChildren().remove(this.viewPane);
+            // exécuter sur le thread UI
+            Platform.runLater(() -> {
+                String fxmlPath = switch (newValue) {
+                    // case View.MCD -> "/fxml/view/mcd.fxml";
+                    case View.DF  -> "/fxml/view/df.fxml";
+                    case View.MLD -> "/fxml/view/mld.fxml";
+                    default       -> "/fxml/view/mld.fxml";
+                };
 
-        //             this.viewPane = loader.load();
+                // tentative robuste : essayer aussi quelques variantes de casse si le resource est null
+                URL resource = getClass().getResource(fxmlPath);
+                if (resource == null) {
+                    // essais communs : tout en minuscule / tout en majuscule / MLD vs mld
+                    String alt = fxmlPath.toLowerCase();
+                    resource = getClass().getResource(alt);
+                }
+                if (resource == null) {
+                    System.err.println("FXML introuvable pour '" + newValue + "'. Chemin essayé: " + fxmlPath);
+                    return;
+                }
 
-        //             this.parent.getChildren().add(this.viewPane);
-        //         }
-        //     } catch(IOException e) {
-        //         e.printStackTrace();
-        //     }
-        // });
+                try {
+                    FXMLLoader loader = new FXMLLoader(resource);
+                    Pane newPane = loader.load();
+                    View newController = loader.getController();
+
+                    // fournir setData au nouveau controller (même parent, même registrar)
+                    newController.setData(this.parent, newPane, this.registrar);
+
+                    // sizing policy (si Region)
+                    if (newPane instanceof Region rNew) {
+                        rNew.setMinSize(0, 0);
+                        rNew.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+                    }
+
+                    // remplacer uniquement cette.viewPane dans le parent (même position)
+                    int idx = this.parent.getChildren().indexOf(this.viewPane);
+                    if (idx >= 0) {
+                        this.parent.getChildren().set(idx, newPane);
+                    } else {
+                        // fallback : ajout en fin
+                        this.parent.getChildren().add(newPane);
+                    }
+
+                    // initialiser la nouvelle vue (open / style)
+                    if (MainApp.getSchema() != null) {
+                        try {
+                            newController.open(MainApp.getSchema());
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    newController.updateStyle();
+
+                    // remplacer la référence locale viewPane pour ce controller
+                    this.viewPane = newPane;
+
+                } catch (IOException ex) {
+                    System.err.println("Erreur lors du chargement du FXML pour " + newValue);
+                    ex.printStackTrace();
+                }
+            });
+        });
     }
 }

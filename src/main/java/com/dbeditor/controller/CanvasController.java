@@ -22,6 +22,8 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -83,17 +85,7 @@ public class CanvasController {
         HBox.setHgrow(this.spacer1, Priority.ALWAYS);
         HBox.setHgrow(this.spacer2, Priority.ALWAYS);
 
-        for(String tableName : D_M.getMysqlDbTables()) {
-            MenuItem mi = new MenuItem(tableName);
-            mi.setOnAction(e -> {
-                try {
-                    this.openDbMYSQL(tableName);
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                }
-            });
-            this.menuOpenDbMYSQL.getItems().add(mi);
-        }
+        this.createMenuItemMysql();
 
         this.updateStyle();
     }
@@ -123,7 +115,7 @@ public class CanvasController {
     @FXML
     void openPersoThemeParameter(ActionEvent event) {
         try {
-	        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/theme.fxml"));
+	        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/parameter/theme.fxml"));
 	        Scene scene = new Scene(loader.load());
 			
 			Stage modalStage = new Stage();
@@ -132,10 +124,10 @@ public class CanvasController {
             modalStage.initStyle(StageStyle.UTILITY);
             modalStage.setResizable(false);
 
+            modalStage.setOnCloseRequest(e -> this.updateStyle());
+
 	        modalStage.setScene(scene);
 			modalStage.showAndWait();
-
-            modalStage.setOnCloseRequest(e -> this.updateStyle());
 	    } catch (IOException e) {
 	        System.err.println("Erreur de chargement de la scène : theme.fxml");
 	        e.printStackTrace();
@@ -186,4 +178,46 @@ public class CanvasController {
     // void saveDbMYSQL(ActionEvent event) {
     //     System.out.println("saveDbMYSQL");
     // }
+
+    private void createMenuItemMysql() {
+        this.menuOpenDbMYSQL.getItems().clear();
+
+        MenuItem mip = new MenuItem();
+        ImageView img = new ImageView(new Image(MainApp.class.getResource("/img/parametre.png").toString(), 15, 15, true, true));
+        mip.setGraphic(img);
+
+        mip.setOnAction(e -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/parameter/mysql.fxml"));
+                Scene scene = new Scene(loader.load());
+                
+                Stage modalStage = new Stage();
+                modalStage.setTitle("MYSQL - paramètre");
+                modalStage.initModality(Modality.APPLICATION_MODAL);
+                modalStage.initStyle(StageStyle.UTILITY);
+                modalStage.setResizable(false);
+
+                modalStage.setOnCloseRequest(ev -> {this.createMenuItemMysql();});
+
+                modalStage.setScene(scene);
+                modalStage.showAndWait();
+            } catch (IOException ioe) {
+                System.err.println("Erreur de chargement de la scène : mysql.fxml");
+                ioe.printStackTrace();
+            }
+        });
+        this.menuOpenDbMYSQL.getItems().add(mip);
+
+        for(String tableName : D_M.getMysqlDbTables()) {
+            MenuItem mi = new MenuItem(tableName);
+            mi.setOnAction(e -> {
+                try {
+                    this.openDbMYSQL(tableName);
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            });
+            this.menuOpenDbMYSQL.getItems().add(mi);
+        }
+    }
 }

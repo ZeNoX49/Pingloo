@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.parameter.MysqlController">
+   <children>
+      <VBox spacing="5.0">
+         <children>
+            <HBox alignment="CENTER" spacing="5.0">
+               <children>
+                  <VBox alignment="TOP_RIGHT" spacing="13.0">
+                     <children>
+                        <Label text="host :" />
+                        <Label text="user :" />
+                        <Label text="password :" />
+                        <Label text="port :" />
+                     </children>
+                     <padding>
+                        <Insets top="2.0" />
+                     </padding>
+                  </VBox>
+                  <VBox spacing="5.0">
+                     <children>
+                        <TextField fx:id="tfHost" prefHeight="25.0" prefWidth="125.0" />
+                        <TextField fx:id="tfUser" prefHeight="25.0" prefWidth="125.0" />
+                        <TextField fx:id="tfPassword" prefHeight="25.0" prefWidth="125.0" />
+                        <TextField fx:id="tfPort" prefHeight="25.0" prefWidth="40.0" text="0000" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <Separator prefWidth="200.0" />
+            <HBox alignment="CENTER">
+               <children>
+                  <Label text="nom des bdd" />
+                  <Button mnemonicParsing="false" onAction="#addBdd" style="-fx-background-color: transparent;">
+                     <graphic>
+                        <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../img/plus.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+               </children>
+            </HBox>
+            <VBox spacing="5.0">
+               <children>
+                  <ScrollPane hbarPolicy="NEVER" prefHeight="250.0">
+                     <content>
+                        <VBox fx:id="vboxBdd" alignment="TOP_CENTER" prefWidth="200.0" spacing="5.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </VBox>
+   </children>
+</AnchorPane>
