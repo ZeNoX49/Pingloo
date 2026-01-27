@@ -22,8 +22,8 @@ public class MysqlController {
     void initialize() {
         this.tfHost.setText(D_M.getMysqlDb().getDbHost());
         this.tfUser.setText(D_M.getMysqlDb().getDbUser());
-        this.tfPassword.setText(D_M.getMysqlDb().getDbdPassword());
-        this.tfPort.setText(D_M.getMysqlDb().getDbdPort());
+        this.tfPassword.setText(D_M.getMysqlDb().getDbPassword());
+        this.tfPort.setText(D_M.getMysqlDb().getDbPort());
 
         for(String name :  D_M.getMysqlDbTables()) {
             this.createBddUtil(name);

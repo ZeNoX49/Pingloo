@@ -13,8 +13,8 @@ import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 
-public class MYSQL_Db implements SQL_Db {
-    private static final Logger LOGGER = Logger.getLogger(MYSQL_Db.class.getName());
+public class MSSQL_Db implements SQL_Db {
+    private static final Logger LOGGER = Logger.getLogger(MSSQL_Db.class.getName());
 
     private String dbHost;
     private String dbUser;
@@ -23,7 +23,7 @@ public class MYSQL_Db implements SQL_Db {
 
     private Connection connection;
 
-    public MYSQL_Db(String dbHost, String dbUser, String dbPassword, String dbPort) {
+    public MSSQL_Db(String dbHost, String dbUser, String dbPassword, String dbPort) {
         this.dbHost = dbHost;
         this.dbUser = dbUser;
         this.dbPassword = dbPassword;
@@ -31,8 +31,8 @@ public class MYSQL_Db implements SQL_Db {
     }
 
     /**
-     * Connecte au serveur MySQL et sélectionne la base passée en paramètre.
-     * L'URL contient des paramètres recommandés (serverTimezone, allowPublicKeyRetrieval, useSSL).
+     * Connecte au serveur MSSQL et sélectionne la base passée en paramètre.
+     * URL JDBC MSSQL : jdbc:sqlserver://host:port;databaseName=DB;...
      */
     public void connect(String dbName) {
         if (isConnected()) {
@@ -40,19 +40,21 @@ public class MYSQL_Db implements SQL_Db {
             return;
         }
 
+        // Paramètres recommandés : encrypt et trustServerCertificate selon ton infra
         String url = String.format(
-            "jdbc:mysql://%s:%s/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
+            "jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=false;trustServerCertificate=true",
             this.dbHost, this.dbPort, dbName);
 
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            // Driver Microsoft JDBC pour SQL Server
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             this.connection = DriverManager.getConnection(url, this.dbUser, this.dbPassword);
-            this.connection.setAutoCommit(true); // comportement par défaut ; transactionnel au besoin
-            LOGGER.info("Connexion établie vers " + url);
+            this.connection.setAutoCommit(true);
+            LOGGER.info("Connexion MSSQL établie vers " + url);
         } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Driver JDBC introuvable", e);
+            LOGGER.log(Level.SEVERE, "Driver JDBC MSSQL introuvable. Ajoute le driver 'mssql-jdbc' au classpath.", e);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Impossible de se connecter à la base", e);
+            LOGGER.log(Level.SEVERE, "Impossible de se connecter à la base MSSQL", e);
         }
     }
 
@@ -80,7 +82,7 @@ public class MYSQL_Db implements SQL_Db {
 
     @Override
     public DatabaseSchema loadDb(String dbName) {
-        this.connect(dbName);
+        connect(dbName);
         if (!isConnected()) {
             LOGGER.severe("Impossible de charger la BD : pas de connexion.");
             return new DatabaseSchema(dbName);
@@ -90,22 +92,19 @@ public class MYSQL_Db implements SQL_Db {
 
         try {
             DatabaseMetaData meta = this.connection.getMetaData();
-            String catalog = this.connection.getCatalog();
+            String catalog = this.connection.getCatalog(); // devrait être le nom de la base
 
             try (ResultSet tablesRs = meta.getTables(catalog, null, "%", new String[]{"TABLE"})) {
                 while (tablesRs.next()) {
                     String tableName = tablesRs.getString("TABLE_NAME");
                     if (tableName == null || tableName.trim().isEmpty()) continue;
-                    Table table = this.buildTable(meta, catalog, tableName);
+                    Table table = buildTable(meta, catalog, tableName);
                     schema.addTable(table);
                 }
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur pendant la lecture du schema", e);
-        } finally {
-            // on ne ferme pas la connexion ici si tu veux réutiliser l'instance plus tard,
-            // mais on peut la fermer si tu préfères. Ici on la laisse ouverte pour l'appelant.
+            LOGGER.log(Level.SEVERE, "Erreur pendant la lecture du schema MSSQL", e);
         }
 
         return schema;
@@ -117,7 +116,7 @@ public class MYSQL_Db implements SQL_Db {
     private Table buildTable(DatabaseMetaData meta, String catalog, String tableName) throws SQLException {
         Table table = new Table(tableName);
 
-        // Récupérer les primary keys d'abord pour marquer les colonnes
+        // Primary keys
         Set<String> primaryKeys = new HashSet<>();
         try (ResultSet pkRs = meta.getPrimaryKeys(catalog, null, tableName)) {
             while (pkRs.next()) {
@@ -135,10 +134,8 @@ public class MYSQL_Db implements SQL_Db {
                 String isNullable = cols.getString("IS_NULLABLE"); // "YES" / "NO"
                 String isAuto = null;
                 try {
-                    // certains pilotes fournissent IS_AUTOINCREMENT
-                    isAuto = cols.getString("IS_AUTOINCREMENT");
+                    isAuto = cols.getString("IS_AUTOINCREMENT"); // peut exister selon pilote
                 } catch (SQLException ignore) {
-                    // si absent, on l'ignore
                 }
 
                 String fullType = typeName;
@@ -161,7 +158,7 @@ public class MYSQL_Db implements SQL_Db {
             }
         }
 
-        // Foreign keys pour cette table
+        // Foreign keys (imported keys)
         try (ResultSet fkRs = meta.getImportedKeys(catalog, null, tableName)) {
             while (fkRs.next()) {
                 String fkName = fkRs.getString("FK_NAME");
@@ -185,7 +182,6 @@ public class MYSQL_Db implements SQL_Db {
 
     /**
      * Exécute une requête SELECT et retourne les lignes sous forme de liste de maps.
-     * Vérifie que la connexion est ouverte.
      */
     public List<Map<String, Object>> queryForList(String query) {
         List<Map<String, Object>> rows = new ArrayList<>();
@@ -218,7 +214,11 @@ public class MYSQL_Db implements SQL_Db {
     }
 
     /**
-     * Exécute un script SQL en découpant correctement les statements (supporte DELIMITER).
+     * Exécute un script SQL en découpant correctement les statements.
+     * Supporte : 
+     *  - point-virgule ';' comme séparateur classique,
+     *  - la directive 'GO' (ligne seule) très utilisée par SQL Server.
+     *
      * Retourne true si tout s'est bien passé.
      */
     public boolean executeSqlScript(String sqlScript) {
@@ -243,8 +243,17 @@ public class MYSQL_Db implements SQL_Db {
                 if (trimmed.startsWith("--") || trimmed.startsWith("#")) continue;
                 if (trimmed.toUpperCase(Locale.ROOT).startsWith("USE ")) continue;
 
+                // Support pour DELIMITER si utilisé (rare sur MSSQL, mais pas gênant)
                 if (trimmed.toUpperCase(Locale.ROOT).startsWith("DELIMITER ")) {
                     delimiter = trimmed.substring("DELIMITER ".length());
+                    continue;
+                }
+
+                // Support pour 'GO' sur une ligne (séparateur de batch MSSQL / sqlcmd / SSMS)
+                if (trimmed.equalsIgnoreCase("GO")) {
+                    String stmt = current.toString().trim();
+                    if (!stmt.isEmpty()) statements.add(stmt);
+                    current.setLength(0);
                     continue;
                 }
 

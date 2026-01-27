@@ -7,7 +7,9 @@ module com.dbeditor {
     
     requires net.sf.jsqlparser;
     requires java.sql;
-    
+
+    requires com.microsoft.sqlserver.jdbc;
+
     opens com.dbeditor to javafx.fxml;
     opens com.dbeditor.controller to javafx.fxml;
     opens com.dbeditor.controller.parameter to javafx.fxml;
