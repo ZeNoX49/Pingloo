@@ -1,7 +1,7 @@
 module com.dbeditor {
     requires javafx.controls;
     requires javafx.fxml;
-    requires javafx.graphics;
+    requires transitive javafx.graphics;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     

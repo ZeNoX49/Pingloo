@@ -249,7 +249,7 @@ public class POSTGRESQL_Db implements SQL_Db {
         sqlScript = sqlScript.replace("\r\n", "\n").replace("\r", "\n");
 
         List<String> statements = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
+        // StringBuilder current = new StringBuilder();
 
         // Parser caractère par caractère pour gérer correctement ' " et $tag$
         try (BufferedReader br = new BufferedReader(new StringReader(sqlScript))) {
@@ -258,7 +258,7 @@ public class POSTGRESQL_Db implements SQL_Db {
             boolean inDoubleQuote = false;
             boolean inLineComment = false;
             String dollarTag = null; // si non-null: on est dans un dollar-quote $tag$
-            Deque<Integer> prevChars = new ArrayDeque<>(2); // pour gérer lookbehind (ex: --)
+            // Deque<Integer> prevChars = new ArrayDeque<>(2); // pour gérer lookbehind (ex: --)
             StringBuilder buffer = new StringBuilder(); // pour construire la ligne/statement
 
             while ((ch = br.read()) != -1) {

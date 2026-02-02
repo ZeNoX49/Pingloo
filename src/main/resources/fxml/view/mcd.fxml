@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+
+<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.view.McdController">
+   <top>
+      <ToolBar fx:id="toolbar" BorderPane.alignment="CENTER">
+         <items>
+            <ComboBox fx:id="cb" />
+            <Button fx:id="btnEntity" mnemonicParsing="false" text="Entité" />
+            <Button fx:id="btnAssociation" mnemonicParsing="false" text="Association" />
+            <Button fx:id="btnLink" mnemonicParsing="false" text="Lien" />
+         </items>
+      </ToolBar>
+   </top>
+   <center>
+      <Pane fx:id="pane" BorderPane.alignment="CENTER">
+         <children>
+            <Group fx:id="group" />
+         </children>
+      </Pane>
+   </center>
+</BorderPane>

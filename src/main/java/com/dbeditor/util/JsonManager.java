@@ -47,9 +47,7 @@ public class JsonManager {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        Map<String, Object> root = mapper.readValue(
-            file, Map.class
-        );
+        Map<String, Object> root = mapper.readValue(file, Map.class);
 
         T_M.changeTheme((int) root.get("id_theme"));
         

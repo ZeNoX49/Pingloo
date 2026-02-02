@@ -322,12 +322,12 @@ public abstract class View {
                     newController.setData(this.parent, newPane, this.registrar);
 
                     // sizing policy (si Region)
-                    if (newPane instanceof Region rNew) {
-                        rNew.setMinSize(0, 0);
-                        rNew.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-                    }
+                    // if (newPane instanceof Region rNew) {
+                    //     rNew.setMinSize(0, 0);
+                    //     rNew.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+                    // }
 
-                    // remplacer uniquement cette.viewPane dans le parent (même position)
+                    // remplacer uniquement this.viewPane dans le parent (même position)
                     int idx = this.parent.getChildren().indexOf(this.viewPane);
                     if (idx >= 0) {
                         this.parent.getChildren().set(idx, newPane);
