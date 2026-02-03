@@ -9,8 +9,8 @@ import java.util.Map;
 
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
-import com.dbeditor.sql.db.MYSQL_Db;
-import com.dbeditor.sql.db.SQL_Db;
+import com.dbeditor.sql.db.MySqlDb;
+import com.dbeditor.sql.db.SqlDb;
 
 public class DbManager {
     private static DbManager instance;
@@ -23,7 +23,7 @@ public class DbManager {
 
     /* ================================================== */
 
-    private Map<String, SQL_Db> db;
+    private Map<String, SqlDb> db;
     private Map<String, List<String>> tables;
     // private Map<String, SQL_DbExporter> dbExporters;
 
@@ -33,7 +33,7 @@ public class DbManager {
     }
 
     public void setMysqlDbData(Map<String, Object> data) {
-        this.db.put("mysql", new MYSQL_Db(
+        this.db.put("mysql", new MySqlDb(
             (String) data.get("host"),
             (String) data.get("user"),
             (String) data.get("password"),
@@ -47,7 +47,7 @@ public class DbManager {
         this.tables.put("mysql", t);
     }
 
-    public MYSQL_Db getMysqlDb() { return (MYSQL_Db) this.db.get("mysql");  }
+    public MySqlDb getMysqlDb() { return (MySqlDb) this.db.get("mysql");  }
     public List<String> getMysqlDbTables() { return this.tables.get("mysql");  }
 
     /* ============================================================================================================================= */

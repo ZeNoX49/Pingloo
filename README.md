@@ -14,7 +14,7 @@
     - [ ] PostgreSQL
     - [ ] ...
 - [ ] se connecter à une bdd
-    - [ ] MYSQL
+    - [X] MYSQL
     - [ ] MSSQL
     - [ ] PostgreSQL
     - [ ] ...
@@ -35,7 +35,7 @@
 
 ### Personnalisation
 - [X] Choisir un thème (couleur)
-- [ ] Pouvoir modifier le thème perso
+- [X] Pouvoir modifier le thème perso
 
 ### Vues
 - [X] MLD
@@ -51,3 +51,49 @@
 - [ ] foreign keys
 - [ ] cardinalités -> à partir de MCD
 - [ ] liens visuelles entre les tables (fk) (flèches)
+
+## Revue de code
+
+### controller
+- [ ] CanvasController
+- [ ] TableController
+- [ ] view/View
+- [ ] view/McdController
+- [ ] view/MldController
+- [ ] view/DfController
+- [X] view/helpers/LassoSelector
+- [X] view/helpers/MultiDragManager
+- [X] view/helpers/SelectionModel
+- [X] view/helpers/ZoomPanHandler
+- [ ] parameter/ThemeController
+- [ ] parameter/MysqlController
+
+### model
+- [X] DatabaseSchema
+- [X] Table
+- [X] Column
+- [X] ForeignKey
+
+### sql
+#### db
+- [ ] SqlDb
+- [ ] MySqlDb
+- [ ] MsSqlDb
+- [ ] PostgreSqlDb
+#### file
+- [ ] parser/SqlParser
+- [ ] parser/MySqlParser
+- [ ] exporter/SqlExporter
+- [ ] exporter/MySqlExporter
+
+### theme
+- [ ] Theme
+- [ ] LightTheme
+- [ ] DarkTheme
+- [ ] PersoTheme
+
+### util
+- [ ] DbManager
+- [ ] FileManager
+- [ ] JsonManager
+- [ ] ThemeManager

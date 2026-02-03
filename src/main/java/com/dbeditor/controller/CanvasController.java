@@ -7,8 +7,8 @@ import java.util.List;
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.view.View;
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.sql.file.exporter.MYSQL_Exporter;
-import com.dbeditor.sql.file.parser.MYSQL_FileParser;
+import com.dbeditor.sql.file.exporter.MySqlExporter;
+import com.dbeditor.sql.file.parser.MySqlParser;
 import com.dbeditor.util.DbManager;
 import com.dbeditor.util.FileManager;
 import com.dbeditor.util.ThemeManager;
@@ -147,7 +147,7 @@ public class CanvasController {
             new FileChooser.ExtensionFilter("Fichiers MYSQL", "*.sql")
         );
 
-        this.open(F_M.openDatabase(fileChooser, new MYSQL_FileParser()));
+        this.open(F_M.openDatabase(fileChooser, new MySqlParser()));
     }
 
     void openDbMYSQL(String dbName) throws IOException {
@@ -176,7 +176,7 @@ public class CanvasController {
         );
         fileChooser.setInitialFileName("export.sql");
 
-        F_M.exportSQL(fileChooser, MainApp.getSchema(), new MYSQL_Exporter());
+        F_M.exportSQL(fileChooser, MainApp.getSchema(), new MySqlExporter());
     }
 
     // void saveDbMYSQL(ActionEvent event) {

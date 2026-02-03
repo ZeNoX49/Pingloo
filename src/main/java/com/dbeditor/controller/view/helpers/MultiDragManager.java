@@ -13,11 +13,11 @@ import javafx.scene.input.MouseEvent;
  * Il s'appuie sur les callbacks fournis par TableController (setOnDrag, setOnDragEnd).
  */
 public class MultiDragManager {
-    private final SelectionModel<TableController> selectionModel;
+    private final SelectionModel selectionModel;
     private final Map<TableController, Point2D> dragStartPositions = new HashMap<>();
     private Point2D dragStartMouse = null;
 
-    public MultiDragManager(SelectionModel<TableController> selectionModel) {
+    public MultiDragManager(SelectionModel selectionModel) {
         this.selectionModel = selectionModel;
     }
 
@@ -25,35 +25,34 @@ public class MultiDragManager {
      * Attache la logique multi-drag à un TableController
      */
     public void attach(TableController tc) {
-        // on suppose TableController expose setOnDrag / setOnDragEnd / setOnSelect
+        // on suppose TableController expose setOnDrag / setOnDragEnd / setOnSelect grâce à SelectionModel
         tc.setOnDrag((t, e) -> handleDrag(t, e));
         tc.setOnDragEnd((t, e) -> handleDragEnd(t, e));
-        // selection handled by Canvas/Mld code using selectionModel
     }
 
     private void handleDrag(TableController tc, MouseEvent e) {
-        // position de la souris dans le parent du node (TableController doit envoyer event avec scene coords)
+        // position de la souris dans le parent du node
         Point2D mouseInParent = tc.getRoot().getParent().sceneToLocal(e.getSceneX(), e.getSceneY());
 
-        if (dragStartMouse == null) {
-            dragStartMouse = mouseInParent;
-            dragStartPositions.clear();
+        if (this.dragStartMouse == null) {
+            this.dragStartMouse = mouseInParent;
+            this.dragStartPositions.clear();
 
-            if (!selectionModel.contains(tc)) {
-                selectionModel.clear();
-                selectionModel.select(tc);
+            if (!this.selectionModel.contains(tc)) {
+                this.selectionModel.clear();
+                this.selectionModel.select(tc);
             }
 
-            for (TableController sel : selectionModel.getSelected()) {
-                dragStartPositions.put(sel, new Point2D(sel.getRoot().getLayoutX(), sel.getRoot().getLayoutY()));
+            for (TableController sel : this.selectionModel.getSelected()) {
+                this.dragStartPositions.put(sel, new Point2D(sel.getRoot().getLayoutX(), sel.getRoot().getLayoutY()));
                 sel.getRoot().toFront();
             }
         }
 
-        double dx = mouseInParent.getX() - dragStartMouse.getX();
-        double dy = mouseInParent.getY() - dragStartMouse.getY();
+        double dx = mouseInParent.getX() - this.dragStartMouse.getX();
+        double dy = mouseInParent.getY() - this.dragStartMouse.getY();
 
-        for (Map.Entry<TableController, Point2D> entry : dragStartPositions.entrySet()) {
+        for (Map.Entry<TableController, Point2D> entry : this.dragStartPositions.entrySet()) {
             TableController t = entry.getKey();
             Point2D s = entry.getValue();
             t.getRoot().setLayoutX(s.getX() + dx);
@@ -64,8 +63,8 @@ public class MultiDragManager {
     }
 
     private void handleDragEnd(TableController tc, MouseEvent e) {
-        dragStartPositions.clear();
-        dragStartMouse = null;
+        this.dragStartPositions.clear();
+        this.dragStartMouse = null;
         e.consume();
     }
 }

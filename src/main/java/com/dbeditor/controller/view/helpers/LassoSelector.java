@@ -17,12 +17,12 @@ import com.dbeditor.controller.TableController;
 public class LassoSelector {
     private final Pane viewportPane;   // reçoit les events (scene coords)
     private final Group content;   // parent local pour le rectangle
-    private final SelectionModel<TableController> selectionModel;
+    private final SelectionModel selectionModel;
     private final Rectangle rect;
     private Point2D startLocal;
     private final List<TableController> tableNodes;
 
-    public LassoSelector(Pane viewportPane, Group content, List<TableController> tableNodes, SelectionModel<TableController> selectionModel) {
+    public LassoSelector(Pane viewportPane, Group content, List<TableController> tableNodes, SelectionModel selectionModel) {
         this.viewportPane = viewportPane;
         this.content = content;
         this.selectionModel = selectionModel;

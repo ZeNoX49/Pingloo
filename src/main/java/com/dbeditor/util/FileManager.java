@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.sql.file.exporter.MYSQL_Exporter;
-import com.dbeditor.sql.file.exporter.SQL_Exporter;
-import com.dbeditor.sql.file.parser.MYSQL_FileParser;
-import com.dbeditor.sql.file.parser.SQL_FileParser;
+import com.dbeditor.sql.file.exporter.MySqlExporter;
+import com.dbeditor.sql.file.exporter.SqlExporter;
+import com.dbeditor.sql.file.parser.MySqlParser;
+import com.dbeditor.sql.file.parser.SqlParser;
 
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
@@ -29,14 +29,14 @@ public class FileManager {
     private Stage stage;
     private File lastUsedDirectory;
  
-    public DatabaseSchema openDatabase(FileChooser fileChooser, SQL_FileParser parser) {
+    public DatabaseSchema openDatabase(FileChooser fileChooser, SqlParser parser) {
         fileChooser.setInitialDirectory(this.lastUsedDirectory);
 
         File fileDir = fileChooser.showOpenDialog(this.stage);
         if (fileDir != null) {
             this.lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
             
-            parser = new MYSQL_FileParser();
+            parser = new MySqlParser();
             DatabaseSchema schema = parser.loadFromFile(fileDir.getAbsolutePath());
             if (schema != null && !schema.getTables().isEmpty()) {
                 return schema;
@@ -50,11 +50,11 @@ public class FileManager {
         return null;
     }
     
-    public void exportSQL(FileChooser fileChooser, DatabaseSchema schema, SQL_Exporter exporter) {
+    public void exportSQL(FileChooser fileChooser, DatabaseSchema schema, SqlExporter exporter) {
         fileChooser.setInitialDirectory(this.lastUsedDirectory);
 
         File file = fileChooser.showSaveDialog(this.stage);
-        exporter = new MYSQL_Exporter();
+        exporter = new MySqlExporter();
         if (file != null) {
             try {
                 exporter.exportToSQL(schema, file.getAbsolutePath());

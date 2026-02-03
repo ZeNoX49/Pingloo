@@ -5,53 +5,59 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-/**
- * Modèle simple de sélection réutilisable.
- * T : type d'élément (ici TableController)
- */
-public class SelectionModel<T> {
-    private final List<T> selected = new ArrayList<>();
-    // callback pour appliquer visuellement la sélection : (item, selected?)
-    private final BiConsumer<T, Boolean> visualizer;
+import com.dbeditor.controller.TableController;
 
-    public SelectionModel(BiConsumer<T, Boolean> visualizer) {
+/**
+ * Modèle simple de sélection
+ */
+public class SelectionModel {
+    private final List<TableController> selected = new ArrayList<>();
+    // callback pour appliquer visuellement la sélection : (table, selected?)
+    private final BiConsumer<TableController, Boolean> visualizer;
+
+    public SelectionModel(BiConsumer<TableController, Boolean> visualizer) {
         this.visualizer = visualizer;
     }
 
-    public void select(T item) {
-        if (!selected.contains(item)) {
-            selected.add(item);
-            visualizer.accept(item, true);
+    public void select(TableController table) {
+        if (!this.selected.contains(table)) {
+            this.selected.add(table);
+            this.visualizer.accept(table, true);
         }
     }
 
-    public void deselect(T item) {
-        if (selected.remove(item)) {
-            visualizer.accept(item, false);
+    public void deselect(TableController table) {
+        if (this.selected.remove(table)) {
+            this.visualizer.accept(table, false);
         }
     }
 
-    public void toggle(T item) {
-        if (selected.contains(item)) deselect(item);
-        else select(item);
+    public void toggle(TableController table) {
+        if (this.selected.contains(table)) {
+            this.deselect(table);
+        } else {
+            this.select(table);
+        }
     }
 
     public void clear() {
-        for (T t : new ArrayList<>(selected)) {
-            visualizer.accept(t, false);
+        for (TableController table : new ArrayList<>(this.selected)) {
+            this.visualizer.accept(table, false);
         }
-        selected.clear();
+        this.selected.clear();
     }
 
-    public List<T> getSelected() {
-        return List.copyOf(selected);
+    public List<TableController> getSelected() {
+        return List.copyOf(this.selected);
     }
 
-    public void selectAll(Collection<T> items) {
-        for (T i : items) select(i);
+    public void selectAll(Collection<TableController> tables) {
+        for (TableController table : tables) {
+            this.select(table);
+        }
     }
 
-    public boolean contains(T item) {
-        return selected.contains(item);
+    public boolean contains(TableController table) {
+        return this.selected.contains(table);
     }
 }
