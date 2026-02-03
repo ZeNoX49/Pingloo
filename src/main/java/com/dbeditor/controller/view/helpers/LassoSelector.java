@@ -31,11 +31,19 @@ public class LassoSelector {
         this.rect = new Rectangle();
         this.rect.setManaged(false);
         this.rect.setMouseTransparent(true);
-        this.rect.setStyle("-fx-fill: rgba(74,144,226,0.14); -fx-stroke: #4A90E2; -fx-stroke-width: 1;");
+        this.rect.setStyle("-fx-fill: #4A90E235; -fx-stroke: #4A90E2; -fx-stroke-width: 1.5;");
         this.rect.setVisible(false);
         this.content.getChildren().add(this.rect);
     }
 
+    /**
+     * Permet de setup les événements :
+     * <ul>
+     *   <li>onPressed</li>
+     *   <li>onDragged</li>
+     *   <li>onReleased</li>
+     * </ul>
+     */
     public void setupEvents() {
         this.viewportPane.setOnMousePressed(this::onPressed);
         this.viewportPane.setOnMouseDragged(this::onDragged);
@@ -92,4 +100,6 @@ public class LassoSelector {
             e.consume();
         }
     }
+
+    public Rectangle getRect() { return this.rect; }
 }

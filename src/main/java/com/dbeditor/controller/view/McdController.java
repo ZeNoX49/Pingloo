@@ -9,7 +9,6 @@ import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
-import com.microsoft.sqlserver.jdbc.dataclassification.Label;
 import com.dbeditor.controller.view.helpers.ZoomPanHandler;
 import com.dbeditor.controller.view.helpers.SelectionModel;
 import com.dbeditor.controller.view.helpers.LassoSelector;
@@ -22,6 +21,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -52,14 +52,11 @@ public class McdController extends View {
     // modèle de données / noeuds
     private final List<TableController> tableNodes = new ArrayList<>();
 
-    // // helpers
+    // helpers
     private ZoomPanHandler zoomPan;
-    // private SelectionModel<TableController> selectionModel;
+    private SelectionModel selectionModel;
     private LassoSelector lasso;
-    // private MultiDragManager multiDrag;
-
-    // selection rect (référencé aussi dans LassoSelector) - créé dans helper, présent dans group
-    private Rectangle selectionRect;
+    private MultiDragManager multiDrag;
 
     @FXML
     void initialize() throws IOException {
@@ -67,26 +64,20 @@ public class McdController extends View {
         // super.createSplit(this.pane);
         // super.setupCombobowView(this.cb, View.MCD);
 
-        // // ===== // create selection model (visualizer calls setSelected on TableController)
-        // selectionModel = new SelectionModel<>((tc, sel) -> tc.setSelected(sel));
+        // visualizer appelle setSelected sur TableController
+        this.selectionModel = new SelectionModel((table, bool) -> table.setSelected(bool));
 
-        // ===== // create helpers
-        zoomPan = new ZoomPanHandler(pane, group);
-        zoomPan.setupEvents();
-        // this.zlLabel.steText(this.zoomPan.getZoomLevel())
+        this.zoomPan = new ZoomPanHandler(pane, group);
+        this.zoomPan.setupEvents();
+        this.zlLabel.setText("%.2f".formatted(this.zoomPan.getZoomLevel()));
 
-        // // ===== // lasso will be constructed below after selectionRect is created
-        // // ===== // multiDrag depends on selectionModel
-        // multiDrag = new MultiDragManager(selectionModel);
+        this.multiDrag = new MultiDragManager(selectionModel);
 
         // // ===== // clip pane so content doesn't draw outside
         // Rectangle clip = new Rectangle();
         // clip.widthProperty().bind(this.pane.widthProperty());
         // clip.heightProperty().bind(this.pane.heightProperty());
         // this.pane.setClip(clip);
-
-        // // ===== // create selection rect and add to group (LassoSelector expects it there)
-        // createSelectionRect();
 
         // ===== // now install lasso with tableNodes list (initially empty)
         lasso = new LassoSelector(pane, group, tableNodes, selectionModel);
@@ -99,48 +90,35 @@ public class McdController extends View {
         this.updateStyle();
     }
 
-    // private void createSelectionRect() {
-    //     this.selectionRect = new Rectangle();
-    //     this.selectionRect.setManaged(false);
-    //     this.selectionRect.setMouseTransparent(true);
-    //     this.selectionRect.setFill(Color.web("#4A90E235"));
-    //     this.selectionRect.setStroke(Color.web("#4A90E2"));
-    //     this.selectionRect.setStrokeWidth(1.5);
-    //     this.selectionRect.setVisible(false);
-    //     this.group.getChildren().add(this.selectionRect);
-    // }
-
     @Override
     public void updateStyle() {
-        // this.group.setStyle("-fx-background-color: transparent;"); // group lui-même transparent
         this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
-        this.toolbar.setStyle("-fx-background-color: " + T_M.getTheme().getToolbarColor() +
-                "; -fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; -fx-border-width: 0 0 1 0;");
-        // update tables styles
-        for (TableController tc : this.tableNodes) tc.updateStyle();
+        this.toolbar.setStyle(
+                "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
+                "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
+                "-fx-border-width: 0 0 1 0;"
+        );
+        
+        for (TableController tc : this.tableNodes) {
+            tc.updateStyle();
+        }
     }
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
         if (dbS == null) return;
 
-        // unbind/detach old lines if any
-        for (Node n : new ArrayList<>(this.group.getChildren())) {
-            if (n instanceof Line) {
-                // simply remove old lines and keep selectionRect
-                this.group.getChildren().remove(n);
-            }
-        }
-
-        // remove all nodes except selectionRect
-        this.group.getChildren().removeIf(node -> node != this.selectionRect);
+        // supprime tous les nodes sauf selectionRect
+        this.group.getChildren().removeIf(node -> node != this.lasso.getRect());
 
         this.tableNodes.clear();
 
         this.createTableNodes(dbS);
         this.drawConnections();
 
-        // if (this.selectionRect != null) this.selectionRect.toFront();
+        if (this.lasso != null) {
+            this.lasso.getRect().toFront();
+        }
         // clampContentPosition();
     }
 
@@ -159,7 +137,7 @@ public class McdController extends View {
             nodeController.createTableNode(table);
 
             // // setup callbacks (selection logic handled here, drag delegated to multiDrag)
-            // nodeController.setOnSelect((tc, e) -> handleSelection(tc, e));
+            nodeController.setOnSelect((tc, e) -> handleSelection(tc, e));
 
             // // attach multi-drag manager (it will setOnDrag / setOnDragEnd on the controller)
             // multiDrag.attach(nodeController);
@@ -168,7 +146,6 @@ public class McdController extends View {
             nodePane.setLayoutX(col * 350 + 50);
             nodePane.setLayoutY(row * 250 + 50);
 
-            // add to scene graph (group)
             this.group.getChildren().add(nodePane);
             this.tableNodes.add(nodeController);
 
@@ -179,10 +156,15 @@ public class McdController extends View {
             }
         }
 
-        // // ensure selectionRect stays above nodes
-        // if (selectionRect != null) selectionRect.toFront();
+        // s'assure que le rectangle de séléction est devant
+        if (this.lasso != null) {
+            this.lasso.getRect().toFront();
+        }
     }
 
+    /**
+     * Tracer tout les liens entre les tables
+     */
     private void drawConnections() {
         for (TableController fromNode : this.tableNodes) {
             Table fromTable = fromNode.getTable();
@@ -195,6 +177,11 @@ public class McdController extends View {
         }
     }
 
+    /**
+     * Permet de tracer un lien entre 2 tables
+     * @param from -> table 1
+     * @param to -> table 2
+     */
     private void drawConnection(TableController from, TableController to) {
         // compute endpoints based on layoutX / layoutY
         double fromX = from.getRoot().getLayoutX() + from.getRoot().getWidth() / 2;
@@ -209,10 +196,7 @@ public class McdController extends View {
 
         // add behind nodes
         this.group.getChildren().add(0, line);
-        bindLine(line, from, to);
-    }
-
-    private void bindLine(Line line, TableController from, TableController to) {
+        
         line.startXProperty().bind(
             from.getRoot().layoutXProperty()
                 .add(from.getRoot().widthProperty().divide(2))
@@ -234,28 +218,42 @@ public class McdController extends View {
         );
     }
 
+    /**
+     * Trouver une table avec son nom
+     * @param tableName -> nom de la table
+     * @return table trouvée, null sinon
+     */
     private TableController findTableNode(String tableName) {
         for (TableController tc : tableNodes) {
-            if (tc.getTable().getName().equals(tableName)) return tc;
+            if (tc.getTable().getName().equals(tableName)) {
+                return tc;
+            }
         }
         return null;
     }
 
-    // // --- sélection ---
-    // private void handleSelection(TableController tc, MouseEvent e) {
-    //     if (e.isControlDown()) {
-    //         selectionModel.toggle(tc);
-    //         return;
-    //     }
-    //     if (selectionModel.contains(tc)) {
-    //         // keep selection as-is (so multi-drag can start)
-    //         tc.getRoot().toFront();
-    //         return;
-    //     }
-    //     selectionModel.clear();
-    //     selectionModel.select(tc);
-    // }
+    /**
+     * S'occupe de gérer la sélection d'une table
+     * @param table
+     * @param e
+     */
+    private void handleSelection(TableController table, MouseEvent e) {
+        if (e.isControlDown()) {
+            this.selectionModel.toggle(table);
+            return;
+        }
 
+        if (this.selectionModel.contains(table)) {
+            // Enleve cette table du multi-drag
+            table.getRoot().toFront();
+            return;
+        }
+        
+        this.selectionModel.clear();
+        this.selectionModel.select(table);
+    }
+
+    /* ====================================================================================================
     // // --- clamp content position (simple) ---
     // private void clampContentPosition() {
     //     if (group == null || pane == null) return;
@@ -286,4 +284,5 @@ public class McdController extends View {
     //     if (Math.abs(tx - group.getTranslateX()) > 0.1) group.setTranslateX(tx);
     //     if (Math.abs(ty - group.getTranslateY()) > 0.1) group.setTranslateY(ty);
     // }
+    ==================================================================================================== */
 }

@@ -106,14 +106,6 @@ public class MldController extends View {
     public void open(DatabaseSchema dbS) throws IOException {
     //     if (dbS == null) return;
 
-    //     // unbind/detach old lines if any
-    //     for (Node n : new ArrayList<>(group.getChildren())) {
-    //         if (n instanceof Line) {
-    //             // simply remove old lines and keep selectionRect
-    //             group.getChildren().remove(n);
-    //         }
-    //     }
-
     //     // remove all nodes except selectionRect
     //     group.getChildren().removeIf(node -> node != this.selectionRect);
 

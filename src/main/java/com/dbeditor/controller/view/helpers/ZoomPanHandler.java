@@ -28,6 +28,15 @@ public class ZoomPanHandler {
         this.content.getTransforms().add(this.scale);
     }
 
+    /**
+     * Permet de setup les événements :
+     * <ul>
+     *   <li>onPressed</li>
+     *   <li>onDragged</li>
+     *   <li>onReleased</li>
+     *   <li>OnScroll</li>
+     * </ul>
+     */
     public void setupEvents() {
         // pan via event filters (capture phase) to avoid child interference
         this.viewportPane.addEventFilter(MouseEvent.MOUSE_PRESSED, this::onPressed);
