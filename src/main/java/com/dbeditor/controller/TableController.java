@@ -21,7 +21,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 public class TableController {
-    private final ThemeManager T_M = ThemeManager.getInstance();
+    private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private AnchorPane pane;
     @FXML private HBox hName;

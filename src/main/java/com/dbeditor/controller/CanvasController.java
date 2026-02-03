@@ -36,9 +36,9 @@ import javafx.stage.StageStyle;
 import javafx.util.Pair;
 
 public class CanvasController {
-    private final DbManager D_M = DbManager.getInstance();
-    private final ThemeManager T_M = ThemeManager.getInstance();
-    private final FileManager F_M = FileManager.getInstance();
+    private static final DbManager D_M = DbManager.getInstance();
+    private static final ThemeManager T_M = ThemeManager.getInstance();
+    private static final FileManager F_M = FileManager.getInstance();
 
     @FXML private StackPane spPane;
     @FXML private ToolBar toolBar;
@@ -54,24 +54,7 @@ public class CanvasController {
     private void initialize() throws IOException {
         this.vues_pane = new ArrayList<>();
         
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
-        Pane mldPane = loader.load();
-        View mldController = loader.getController();
-        // on fournit la fonction d'enregistrement au controller
-        mldController.setData(this.spPane, mldPane, (pair) -> {
-            // registrar : ajoute la paire dans la liste vues_pane
-            this.vues_pane.add(pair);
-        });
-        // on enregistre explicitement la première vue aussi
-        this.vues_pane.add(new Pair<>(mldController, mldPane));
-
-        // IMPORTANT : ne lie pas prefWidth à pane.widthProperty() ici.
-        // Le Pane parent ajouté dans un SplitPane ou dans this.pane gérera la taille.
-        // Si tu veux absolument binder (si ton parent est un simple Pane), fais-le conditionnellement.
-        mldPane.setMinSize(0, 0);
-        mldPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        this.spPane.getChildren().add(mldPane);
+        this.createBaseView();
 
         this.miLT.setOnAction(e -> this.changeTheme(1));
         this.miDT.setOnAction(e -> this.changeTheme(2));
@@ -88,6 +71,27 @@ public class CanvasController {
         this.createMenuItemMysql();
 
         this.updateStyle();
+    }
+
+    private void createBaseView() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
+        Pane mcdPane = loader.load();
+        View mcdController = loader.getController();
+        // on fournit la fonction d'enregistrement au controller
+        mcdController.setData(this.spPane, mcdPane, (pair) -> {
+            // registrar : ajoute la paire dans la liste vues_pane
+            this.vues_pane.add(pair);
+        });
+        // on enregistre explicitement la première vue aussi
+        this.vues_pane.add(new Pair<>(mcdController, mcdPane));
+
+        // IMPORTANT : ne lie pas prefWidth à pane.widthProperty() ici.
+        // Le Pane parent ajouté dans un SplitPane ou dans this.pane gérera la taille.
+        // Si tu veux absolument binder (si ton parent est un simple Pane), fais-le conditionnellement.
+        mcdPane.setMinSize(0, 0);
+        mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+        this.spPane.getChildren().add(mcdPane);
     }
 
     public void registerView(View v, Pane pane) {
@@ -143,11 +147,11 @@ public class CanvasController {
             new FileChooser.ExtensionFilter("Fichiers MYSQL", "*.sql")
         );
 
-        this.open(this.F_M.openDatabase(fileChooser, new MYSQL_FileParser()));
+        this.open(F_M.openDatabase(fileChooser, new MYSQL_FileParser()));
     }
 
     void openDbMYSQL(String dbName) throws IOException {
-        this.open(this.D_M.getMysqlDb().loadDb(dbName));
+        this.open(D_M.getMysqlDb().loadDb(dbName));
     }
 
     private void open(DatabaseSchema dbS) throws IOException {
@@ -172,7 +176,7 @@ public class CanvasController {
         );
         fileChooser.setInitialFileName("export.sql");
 
-        this.F_M.exportSQL(fileChooser, MainApp.getSchema(), new MYSQL_Exporter());
+        F_M.exportSQL(fileChooser, MainApp.getSchema(), new MYSQL_Exporter());
     }
 
     // void saveDbMYSQL(ActionEvent event) {

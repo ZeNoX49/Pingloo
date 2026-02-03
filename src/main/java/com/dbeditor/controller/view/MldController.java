@@ -6,29 +6,14 @@ import java.util.ArrayList;
 
 import com.dbeditor.controller.TableController;
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.model.ForeignKey;
-import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
-import com.dbeditor.controller.view.helpers.ZoomPanHandler;
-import com.dbeditor.controller.view.helpers.SelectionModel;
-import com.dbeditor.controller.view.helpers.LassoSelector;
-import com.dbeditor.controller.view.helpers.MultiDragManager;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Bounds;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-
 /**
  * MldController réécrit en se reposant sur des helpers:
  * - ZoomPanHandler : zoom + pan
@@ -39,7 +24,7 @@ import javafx.scene.shape.Rectangle;
  * Assure-toi d'avoir créé les helper classes dans le bon package.
  */
 public class MldController extends View {
-    private final ThemeManager T_M = ThemeManager.getInstance();
+    private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private BorderPane root;
     @FXML private ToolBar toolbar;
@@ -50,62 +35,62 @@ public class MldController extends View {
     // modèle de données / noeuds
     private final List<TableController> tableNodes = new ArrayList<>();
 
-    // helpers
-    private ZoomPanHandler zoomPan;
-    private SelectionModel<TableController> selectionModel;
-    private LassoSelector lasso;
-    private MultiDragManager multiDrag;
+    // // helpers
+    // private ZoomPanHandler zoomPan;
+    // private SelectionModel<TableController> selectionModel;
+    // private LassoSelector lasso;
+    // private MultiDragManager multiDrag;
 
-    // selection rect (référencé aussi dans LassoSelector) - créé dans helper, présent dans group
-    private Rectangle selectionRect;
+    // // selection rect (référencé aussi dans LassoSelector) - créé dans helper, présent dans group
+    // private Rectangle selectionRect;
 
-    @FXML
-    void initialize() throws IOException {
-        // initialisation UI
-        super.createSplit(this.pane);
-        super.setupCombobowView(this.cb, View.MLD);
+    // @FXML
+    // void initialize() throws IOException {
+    //     // initialisation UI
+    //     super.createSplit(this.pane);
+    //     super.setupCombobowView(this.cb, View.MLD);
 
-        // create selection model (visualizer calls setSelected on TableController)
-        selectionModel = new SelectionModel<>((tc, sel) -> tc.setSelected(sel));
+    //     // create selection model (visualizer calls setSelected on TableController)
+    //     selectionModel = new SelectionModel<>((tc, sel) -> tc.setSelected(sel));
 
-        // create helpers
-        zoomPan = new ZoomPanHandler(pane, group);
-        zoomPan.install();
+    //     // create helpers
+    //     zoomPan = new ZoomPanHandler(pane, group);
+    //     zoomPan.install();
 
-        // lasso will be constructed below after selectionRect is created
-        // multiDrag depends on selectionModel
-        multiDrag = new MultiDragManager(selectionModel);
+    //     // lasso will be constructed below after selectionRect is created
+    //     // multiDrag depends on selectionModel
+    //     multiDrag = new MultiDragManager(selectionModel);
 
-        // clip pane so content doesn't draw outside
-        Rectangle clip = new Rectangle();
-        clip.widthProperty().bind(this.pane.widthProperty());
-        clip.heightProperty().bind(this.pane.heightProperty());
-        this.pane.setClip(clip);
+    //     // clip pane so content doesn't draw outside
+    //     Rectangle clip = new Rectangle();
+    //     clip.widthProperty().bind(this.pane.widthProperty());
+    //     clip.heightProperty().bind(this.pane.heightProperty());
+    //     this.pane.setClip(clip);
 
-        // create selection rect and add to group (LassoSelector expects it there)
-        createSelectionRect();
+    //     // create selection rect and add to group (LassoSelector expects it there)
+    //     createSelectionRect();
 
-        // now install lasso with tableNodes list (initially empty)
-        lasso = new LassoSelector(pane, group, tableNodes, selectionModel);
-        lasso.install();
+    //     // now install lasso with tableNodes list (initially empty)
+    //     lasso = new LassoSelector(pane, group, tableNodes, selectionModel);
+    //     lasso.install();
 
-        // handlers for resize to keep content constrained if you want (clamp)
-        this.pane.widthProperty().addListener((obs, o, n) -> clampContentPosition());
-        this.pane.heightProperty().addListener((obs, o, n) -> clampContentPosition());
+    //     // handlers for resize to keep content constrained if you want (clamp)
+    //     this.pane.widthProperty().addListener((obs, o, n) -> clampContentPosition());
+    //     this.pane.heightProperty().addListener((obs, o, n) -> clampContentPosition());
 
-        updateStyle();
-    }
+    //     updateStyle();
+    // }
 
-    private void createSelectionRect() {
-        this.selectionRect = new Rectangle();
-        this.selectionRect.setManaged(false);
-        this.selectionRect.setMouseTransparent(true);
-        this.selectionRect.setFill(Color.web("#4A90E235"));
-        this.selectionRect.setStroke(Color.web("#4A90E2"));
-        this.selectionRect.setStrokeWidth(1.5);
-        this.selectionRect.setVisible(false);
-        this.group.getChildren().add(this.selectionRect);
-    }
+    // private void createSelectionRect() {
+    //     this.selectionRect = new Rectangle();
+    //     this.selectionRect.setManaged(false);
+    //     this.selectionRect.setMouseTransparent(true);
+    //     this.selectionRect.setFill(Color.web("#4A90E235"));
+    //     this.selectionRect.setStroke(Color.web("#4A90E2"));
+    //     this.selectionRect.setStrokeWidth(1.5);
+    //     this.selectionRect.setVisible(false);
+    //     this.group.getChildren().add(this.selectionRect);
+    // }
 
     @Override
     public void updateStyle() {
@@ -119,165 +104,168 @@ public class MldController extends View {
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
-        if (dbS == null) return;
+    //     if (dbS == null) return;
 
-        // unbind/detach old lines if any
-        for (Node n : new ArrayList<>(group.getChildren())) {
-            if (n instanceof Line) {
-                // simply remove old lines and keep selectionRect
-                group.getChildren().remove(n);
-            }
-        }
+    //     // unbind/detach old lines if any
+    //     for (Node n : new ArrayList<>(group.getChildren())) {
+    //         if (n instanceof Line) {
+    //             // simply remove old lines and keep selectionRect
+    //             group.getChildren().remove(n);
+    //         }
+    //     }
 
-        // remove all nodes except selectionRect
-        group.getChildren().removeIf(node -> node != this.selectionRect);
+    //     // remove all nodes except selectionRect
+    //     group.getChildren().removeIf(node -> node != this.selectionRect);
 
-        tableNodes.clear();
+    //     tableNodes.clear();
 
-        createTableNodes(dbS);
-        drawConnections();
+    //     createTableNodes(dbS);
+    //     drawConnections();
 
-        if (this.selectionRect != null) this.selectionRect.toFront();
-        clampContentPosition();
+    //     if (this.selectionRect != null) this.selectionRect.toFront();
+    //     clampContentPosition();
     }
 
-    // --- création nodes & branchements ---
-    private void createTableNodes(DatabaseSchema dbS) throws IOException {
-        int col = 0, row = 0;
-        int cols = (int) Math.ceil(Math.sqrt(dbS.getTables().size()));
+    @Override
+    public void onChange() {}
 
-        for (Table table : dbS.getTables().values()) {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
-            AnchorPane nodePane = loader.load();
-            TableController nodeController = loader.getController();
-            nodeController.createTableNode(table);
+    // // --- création nodes & branchements ---
+    // private void createTableNodes(DatabaseSchema dbS) throws IOException {
+    //     int col = 0, row = 0;
+    //     int cols = (int) Math.ceil(Math.sqrt(dbS.getTables().size()));
 
-            // setup callbacks (selection logic handled here, drag delegated to multiDrag)
-            nodeController.setOnSelect((tc, e) -> handleSelection(tc, e));
+    //     for (Table table : dbS.getTables().values()) {
+    //         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
+    //         AnchorPane nodePane = loader.load();
+    //         TableController nodeController = loader.getController();
+    //         nodeController.createTableNode(table);
 
-            // attach multi-drag manager (it will setOnDrag / setOnDragEnd on the controller)
-            multiDrag.attach(nodeController);
+    //         // setup callbacks (selection logic handled here, drag delegated to multiDrag)
+    //         nodeController.setOnSelect((tc, e) -> handleSelection(tc, e));
 
-            // position initiale
-            nodePane.setLayoutX(col * 350 + 50);
-            nodePane.setLayoutY(row * 250 + 50);
+    //         // attach multi-drag manager (it will setOnDrag / setOnDragEnd on the controller)
+    //         multiDrag.attach(nodeController);
 
-            // add to scene graph (group)
-            this.group.getChildren().add(nodePane);
-            this.tableNodes.add(nodeController);
+    //         // position initiale
+    //         nodePane.setLayoutX(col * 350 + 50);
+    //         nodePane.setLayoutY(row * 250 + 50);
 
-            col++;
-            if (col >= cols) {
-                col = 0;
-                row++;
-            }
-        }
+    //         // add to scene graph (group)
+    //         this.group.getChildren().add(nodePane);
+    //         this.tableNodes.add(nodeController);
 
-        // ensure selectionRect stays above nodes
-        if (selectionRect != null) selectionRect.toFront();
-    }
+    //         col++;
+    //         if (col >= cols) {
+    //             col = 0;
+    //             row++;
+    //         }
+    //     }
 
-    private void drawConnections() {
-        for (TableController fromNode : this.tableNodes) {
-            Table fromTable = fromNode.getTable();
-            for (ForeignKey fk : fromTable.getForeignKeys()) {
-                TableController toNode = this.findTableNode(fk.getReferencedTable());
-                if (toNode != null) {
-                    drawConnection(fromNode, toNode);
-                }
-            }
-        }
-    }
+    //     // ensure selectionRect stays above nodes
+    //     if (selectionRect != null) selectionRect.toFront();
+    // }
 
-    private void drawConnection(TableController from, TableController to) {
-        // compute endpoints based on layoutX / layoutY
-        double fromX = from.getRoot().getLayoutX() + from.getRoot().getWidth() / 2;
-        double fromY = from.getRoot().getLayoutY() + from.getRoot().getHeight() / 2;
-        double toX = to.getRoot().getLayoutX() + to.getRoot().getWidth() / 2;
-        double toY = to.getRoot().getLayoutY() + to.getRoot().getHeight() / 2;
+    // private void drawConnections() {
+    //     for (TableController fromNode : this.tableNodes) {
+    //         Table fromTable = fromNode.getTable();
+    //         for (ForeignKey fk : fromTable.getForeignKeys()) {
+    //             TableController toNode = this.findTableNode(fk.getReferencedTable());
+    //             if (toNode != null) {
+    //                 drawConnection(fromNode, toNode);
+    //             }
+    //         }
+    //     }
+    // }
 
-        Line line = new Line(fromX, fromY, toX, toY);
-        line.setStroke(Color.web(T_M.getTheme().getSecondaryTextColor()));
-        line.setStrokeWidth(2);
-        line.getStrokeDashArray().addAll(5.0, 5.0);
+    // private void drawConnection(TableController from, TableController to) {
+    //     // compute endpoints based on layoutX / layoutY
+    //     double fromX = from.getRoot().getLayoutX() + from.getRoot().getWidth() / 2;
+    //     double fromY = from.getRoot().getLayoutY() + from.getRoot().getHeight() / 2;
+    //     double toX = to.getRoot().getLayoutX() + to.getRoot().getWidth() / 2;
+    //     double toY = to.getRoot().getLayoutY() + to.getRoot().getHeight() / 2;
 
-        // add behind nodes
-        this.group.getChildren().add(0, line);
-        bindLine(line, from, to);
-    }
+    //     Line line = new Line(fromX, fromY, toX, toY);
+    //     line.setStroke(Color.web(T_M.getTheme().getSecondaryTextColor()));
+    //     line.setStrokeWidth(2);
+    //     line.getStrokeDashArray().addAll(5.0, 5.0);
 
-    private void bindLine(Line line, TableController from, TableController to) {
-        line.startXProperty().bind(
-            from.getRoot().layoutXProperty()
-                .add(from.getRoot().widthProperty().divide(2))
-        );
+    //     // add behind nodes
+    //     this.group.getChildren().add(0, line);
+    //     bindLine(line, from, to);
+    // }
 
-        line.startYProperty().bind(
-            from.getRoot().layoutYProperty()
-                .add(from.getRoot().heightProperty().divide(2))
-        );
+    // private void bindLine(Line line, TableController from, TableController to) {
+    //     line.startXProperty().bind(
+    //         from.getRoot().layoutXProperty()
+    //             .add(from.getRoot().widthProperty().divide(2))
+    //     );
 
-        line.endXProperty().bind(
-            to.getRoot().layoutXProperty()
-                .add(to.getRoot().widthProperty().divide(2))
-        );
+    //     line.startYProperty().bind(
+    //         from.getRoot().layoutYProperty()
+    //             .add(from.getRoot().heightProperty().divide(2))
+    //     );
 
-        line.endYProperty().bind(
-            to.getRoot().layoutYProperty()
-                .add(to.getRoot().heightProperty().divide(2))
-        );
-    }
+    //     line.endXProperty().bind(
+    //         to.getRoot().layoutXProperty()
+    //             .add(to.getRoot().widthProperty().divide(2))
+    //     );
 
-    private TableController findTableNode(String tableName) {
-        for (TableController tc : tableNodes) {
-            if (tc.getTable().getName().equals(tableName)) return tc;
-        }
-        return null;
-    }
+    //     line.endYProperty().bind(
+    //         to.getRoot().layoutYProperty()
+    //             .add(to.getRoot().heightProperty().divide(2))
+    //     );
+    // }
 
-    // --- sélection ---
-    private void handleSelection(TableController tc, MouseEvent e) {
-        if (e.isControlDown()) {
-            selectionModel.toggle(tc);
-            return;
-        }
-        if (selectionModel.contains(tc)) {
-            // keep selection as-is (so multi-drag can start)
-            tc.getRoot().toFront();
-            return;
-        }
-        selectionModel.clear();
-        selectionModel.select(tc);
-    }
+    // private TableController findTableNode(String tableName) {
+    //     for (TableController tc : tableNodes) {
+    //         if (tc.getTable().getName().equals(tableName)) return tc;
+    //     }
+    //     return null;
+    // }
 
-    // --- clamp content position (simple) ---
-    private void clampContentPosition() {
-        if (group == null || pane == null) return;
+    // // --- sélection ---
+    // private void handleSelection(TableController tc, MouseEvent e) {
+    //     if (e.isControlDown()) {
+    //         selectionModel.toggle(tc);
+    //         return;
+    //     }
+    //     if (selectionModel.contains(tc)) {
+    //         // keep selection as-is (so multi-drag can start)
+    //         tc.getRoot().toFront();
+    //         return;
+    //     }
+    //     selectionModel.clear();
+    //     selectionModel.select(tc);
+    // }
 
-        Bounds bounds = group.getBoundsInParent();
-        double paneW = pane.getWidth();
-        double paneH = pane.getHeight();
+    // // --- clamp content position (simple) ---
+    // private void clampContentPosition() {
+    //     if (group == null || pane == null) return;
 
-        double tx = group.getTranslateX();
-        double ty = group.getTranslateY();
+    //     Bounds bounds = group.getBoundsInParent();
+    //     double paneW = pane.getWidth();
+    //     double paneH = pane.getHeight();
 
-        final double minVisible = 16.0;
+    //     double tx = group.getTranslateX();
+    //     double ty = group.getTranslateY();
 
-        if (bounds.getMaxX() < minVisible) {
-            tx += (minVisible - bounds.getMaxX());
-        }
-        if (bounds.getMinX() > paneW - minVisible) {
-            tx -= (bounds.getMinX() - (paneW - minVisible));
-        }
-        if (bounds.getMaxY() < minVisible) {
-            ty += (minVisible - bounds.getMaxY());
-        }
-        if (bounds.getMinY() > paneH - minVisible) {
-            ty -= (bounds.getMinY() - (paneH - minVisible));
-        }
+    //     final double minVisible = 16.0;
 
-        // apply if changed noticeably
-        if (Math.abs(tx - group.getTranslateX()) > 0.1) group.setTranslateX(tx);
-        if (Math.abs(ty - group.getTranslateY()) > 0.1) group.setTranslateY(ty);
-    }
+    //     if (bounds.getMaxX() < minVisible) {
+    //         tx += (minVisible - bounds.getMaxX());
+    //     }
+    //     if (bounds.getMinX() > paneW - minVisible) {
+    //         tx -= (bounds.getMinX() - (paneW - minVisible));
+    //     }
+    //     if (bounds.getMaxY() < minVisible) {
+    //         ty += (minVisible - bounds.getMaxY());
+    //     }
+    //     if (bounds.getMinY() > paneH - minVisible) {
+    //         ty -= (bounds.getMinY() - (paneH - minVisible));
+    //     }
+
+    //     // apply if changed noticeably
+    //     if (Math.abs(tx - group.getTranslateX()) > 0.1) group.setTranslateX(tx);
+    //     if (Math.abs(ty - group.getTranslateY()) > 0.1) group.setTranslateY(ty);
+    // }
 }

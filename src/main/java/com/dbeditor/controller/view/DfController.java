@@ -1,13 +1,9 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.model.ForeignKey;
-import com.dbeditor.model.Table;
 import com.dbeditor.util.DbManager;
 
 import javafx.fxml.FXML;
@@ -18,7 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 
 public class DfController extends View {
-    private DbManager D_M = DbManager.getInstance();
+    private static final DbManager D_M = DbManager.getInstance();
 
     @FXML private BorderPane root;
     @FXML private ToolBar toolbar;
@@ -26,13 +22,13 @@ public class DfController extends View {
     @FXML private Pane pane;
     @FXML private TextArea textArea;
 
-    @FXML
-    void initialize() {
-        super.createSplit(this.pane);
-        super.setupCombobowView(this.cb, View.DF);
+    // @FXML
+    // void initialize() {
+    //     super.createSplit(this.pane);
+    //     super.setupCombobowView(this.cb, View.DF);
 
-        this.updateStyle();
-    }
+    //     this.updateStyle();
+    // }
 
     @Override
     public void updateStyle() {
@@ -41,41 +37,49 @@ public class DfController extends View {
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
-        String text = "";
-        List<Table> tables = D_M.sortTables(dbS.getTables().values());
-
-        for(Table t : tables) {
-            // 1 - trier
-            List<String> pk = new ArrayList<>();
-            List<String> col = new ArrayList<>();
-            List<ForeignKey> fk = t.getForeignKeys();
-
-            for(Column c : t.getColumns()) {
-                if(c.isPrimaryKey()) {
-                    pk.add(c.getName());
-                } else {
-                    col.add(c.getName());
-                }
-            }
-
-            // 2 - écrire
-            text += "[" + t.getName() + "] ";
-            for(int ipk = 0; ipk < pk.size(); ipk++) {
-                text += pk.get(ipk);
-                text += (ipk == pk.size() - 1) ? " -> " : ", ";
-            }
-            for(int ic = 0; ic < col.size(); ic++) {
-                text += col.get(ic);
-                text += (ic == col.size() - 1) ? "" : ", ";
-            }
-            for(ForeignKey f : fk) {
-                text += ", {" + f.getReferencedTable() + "}" + f.getColumnName();
-            }
-            text += "\n";
-        }
-
-        this.textArea.setText(text);
-        this.updateStyle();
+        this.setupText();
     }
-    
+
+    @Override
+    public void onChange() {
+        this.setupText();
+    }
+
+    private void setupText() {
+        // String text = "";
+        // List<Table> tables = D_M.sortTables(dbS.getTables().values());
+
+        // for(Table t : tables) {
+        //     // 1 - trier
+        //     List<String> pk = new ArrayList<>();
+        //     List<String> col = new ArrayList<>();
+        //     List<ForeignKey> fk = t.getForeignKeys();
+
+        //     for(Column c : t.getColumns()) {
+        //         if(c.isPrimaryKey()) {
+        //             pk.add(c.getName());
+        //         } else {
+        //             col.add(c.getName());
+        //         }
+        //     }
+
+        //     // 2 - écrire
+        //     text += "[" + t.getName() + "] ";
+        //     for(int ipk = 0; ipk < pk.size(); ipk++) {
+        //         text += pk.get(ipk);
+        //         text += (ipk == pk.size() - 1) ? " -> " : ", ";
+        //     }
+        //     for(int ic = 0; ic < col.size(); ic++) {
+        //         text += col.get(ic);
+        //         text += (ic == col.size() - 1) ? "" : ", ";
+        //     }
+        //     for(ForeignKey f : fk) {
+        //         text += ", {" + f.getReferencedTable() + "}" + f.getColumnName();
+        //     }
+        //     text += "\n";
+        // }
+
+        // this.textArea.setText(text);
+        // this.updateStyle();
+    }
 }

@@ -11,76 +11,84 @@ import javafx.scene.Group;
 import com.dbeditor.controller.TableController;
 
 /**
- * Lasso rectangular : attache des handlers sur 'viewport' et ajoute une Rectangle dans 'content'.
+ * Lasso rectangulaire : attache des handlers sur le 'viewportPane' et ajoute une Rectangle dans 'content'.
  * tableNodes : la liste des TableController à tester.
  */
 public class LassoSelector {
-    private final Pane viewport;   // reçoit les events (scene coords)
+    private final Pane viewportPane;   // reçoit les events (scene coords)
     private final Group content;   // parent local pour le rectangle
     private final SelectionModel<TableController> selectionModel;
     private final Rectangle rect;
     private Point2D startLocal;
     private final List<TableController> tableNodes;
 
-    public LassoSelector(Pane viewport, Group content, List<TableController> tableNodes, SelectionModel<TableController> selectionModel) {
-        this.viewport = viewport;
+    public LassoSelector(Pane viewportPane, Group content, List<TableController> tableNodes, SelectionModel<TableController> selectionModel) {
+        this.viewportPane = viewportPane;
         this.content = content;
         this.selectionModel = selectionModel;
         this.tableNodes = tableNodes;
 
         this.rect = new Rectangle();
-        rect.setManaged(false);
-        rect.setMouseTransparent(true);
-        rect.setStyle("-fx-fill: rgba(74,144,226,0.14); -fx-stroke: #4A90E2; -fx-stroke-width: 1;");
-        rect.setVisible(false);
-        this.content.getChildren().add(rect);
+        this.rect.setManaged(false);
+        this.rect.setMouseTransparent(true);
+        this.rect.setStyle("-fx-fill: rgba(74,144,226,0.14); -fx-stroke: #4A90E2; -fx-stroke-width: 1;");
+        this.rect.setVisible(false);
+        this.content.getChildren().add(this.rect);
     }
 
-    public void install() {
-        viewport.setOnMousePressed(this::onPressed);
-        viewport.setOnMouseDragged(this::onDragged);
-        viewport.setOnMouseReleased(this::onReleased);
+    public void setupEvents() {
+        this.viewportPane.setOnMousePressed(this::onPressed);
+        this.viewportPane.setOnMouseDragged(this::onDragged);
+        this.viewportPane.setOnMouseReleased(this::onReleased);
     }
 
     private void onPressed(MouseEvent e) {
+        // si pas un clic gauche
         if (e.getButton() != MouseButton.PRIMARY) return;
 
-        // only if clicked on background (not on a child) — we check target is viewport itself
-        if (e.getTarget() != viewport) return;
+        // si le clic n'est pas dans cette vue (le pane parent)
+        if (e.getTarget() != viewportPane) return;
 
-        selectionModel.clear();
-        startLocal = content.sceneToLocal(e.getSceneX(), e.getSceneY());
-        rect.setX(startLocal.getX());
-        rect.setY(startLocal.getY());
-        rect.setWidth(0);
-        rect.setHeight(0);
-        rect.setVisible(true);
+        this.selectionModel.clear();
+        startLocal = this.content.sceneToLocal(e.getSceneX(), e.getSceneY());
+        this.rect.setX(startLocal.getX());
+        this.rect.setY(startLocal.getY());
+        this.rect.setWidth(0);
+        this.rect.setHeight(0);
+        this.rect.setVisible(true);
+
         e.consume();
     }
 
     private void onDragged(MouseEvent e) {
-        if (!rect.isVisible()) return;
-        Point2D cur = content.sceneToLocal(e.getSceneX(), e.getSceneY());
+        // sécurité
+        if (!this.rect.isVisible()) return;
+
+        Point2D cur = this.content.sceneToLocal(e.getSceneX(), e.getSceneY());
         double x = Math.min(startLocal.getX(), cur.getX());
         double y = Math.min(startLocal.getY(), cur.getY());
         double w = Math.abs(cur.getX() - startLocal.getX());
         double h = Math.abs(cur.getY() - startLocal.getY());
-        rect.setX(x); rect.setY(y); rect.setWidth(w); rect.setHeight(h);
+        this.rect.setX(x);
+        this.rect.setY(y);
+        this.rect.setWidth(w);
+        this.rect.setHeight(h);
 
         // sélectionner les tables qui intersectent
-        Bounds rectBounds = rect.getBoundsInParent();
-        selectionModel.clear();
-        for (TableController tc : tableNodes) {
+        Bounds rectBounds = this.rect.getBoundsInParent();
+        this.selectionModel.clear();
+        for (TableController tc : this.tableNodes) {
             if (tc.getRoot().getBoundsInParent().intersects(rectBounds)) {
-                selectionModel.select(tc);
+                this.selectionModel.select(tc);
             }
         }
+
         e.consume();
     }
 
     private void onReleased(MouseEvent e) {
-        if (rect.isVisible()) {
-            rect.setVisible(false);
+        if (this.rect.isVisible()) {
+            this.rect.setVisible(false);
             e.consume();
         }
     }
