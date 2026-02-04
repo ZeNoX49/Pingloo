@@ -56,7 +56,7 @@
 
 ### controller
 - [ ] CanvasController
-- [ ] TableController
+- [X] TableController
 - [ ] view/View
 - [ ] view/McdController
 - [ ] view/MldController

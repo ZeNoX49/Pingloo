@@ -38,11 +38,9 @@ public class LassoSelector {
 
     /**
      * Permet de setup les événements :
-     * <ul>
-     *   <li>onPressed</li>
-     *   <li>onDragged</li>
-     *   <li>onReleased</li>
-     * </ul>
+     * - onPressed
+     * - onDragged
+     * - onReleased
      */
     public void setupEvents() {
         this.viewportPane.setOnMousePressed(this::onPressed);

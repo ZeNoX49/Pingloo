@@ -73,6 +73,11 @@ public class CanvasController {
         this.updateStyle();
     }
 
+    /**
+     * Permettre de créer une vue de base<br>
+     * dans ce cas le MCD
+     * @throws IOException
+     */
     private void createBaseView() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
         Pane mcdPane = loader.load();
@@ -85,9 +90,6 @@ public class CanvasController {
         // on enregistre explicitement la première vue aussi
         this.vues_pane.add(new Pair<>(mcdController, mcdPane));
 
-        // IMPORTANT : ne lie pas prefWidth à pane.widthProperty() ici.
-        // Le Pane parent ajouté dans un SplitPane ou dans this.pane gérera la taille.
-        // Si tu veux absolument binder (si ton parent est un simple Pane), fais-le conditionnellement.
         mcdPane.setMinSize(0, 0);
         mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
@@ -103,6 +105,10 @@ public class CanvasController {
         this.updateStyle();
     }
 
+    /**
+     * Permet de mettre à jour le style au lancement de l'app
+     * ou lors d'un changement de style
+     */
     private void updateStyle() {
         this.spPane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
 
@@ -116,6 +122,10 @@ public class CanvasController {
         }
     }
 
+    /**
+     * Ouvre la fenêtre de modification du thème perso
+     * @param event
+     */
     @FXML
     void openPersoThemeParameter(ActionEvent event) {
         try {
@@ -150,10 +160,11 @@ public class CanvasController {
         this.open(F_M.openDatabase(fileChooser, new MySqlParser()));
     }
 
-    void openDbMYSQL(String dbName) throws IOException {
-        this.open(D_M.getMysqlDb().loadDb(dbName));
-    }
-
+    /**
+     * Permet de charger un DatabaseSchema dans toutes les vues
+     * @param dbS
+     * @throws IOException
+     */
     private void open(DatabaseSchema dbS) throws IOException {
         if(dbS != null) {
             MainApp.setSchema(dbS);
@@ -183,6 +194,10 @@ public class CanvasController {
     //     System.out.println("saveDbMYSQL");
     // }
 
+    /**
+     * Créer les MenuItem pour chaque nom des bdd mysql
+     * et leur associe l'action permettant de charger la bdd
+     */
     private void createMenuItemMysql() {
         this.menuOpenDbMYSQL.getItems().clear();
 
@@ -201,7 +216,7 @@ public class CanvasController {
                 modalStage.initStyle(StageStyle.UTILITY);
                 modalStage.setResizable(false);
 
-                modalStage.setOnCloseRequest(ev -> {this.createMenuItemMysql();});
+                modalStage.setOnCloseRequest(ev -> { this.createMenuItemMysql(); });
 
                 modalStage.setScene(scene);
                 modalStage.showAndWait();
@@ -216,7 +231,7 @@ public class CanvasController {
             MenuItem mi = new MenuItem(tableName);
             mi.setOnAction(e -> {
                 try {
-                    this.openDbMYSQL(tableName);
+                    this.open(D_M.getMysqlDb().loadDb(tableName));
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }

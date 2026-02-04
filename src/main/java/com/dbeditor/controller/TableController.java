@@ -37,10 +37,13 @@ public class TableController {
 
     public void createTableNode(Table table) {
         this.table = table;
-        createUI();
-        setupDragHandlers();
+        this.createUI();
+        this.setupDragHandlers();
     }
     
+    /**
+     * Permet de créer l'UI de la table
+     */
     private void createUI() {
         this.hName.setPadding(new Insets(2));
 
@@ -77,6 +80,10 @@ public class TableController {
         this.updateStyle();
     }
     
+    /**
+     * Permete de mettre à jour le style au lancement de l'app
+     * ou lors d'un changement de style
+     */
     public void updateStyle() {
         this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getCardColor() + 
                 "; -fx-border-color: " + T_M.getTheme().getBorderColor() + 
@@ -98,11 +105,16 @@ public class TableController {
         }
     }
     
+    /**
+     * Met en place la logique de drag
+     */
     private void setupDragHandlers() {
         this.pane.setOnMousePressed(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
-                // informer CanvasController de la sélection (il gère la logique)
-                if (this.onSelect != null) this.onSelect.accept(this, e);
+                // informer CanvasController de la sélection
+                if (this.onSelect != null) {
+                    this.onSelect.accept(this, e);
+                }
 
                 // amener au front pour l'UX
                 this.pane.toFront();
@@ -113,8 +125,10 @@ public class TableController {
         
         this.pane.setOnMouseDragged(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
-                // déléguer le drag au CanvasController (qui gère multi-drag)
-                if (this.onDrag != null) this.onDrag.accept(this, e);
+                // déléguer le drag au CanvasController
+                if (this.onDrag != null) {
+                    this.onDrag.accept(this, e);
+                }
                 e.consume();
             }
         });
@@ -127,16 +141,25 @@ public class TableController {
         });
     }
 
+    /**
+     * Modifie le bord de la table en fonction de la sélection
+     * @param selected
+     */
     public void setSelected(boolean selected) {
         if (selected) {
             pane.setStyle(pane.getStyle() + "; -fx-border-color: " + T_M.getTheme().getSelectionBorderColor() + ";");
         } else {
-            updateStyle(); // remet le style normal
+            this.updateStyle(); // remet le style normal
         }
     }
 
+    /**
+     * On regarde si l'élement est déja inclus
+     * @param pInParent
+     * @return
+     */
     public boolean contains(Point2D pInParent) {
-        return pane.getBoundsInParent().contains(pInParent);
+        return this.pane.getBoundsInParent().contains(pInParent);
     }
 
     public void setOnSelect(BiConsumer<TableController, MouseEvent> onSelect) {

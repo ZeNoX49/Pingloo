@@ -30,12 +30,10 @@ public class ZoomPanHandler {
 
     /**
      * Permet de setup les événements :
-     * <ul>
-     *   <li>onPressed</li>
-     *   <li>onDragged</li>
-     *   <li>onReleased</li>
-     *   <li>OnScroll</li>
-     * </ul>
+     * - onPressed
+     * - onDragged
+     * - onReleased
+     * - OnScroll
      */
     public void setupEvents() {
         // pan via event filters (capture phase) to avoid child interference
