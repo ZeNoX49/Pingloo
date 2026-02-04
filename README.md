@@ -55,7 +55,7 @@
 ## Revue de code
 
 ### controller
-- [ ] CanvasController
+- [X] CanvasController
 - [X] TableController
 - [ ] view/View
 - [ ] view/McdController
