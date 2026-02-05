@@ -12,13 +12,18 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
-    
+    private static DatabaseSchema schema;
+	public static void setSchema(DatabaseSchema schema) { MainApp.schema = schema; }
+	public static DatabaseSchema getSchema() { return MainApp.schema; }
+
     @Override
 	public void start(Stage stage) throws IOException {
 		JsonManager J_M = JsonManager.getInstance();
 		FileManager F_M = FileManager.getInstance();
         try {
 			J_M.load();
+
+			MainApp.schema = new DatabaseSchema("");
 
 	        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/canvas.fxml"));
 	        Scene scene = new Scene(loader.load(), 1280, 720);
@@ -35,10 +40,4 @@ public class MainApp extends Application {
 			throw new Error("Erreur de chargement de la scène : /fxml/canvas.fxml");
 	    }
 	} public static void main(String[] args) { launch(args); }
-
-	/* ==================================================================================================== */
-
-	private static DatabaseSchema schema;
-	public static void setSchema(DatabaseSchema schema) { MainApp.schema = schema; }
-	public static DatabaseSchema getSchema() { return MainApp.schema; }
 }

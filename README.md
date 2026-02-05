@@ -54,6 +54,8 @@
 
 ## Revue de code
 
+- [ ] MainApp
+
 ### controller
 - [X] CanvasController
 - [X] TableController

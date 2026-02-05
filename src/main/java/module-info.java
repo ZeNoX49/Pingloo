@@ -25,5 +25,4 @@ module com.dbeditor {
     exports com.dbeditor.sql.file.parser;
     exports com.dbeditor.theme;
     exports com.dbeditor.util;
-    // exports com.dbeditor.commands;
 }

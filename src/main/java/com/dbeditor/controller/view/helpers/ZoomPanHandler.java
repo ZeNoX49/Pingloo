@@ -3,6 +3,7 @@ package com.dbeditor.controller.view.helpers;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -35,7 +36,7 @@ public class ZoomPanHandler {
      * - onReleased
      * - OnScroll
      */
-    public void setupEvents() {
+    public void setupEvents(Label zlLabel) {
         // pan via event filters (capture phase) to avoid child interference
         this.viewportPane.addEventFilter(MouseEvent.MOUSE_PRESSED, this::onPressed);
         this.viewportPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::onDragged);
@@ -59,6 +60,8 @@ public class ZoomPanHandler {
 
             this.content.setTranslateX(this.content.getTranslateX() - dx);
             this.content.setTranslateY(this.content.getTranslateY() - dy);
+
+            zlLabel.setText("%.2f".formatted(this.zoomLevel));
         });
     }
 
