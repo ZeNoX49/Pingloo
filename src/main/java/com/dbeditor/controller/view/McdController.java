@@ -1,21 +1,21 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
+import com.dbeditor.controller.view.helpers.LassoSelector;
+import com.dbeditor.controller.view.helpers.MultiDragManager;
+import com.dbeditor.controller.view.helpers.SelectionModel;
+import com.dbeditor.controller.view.helpers.ZoomPanHandler;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
-import com.dbeditor.controller.view.helpers.ZoomPanHandler;
-import com.dbeditor.controller.view.helpers.SelectionModel;
-import com.dbeditor.controller.view.helpers.LassoSelector;
-import com.dbeditor.controller.view.helpers.MultiDragManager;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
