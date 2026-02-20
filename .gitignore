@@ -1,6 +1,7 @@
 src/main/resources/userPreferences.json
 .vscode/
-__temp__/
 target/
+src/test/
 *.sql
+__temp__/
 df_example.txt

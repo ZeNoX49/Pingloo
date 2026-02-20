@@ -82,39 +82,22 @@ public class CanvasController {
      * @throws IOException
      */
     private void createBaseView() throws IOException {
-        // FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
-        // Pane mcdPane = loader.load();
-        // View mcdController = loader.getController();
-
-        // // on fournit la fonction d'enregistrement au controller
-        // mcdController.setData(this.spPane, mcdPane, (pair) -> {
-        //     // registrar : ajoute la paire dans la liste viewsPane
-        //     this.viewsPane.add(pair);
-        // });
-        // // on enregistre explicitement la première vue aussi
-        // this.viewsPane.add(new Pair<>(mcdController, mcdPane));
-
-        // mcdPane.setMinSize(0, 0);
-        // mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        // this.spPane.getChildren().add(mcdPane);
-
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
-        Pane mldPane = loader.load();
-        View mldController = loader.getController();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
+        Pane mcdPane = loader.load();
+        View mcdController = loader.getController();
 
         // on fournit la fonction d'enregistrement au controller
-        mldController.setData(this.spPane, mldPane, (pair) -> {
+        mcdController.setData(this.spPane, mcdPane, (pair) -> {
             // registrar : ajoute la paire dans la liste viewsPane
             this.viewsPane.add(pair);
         });
         // on enregistre explicitement la première vue aussi
-        this.viewsPane.add(new Pair<>(mldController, mldPane));
+        this.viewsPane.add(new Pair<>(mcdController, mcdPane));
 
-        mldPane.setMinSize(0, 0);
-        mldPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        mcdPane.setMinSize(0, 0);
+        mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-        this.spPane.getChildren().add(mldPane);
+        this.spPane.getChildren().add(mcdPane);
     }
 
     public void registerView(View v, Pane pane) {

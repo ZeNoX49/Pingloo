@@ -62,10 +62,12 @@ public class MldController extends View {
         // visualizer appelle setSelected sur TableController
         this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
 
+        // Initialiser le zoom/pan
         this.zoomPan = new ZoomPanHandler(this.pane, this.group);
         this.zoomPan.setupEvents(this.zlLabel);
         this.zlLabel.setText("%.2f".formatted(this.zoomPan.getZoomLevel()));
 
+        // Initialiser le multidrag
         this.multiDrag = new MultiDragManager(this.selectionModel);
 
         // Permet au node de ne pas sortir du pane (pour ne pas les voir au dessus de la toolbar)
@@ -74,6 +76,7 @@ public class MldController extends View {
         clip.heightProperty().bind(this.pane.heightProperty());
         this.pane.setClip(clip);
 
+        // Initialiser le lasso
         this.lasso = new LassoSelector(this.pane, this.group, this.tableNodes, this.selectionModel);
         this.lasso.setupEvents();
 
@@ -136,8 +139,7 @@ public class MldController extends View {
         int cols = (int) Math.ceil(Math.sqrt(dbS.getTables().size()));
 
         for (Table table : dbS.getTables().values()) {
-            TableController nodeController = this.createTableNode(table, col * 350 + 50, row * 250 + 50);
-            this.tableNodes.add(nodeController);
+            this.createTableNode(table, col * 350 + 50, row * 250 + 50);
 
             col++;
             if (col >= cols) {
@@ -159,11 +161,13 @@ public class MldController extends View {
      * @param y position Y
      * @return le contrôleur de la table créée
      */
-    private TableController createTableNode(Table table, double x, double y) throws IOException {
+    private void createTableNode(Table table, double x, double y) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
         AnchorPane nodePane = loader.load();
         TableController nodeController = loader.getController();
         nodeController.createTableNode(table);
+
+        this.tableNodes.add(nodeController);
 
         // gérer la sélection d'un table lorsqu'elle est cliquée
         nodeController.setOnSelect((tc, e) -> this.handleSelection(tc, e));
@@ -187,8 +191,6 @@ public class MldController extends View {
         nodePane.setLayoutY(y);
 
         this.group.getChildren().add(nodePane);
-        
-        return nodeController;
     }
 
     /**
@@ -287,53 +289,53 @@ public class MldController extends View {
         this.selectionModel.select(table);
     }
 
-    /**
-     * Ajoute une nouvelle table
-     */
-    @FXML
-    private void addTable() {
-        DatabaseSchema schema = MainApp.getSchema();
+    // /**
+    //  * Ajoute une nouvelle table
+    //  */
+    // @FXML
+    // private void addTable() {
+    //     DatabaseSchema schema = MainApp.getSchema();
 
-        // Ouvrir le dialogue d'édition
-        TableEditorDialog dialog = new TableEditorDialog();
-        dialog.showAndWait();
+    //     // Ouvrir le dialogue d'édition
+    //     TableEditorDialog dialog = new TableEditorDialog();
+    //     dialog.showAndWait();
 
-        if (dialog.isConfirmed()) {
-            Table newTable = dialog.getResultTable();
+    //     if (dialog.isConfirmed()) {
+    //         Table newTable = dialog.getResultTable();
             
-            // Vérifier si une table avec ce nom existe déjà
-            if (schema.getTable(newTable.getName()) != null) {
-                CanvasController.showWarningAlert("Erreur", "Une table avec ce nom existe déjà.");
-                return;
-            }
+    //         // Vérifier si une table avec ce nom existe déjà
+    //         if (schema.getTable(newTable.getName()) != null) {
+    //             CanvasController.showWarningAlert("Erreur", "Une table avec ce nom existe déjà.");
+    //             return;
+    //         }
 
-            // Ajouter la table au schéma
-            schema.addTable(newTable);
+    //         // Ajouter la table au schéma
+    //         schema.addTable(newTable);
 
-            try {
-                // Créer le node visuel
-                // Position au centre de la vue visible
-                double x = (this.pane.getWidth() / 2) - 150;
-                double y = (this.pane.getHeight() / 2) - 100;
+    //         try {
+    //             // Créer le node visuel
+    //             // Position au centre de la vue visible
+    //             double x = (this.pane.getWidth() / 2) - 150;
+    //             double y = (this.pane.getHeight() / 2) - 100;
                 
-                TableController newNode = createTableNode(newTable, x, y);
-                this.tableNodes.add(newNode);
+    //             TableController newNode = createTableNode(newTable, x, y);
+    //             this.tableNodes.add(newNode);
 
-                // Sélectionne la nouvelle table
-                this.selectionModel.clear();
-                this.selectionModel.select(newNode);
+    //             // Sélectionne la nouvelle table
+    //             this.selectionModel.clear();
+    //             this.selectionModel.select(newNode);
 
-                // Mettre le rectangle de sélection devant
-                if (this.lasso != null) {
-                    this.lasso.getRect().toFront();
-                }
+    //             // Mettre le rectangle de sélection devant
+    //             if (this.lasso != null) {
+    //                 this.lasso.getRect().toFront();
+    //             }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                CanvasController.showWarningAlert("Erreur", "Impossible de créer la table visuellement.");
-            }
-        }
-    }
+    //         } catch (IOException e) {
+    //             e.printStackTrace();
+    //             CanvasController.showWarningAlert("Erreur", "Impossible de créer la table visuellement.");
+    //         }
+    //     }
+    // }
 
     /**
      * Modifie une table existante

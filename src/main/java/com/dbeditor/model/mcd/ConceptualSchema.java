@@ -22,20 +22,24 @@ public class ConceptualSchema {
     public ConceptualSchema(DatabaseSchema schema) {
         this.name = schema.getName();
 
+        this.entities = new HashMap<>();
+        this.associations = new ArrayList<>();
+
         if(schema.getTables().isEmpty()) return;
 
         Map<String, List<ForeignKey>> fkList = new HashMap<>();
         for(Table table : schema.getTables().values()) {
-            String name = table.getName();
-            entities.put(name, new Entity(table));
-
-            fkList.put(name, new ArrayList<>());
-            fkList.get(name).addAll(table.getForeignKeys());
+            this.addTable(table);
+            
+            // on récupère les foreign keys pour pouvoir créer les associations
+            String tableName = table.getName();
+            fkList.put(tableName, new ArrayList<>());
+            fkList.get(tableName).addAll(table.getForeignKeys());
         }
 
-        for(String name : fkList.keySet()) {
-            for(ForeignKey fk : fkList.get(name)) {
-                Entity entity1 = entities.get(name);
+        for(String tableName : fkList.keySet()) {
+            for(ForeignKey fk : fkList.get(tableName)) {
+                Entity entity1 = entities.get(tableName);
                 Entity entity2 = entities.get(fk.getReferencedTable());
 
                 associations.add(new Association(entity1, entity2));
@@ -43,8 +47,12 @@ public class ConceptualSchema {
         }
     }
 
+    public void addTable(Table table) {
+        entities.put(table.getName(), new Entity(table));
+    }
+
     private class Entity {
-        public Table table;
+        public final Table table;
 
         public Entity(Table table) {
             this.table = table;
@@ -52,7 +60,7 @@ public class ConceptualSchema {
     }
 
     private class Association {
-        public Pair<Entity, Entity> link;
+        public final Pair<Entity, Entity> link;
 
         public Association(Entity entity1, Entity entity2) {
             this.link = new Pair<>(entity1, entity2);
@@ -70,6 +78,12 @@ public class ConceptualSchema {
             tables.add(entity.table);
         }
         return tables;
+    }
+
+    public Table getTable(String name) {
+        Entity entity = this.entities.get(name);
+        if(entity == null) return null;
+        return entity.table;
     }
 
     public List<Pair<Table, Table>> getLinks() {

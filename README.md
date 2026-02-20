@@ -12,12 +12,10 @@
     - [X] MYSQL
     - [ ] MSSQL
     - [ ] PostgreSQL
-    - [ ] ...
 - [ ] se connecter à une bdd
     - [X] MYSQL
-    - [ ] MSSQL
-    - [ ] PostgreSQL
-    - [ ] ...
+    - [X] MSSQL
+    - [X] PostgreSQL
 - [ ] charger un dictionnaire des données et ses dépendances fonctionnelles
 
 #### Exportation
@@ -25,12 +23,10 @@
     - [X] MYSQL
     - [ ] MSSQL
     - [ ] PostgreSQL
-    - [ ] ...
 - [ ] créer/modifier une bdd
     - [ ] MYSQL
     - [ ] MSSQL
     - [ ] PostgreSQL
-    - [ ] ...
 - [ ] exporter un dictionnaire des données et ses dépendances fonctionnelles
 
 ### Personnalisation

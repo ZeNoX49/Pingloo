@@ -1,6 +1,9 @@
 package com.dbeditor;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.List;
 
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.util.FileManager;
@@ -39,5 +42,41 @@ public class MainApp extends Application {
 			e.printStackTrace();
 			throw new Error("Erreur de chargement de la scène : /fxml/canvas.fxml");
 	    }
-	} public static void main(String[] args) { launch(args); }
+	} public static void main(String[] args) {
+		deleteUselessLog();
+		launch(args);
+	}
+
+	/**
+	 * Supprime tous les logs inutiles de JavaFX
+	 * - "javafx.fxml.FXMLLoader$ValueElement processValue"
+	 * - "Loading FXML document with JavaFX API of version"
+	 */
+	private static void deleteUselessLog() {
+		List<String> toDelete = List.of(
+			"javafx.fxml.FXMLLoader$ValueElement processValue",
+			"Loading FXML document with JavaFX API of version"
+		);
+
+		PrintStream originalErr = System.err;
+		System.setErr(new PrintStream(new OutputStream() {
+			private final StringBuilder sb = new StringBuilder();
+
+			@Override
+			public void write(int b) throws IOException {
+				if (b == '\n') {
+					String line = sb.toString();
+					sb.setLength(0);
+
+					// Vérifie si la ligne contient un des motifs à supprimer
+					boolean shouldDelete = toDelete.stream().anyMatch(line::contains);
+					if (!shouldDelete) {
+						originalErr.println(line);
+					}
+				} else {
+					sb.append((char)b);
+				}
+			}
+		}, true));
+	}
 }

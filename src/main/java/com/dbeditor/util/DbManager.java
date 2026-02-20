@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.sql.db.MySqlDb;
 import com.dbeditor.sql.db.SqlDb;
 
@@ -23,8 +24,8 @@ public class DbManager {
 
     /* ================================================== */
 
-    private Map<String, SqlDb> db;
-    private Map<String, List<String>> tables;
+    private Map<DbType, SqlDb> db;
+    private Map<DbType, List<String>> tables;
     // private Map<String, SQL_DbExporter> dbExporters;
 
     private DbManager() {
@@ -33,7 +34,7 @@ public class DbManager {
     }
 
     public void setMysqlDbData(Map<String, Object> data) {
-        this.db.put("mysql", new MySqlDb(
+        this.db.put(DbType.MySql, new MySqlDb(
             (String) data.get("host"),
             (String) data.get("user"),
             (String) data.get("password"),
@@ -44,11 +45,11 @@ public class DbManager {
         for(Map<String, Object> table : (List<Map<String, Object>>) data.get("tables")) {
             t.add((String) table.get("name"));
         }
-        this.tables.put("mysql", t);
+        this.tables.put(DbType.MySql, t);
     }
 
-    public MySqlDb getMysqlDb() { return (MySqlDb) this.db.get("mysql");  }
-    public List<String> getMysqlDbTables() { return this.tables.get("mysql");  }
+    public MySqlDb getMysqlDb() { return (MySqlDb) this.db.get(DbType.MySql);  }
+    public List<String> getMysqlDbTables() { return this.tables.get(DbType.MySql);  }
 
     /* ============================================================================================================================= */
 
