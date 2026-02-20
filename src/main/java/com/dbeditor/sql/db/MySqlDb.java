@@ -3,8 +3,20 @@ package com.dbeditor.sql.db;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,13 +92,13 @@ public class MySqlDb implements SqlDb {
 
     @Override
     public DatabaseSchema loadDb(String dbName) {
-        this.connect(dbName);
-        if (!isConnected()) {
-            LOGGER.severe("Impossible de charger la BD : pas de connexion.");
-            return new DatabaseSchema(dbName);
-        }
-
         DatabaseSchema schema = new DatabaseSchema(dbName);
+
+        this.connect(dbName);
+        if (!this.isConnected()) {
+            LOGGER.severe("Impossible de charger la BD : pas de connexion.");
+            return schema;
+        }
 
         try {
             DatabaseMetaData meta = this.connection.getMetaData();
@@ -104,8 +116,7 @@ public class MySqlDb implements SqlDb {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur pendant la lecture du schema", e);
         } finally {
-            // on ne ferme pas la connexion ici si tu veux réutiliser l'instance plus tard,
-            // mais on peut la fermer si tu préfères. Ici on la laisse ouverte pour l'appelant.
+            this.deconnect();
         }
 
         return schema;

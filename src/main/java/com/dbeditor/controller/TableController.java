@@ -35,6 +35,10 @@ public class TableController {
     private BiConsumer<TableController, MouseEvent> onDrag;
     private BiConsumer<TableController, MouseEvent> onDragEnd;
 
+    /**
+     * Permet de mettre en place le visuel de la table.<br>
+     * Met aussi en en place l'ui et le drag
+     */
     public void createTableNode(Table table) {
         this.table = table;
         this.createUI();

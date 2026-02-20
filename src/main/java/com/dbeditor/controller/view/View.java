@@ -1,48 +1,30 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.function.Consumer;
 
-import com.dbeditor.MainApp;
 import com.dbeditor.model.DatabaseSchema;
 
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Bounds;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.SplitPane;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
-import javafx.stage.Popup;
 import javafx.util.Pair;
 
 public abstract class View {
-    // public final static String MLD = "MLD";
-    // public final static String MCD = "MCD";
-    // public final static String DF = "DF";
-    // public final static String DD = "DD";
-    // public final static String SDF = "SDF";
-    // public final static String VALUE = "value";
+
+    public enum ViewType {
+        MCD, MLD, DF, DD, SDF, VALUE;
+    }
 
     private Pane parent;
     private Pane viewPane;
     private Consumer<Pair<View, Pane>> registrar; // callback pour enregistrer la vue dans CanvasController
     // private Popup popup;
-    
+
     /**
      * Permet de charger les données à la création de la vue
-     * @param parent : le conteneur parent (ex : zone centrale ou split pane)
-     * @param viewPane : la Node root chargée depuis le FXML
-     * @param registrar : fonction fournie par CanvasController pour enregistrer la paire (controller, pane)
+     * @param parent le Canvas Controller et le conteneur parent
+     * @param viewPane la Node root chargée depuis le FXML
+     * @param registrar fonction fournie par CanvasController pour enregistrer la paire (controller, pane)
      */
     public void setData(Pane parent, Pane viewPane, Consumer<Pair<View, Pane>> registrar) {
         this.parent = parent;
@@ -51,7 +33,7 @@ public abstract class View {
     }
 
     /**
-     * Permete de mettre à jour le style au lancement de l'app
+     * Permet de mettre à jour le style au lancement de l'app
      * ou lors d'un changement de style
      */
     public abstract void updateStyle();
@@ -287,22 +269,19 @@ public abstract class View {
     //     }
     // }
 
-    // public void setupCombobowView(ComboBox<String> cb, String value) {
-    //     // liste des vues disponibles
-    //     cb.getItems().clear();
-    //     cb.getItems().addAll(
-    //         View.MLD,
-    //         View.MCD,
-    //         View.DF
-    //         // ajouter d'autres si besoin
-    //     );
+    public void setupCombobowView(ComboBox<String> cb, ViewType value) {
+        cb.getItems().clear();
+        cb.getItems().addAll(
+            ViewType.MCD.toString(),
+            ViewType.MLD.toString()
+        );
 
-    //     // affichage initial
-    //     if (value != null && cb.getItems().contains(value)) {
-    //         cb.setValue(value);
-    //     } else if (!cb.getItems().isEmpty()) {
-    //         cb.setValue(cb.getItems().get(0));
-    //     }
+        // affichage initial
+        if (value != null && cb.getItems().contains(value.toString())) {
+            cb.setValue(value.toString());
+        } else if (!cb.getItems().isEmpty()) {
+            cb.setValue(cb.getItems().get(0));
+        }
 
     //     cb.valueProperty().addListener((obs, oldValue, newValue) -> {
     //         if (newValue == null || newValue.equals(oldValue)) return;
@@ -371,5 +350,5 @@ public abstract class View {
     //             }
     //         });
     //     });
-    // }
+    }
 }

@@ -3,6 +3,7 @@ package com.dbeditor.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.view.View;
@@ -17,7 +18,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -48,11 +51,11 @@ public class CanvasController {
     @FXML private Menu menuOpenDbMYSQL, menuSaveDbMYSQL;
     @FXML private MenuItem miLT, miDT, miPT;
     
-    private List<Pair<View, Pane>> vues_pane;
+    private List<Pair<View, Pane>> viewsPane;
 
     @FXML
     private void initialize() throws IOException {
-        this.vues_pane = new ArrayList<>();
+        this.viewsPane = new ArrayList<>();
         
         this.createBaseView();
 
@@ -79,25 +82,43 @@ public class CanvasController {
      * @throws IOException
      */
     private void createBaseView() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
-        Pane mcdPane = loader.load();
-        View mcdController = loader.getController();
+        // FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
+        // Pane mcdPane = loader.load();
+        // View mcdController = loader.getController();
+
+        // // on fournit la fonction d'enregistrement au controller
+        // mcdController.setData(this.spPane, mcdPane, (pair) -> {
+        //     // registrar : ajoute la paire dans la liste viewsPane
+        //     this.viewsPane.add(pair);
+        // });
+        // // on enregistre explicitement la première vue aussi
+        // this.viewsPane.add(new Pair<>(mcdController, mcdPane));
+
+        // mcdPane.setMinSize(0, 0);
+        // mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+        // this.spPane.getChildren().add(mcdPane);
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
+        Pane mldPane = loader.load();
+        View mldController = loader.getController();
+
         // on fournit la fonction d'enregistrement au controller
-        mcdController.setData(this.spPane, mcdPane, (pair) -> {
-            // registrar : ajoute la paire dans la liste vues_pane
-            this.vues_pane.add(pair);
+        mldController.setData(this.spPane, mldPane, (pair) -> {
+            // registrar : ajoute la paire dans la liste viewsPane
+            this.viewsPane.add(pair);
         });
         // on enregistre explicitement la première vue aussi
-        this.vues_pane.add(new Pair<>(mcdController, mcdPane));
+        this.viewsPane.add(new Pair<>(mldController, mldPane));
 
-        mcdPane.setMinSize(0, 0);
-        mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        mldPane.setMinSize(0, 0);
+        mldPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-        this.spPane.getChildren().add(mcdPane);
+        this.spPane.getChildren().add(mldPane);
     }
 
     public void registerView(View v, Pane pane) {
-        this.vues_pane.add(new Pair<>(v, pane));
+        this.viewsPane.add(new Pair<>(v, pane));
     }
 
     private void changeTheme(int idTheme) {
@@ -116,7 +137,7 @@ public class CanvasController {
                         "; -fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + 
                         "; -fx-border-width: 0 0 1 0;");
 
-        for(Pair<View, Pane> p : this.vues_pane) {
+        for(Pair<View, Pane> p : this.viewsPane) {
             View v = p.getKey();
             v.updateStyle();
         }
@@ -170,7 +191,7 @@ public class CanvasController {
             MainApp.setSchema(dbS);
             this.tfDbName.setText(dbS.getName());
 
-            for(Pair<View, Pane> p : this.vues_pane) {
+            for(Pair<View, Pane> p : this.viewsPane) {
                 View v = p.getKey();
                 v.open(dbS);
             }
@@ -239,4 +260,29 @@ public class CanvasController {
             this.menuOpenDbMYSQL.getItems().add(mi);
         }
     }
+
+    /**
+     * Affiche une alerte "warning"
+     */
+    public static void showWarningAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    /**
+     * Affiche une alerte "confirmation"
+     */
+    public static boolean showConfirmationAlert(String title, String header, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(message);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return (result.isPresent() && result.get() == ButtonType.OK);
+    }
+    
 }

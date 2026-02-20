@@ -1,13 +1,22 @@
 package com.dbeditor.controller.view.dialogs;
 
+import com.dbeditor.controller.CanvasController;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
@@ -16,10 +25,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
 
 /**
  * Dialogue pour créer ou modifier une table
@@ -274,7 +279,7 @@ public class TableEditorDialog {
         if (selected != null) {
             columnData.remove(selected);
         } else {
-            showAlert("Aucune sélection", "Veuillez sélectionner une colonne à supprimer.");
+            CanvasController.showWarningAlert("Aucune sélection", "Veuillez sélectionner une colonne à supprimer.");
         }
     }
 
@@ -285,19 +290,19 @@ public class TableEditorDialog {
         String name = tfTableName.getText().trim();
         
         if (name.isEmpty()) {
-            showAlert("Erreur", "Le nom de la table ne peut pas être vide.");
+            CanvasController.showWarningAlert("Erreur", "Le nom de la table ne peut pas être vide.");
             return false;
         }
         
         if (columnData.isEmpty()) {
-            showAlert("Erreur", "La table doit contenir au moins une colonne.");
+            CanvasController.showWarningAlert("Erreur", "La table doit contenir au moins une colonne.");
             return false;
         }
 
         // Vérifier que toutes les colonnes ont un nom
         for (ColumnRow row : columnData) {
             if (row.getName().trim().isEmpty()) {
-                showAlert("Erreur", "Toutes les colonnes doivent avoir un nom.");
+                CanvasController.showWarningAlert("Erreur", "Toutes les colonnes doivent avoir un nom.");
                 return false;
             }
         }
@@ -314,17 +319,6 @@ public class TableEditorDialog {
         }
 
         return true;
-    }
-
-    /**
-     * Affiche une alerte
-     */
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     /**

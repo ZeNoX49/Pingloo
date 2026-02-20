@@ -1,14 +1,16 @@
 package com.dbeditor.controller.view.helpers;
 
 import java.util.List;
-import javafx.geometry.Point2D;
+
+import com.dbeditor.controller.TableController;
+
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.Group;
-import com.dbeditor.controller.TableController;
 
 /**
  * Lasso rectangulaire : attache des handlers sur le 'viewportPane' et ajoute une Rectangle dans 'content'.
@@ -28,6 +30,7 @@ public class LassoSelector {
         this.selectionModel = selectionModel;
         this.tableNodes = tableNodes;
 
+        // le lasso
         this.rect = new Rectangle();
         this.rect.setManaged(false);
         this.rect.setMouseTransparent(true);
@@ -53,7 +56,7 @@ public class LassoSelector {
         if (e.getButton() != MouseButton.PRIMARY) return;
 
         // si le clic n'est pas dans cette vue (le pane parent)
-        if (e.getTarget() != viewportPane) return;
+        if (e.getTarget() != this.viewportPane) return;
 
         this.selectionModel.clear();
         startLocal = this.content.sceneToLocal(e.getSceneX(), e.getSceneY());

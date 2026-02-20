@@ -5,88 +5,80 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import com.dbeditor.controller.TableController;
-
 /**
  * Modèle simple de sélection
  */
-public class SelectionModel {
-    private final List<TableController> selected = new ArrayList<>();
+public class SelectionModel<T> {
+    private final List<T> selected = new ArrayList<>();
     // callback pour appliquer visuellement la sélection : (table, selected?)
-    private final BiConsumer<TableController, Boolean> visualizer;
+    private final BiConsumer<T, Boolean> visualizer;
 
-    public SelectionModel(BiConsumer<TableController, Boolean> visualizer) {
+    public SelectionModel(BiConsumer<T, Boolean> visualizer) {
         this.visualizer = visualizer;
     }
 
     /**
-     * Sélectionne la table si il n'est pas déja sélectionné
-     * @param table
+     * Sélectionne la value si elle n'est pas déja sélectionné
      */
-    public void select(TableController table) {
-        if (!this.selected.contains(table)) {
-            this.selected.add(table);
-            this.visualizer.accept(table, true);
+    public void select(T value) {
+        if (!this.selected.contains(value)) {
+            this.selected.add(value);
+            this.visualizer.accept(value, true);
         }
     }
 
     /**
-     * Désélectionne la table si il est déja sélectionné
-     * @param table
+     * Désélectionne la value si elle est déja sélectionné
      */
-    public void deselect(TableController table) {
-        if (this.selected.remove(table)) {
-            this.visualizer.accept(table, false);
+    public void deselect(T value) {
+        if (this.selected.remove(value)) {
+            this.visualizer.accept(value, false);
         }
     }
 
     /**
-     * Si la table est sélectionnée, la désélectionne<br>
+     * Si la value est sélectionnée, la désélectionne<br>
      * Sinon la sélectionne
-     * @param table
      */
-    public void toggle(TableController table) {
-        if (this.selected.contains(table)) {
-            this.deselect(table);
+    public void toggle(T value) {
+        if (this.selected.contains(value)) {
+            this.deselect(value);
         } else {
-            this.select(table);
+            this.select(value);
         }
     }
 
     /**
-     * Déselectionne toutes les tables
+     * Déselectionne toutes les value
      */
     public void clear() {
-        for (TableController table : new ArrayList<>(this.selected)) {
-            this.visualizer.accept(table, false);
+        for (T table : new ArrayList<>(this.selected)) {
+            this.deselect(table);
         }
-        this.selected.clear();
     }
 
     /**
-     * Retourne toutes les tables sélectionnées
+     * Retourne toutes les value sélectionnées
      * @return
      */
-    public List<TableController> getSelected() {
+    public List<T> getSelected() {
         return List.copyOf(this.selected);
     }
 
     /**
-     * Sélectionne une liste de tables
-     * @param tables
+     * Sélectionne une liste de values
      */
-    public void selectAll(Collection<TableController> tables) {
-        for (TableController table : tables) {
-            this.select(table);
+    public void selectAll(Collection<T> values) {
+        for (T value : values) {
+            this.select(value);
         }
     }
 
     /**
-     * Vérifie si la table est déja sélectionné
-     * @param table
+     * Vérifie si la value est déja sélectionné
      * @return bool
      */
-    public boolean contains(TableController table) {
-        return this.selected.contains(table);
+    public boolean contains(T value) {
+        return this.selected.contains(value);
     }
 }

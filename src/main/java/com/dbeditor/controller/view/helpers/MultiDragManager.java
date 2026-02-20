@@ -13,11 +13,11 @@ import javafx.scene.input.MouseEvent;
  * Il s'appuie sur les callbacks fournis par TableController (setOnDrag, setOnDragEnd).
  */
 public class MultiDragManager {
-    private final SelectionModel selectionModel;
+    private final SelectionModel<TableController> selectionModel;
     private final Map<TableController, Point2D> dragStartPositions = new HashMap<>();
     private Point2D dragStartMouse = null;
 
-    public MultiDragManager(SelectionModel selectionModel) {
+    public MultiDragManager(SelectionModel<TableController> selectionModel) {
         this.selectionModel = selectionModel;
     }
 
@@ -43,9 +43,9 @@ public class MultiDragManager {
                 this.selectionModel.select(tc);
             }
 
-            for (TableController sel : this.selectionModel.getSelected()) {
-                this.dragStartPositions.put(sel, new Point2D(sel.getRoot().getLayoutX(), sel.getRoot().getLayoutY()));
-                sel.getRoot().toFront();
+            for (TableController selected : this.selectionModel.getSelected()) {
+                this.dragStartPositions.put(selected, new Point2D(selected.getRoot().getLayoutX(), selected.getRoot().getLayoutY()));
+                selected.getRoot().toFront();
             }
         }
 

@@ -41,7 +41,6 @@ public class MysqlController {
 
         TextField tf = new TextField(name);
         tf.textProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("\nAvant modification : " + D_M.getMysqlDbTables());
             // supprime l'ancien nom s'il existe
             if (!oldValue.isEmpty()) {
                 D_M.getMysqlDbTables().remove(oldValue);
@@ -50,7 +49,6 @@ public class MysqlController {
             if (!newValue.isEmpty() && !D_M.getMysqlDbTables().contains(newValue)) {
                 D_M.getMysqlDbTables().add(newValue);
             }
-            System.out.println("Après modification : " + D_M.getMysqlDbTables() +"\n");
         });
 
         Button btn = new Button();
