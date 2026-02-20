@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
@@ -58,7 +59,7 @@ public class MySqlParser implements SqlParser {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            MainApp.getLogger().severe(e.getMessage());
             return null;
         }
 

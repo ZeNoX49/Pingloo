@@ -107,7 +107,7 @@ public class McdController extends View {
                         try {
                             this.deleteSelectedTables();
                         } catch (IOException ioe) {
-                            ioe.printStackTrace();
+                            MainApp.getLogger().severe(ioe.getMessage());
                         }
                     }
                 });
@@ -363,7 +363,7 @@ public class McdController extends View {
                 this.open(schema);
 
             } catch (IOException e) {
-                e.printStackTrace();
+                MainApp.getLogger().severe(e.getMessage());
                 CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
             }
         }
@@ -392,7 +392,7 @@ public class McdController extends View {
         //     try {
         //         openConceptualSchema(conceptualSchema);
         //     } catch (IOException e) {
-        //         e.printStackTrace();
+        //         MainApp.getLogger().severe(e.getMessage());
         //     }
         // }
     }
@@ -417,7 +417,7 @@ public class McdController extends View {
         //     try {
         //         openConceptualSchema(conceptualSchema);
         //     } catch (IOException e) {
-        //         e.printStackTrace();
+        //         MainApp.getLogger().severe(e.getMessage());
         //     }
         // }
     }
@@ -477,7 +477,7 @@ public class McdController extends View {
             
             MainApp.setSchema(mld);
         } catch (Exception e) {
-            e.printStackTrace();
+            MainApp.getLogger().severe(e.getMessage());
             CanvasController.showWarningAlert("Erreur", "Erreur lors de la conversion : " + e.getMessage());
         }
     }

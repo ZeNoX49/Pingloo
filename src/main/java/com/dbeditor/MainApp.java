@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.util.FileManager;
@@ -19,6 +20,9 @@ public class MainApp extends Application {
 	public static void setSchema(DatabaseSchema schema) { MainApp.schema = schema; }
 	public static DatabaseSchema getSchema() { return MainApp.schema; }
 
+	private static Logger logger = Logger.getLogger(MainApp.class.getName());;
+	public static Logger getLogger() { return MainApp.logger; }
+
     @Override
 	public void start(Stage stage) throws IOException {
 		JsonManager J_M = JsonManager.getInstance();
@@ -26,7 +30,7 @@ public class MainApp extends Application {
         try {
 			J_M.load();
 
-			MainApp.schema = new DatabaseSchema("");
+			MainApp.setSchema(new DatabaseSchema(""));
 
 	        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/canvas.fxml"));
 	        Scene scene = new Scene(loader.load(), 1280, 720);
@@ -39,7 +43,7 @@ public class MainApp extends Application {
 
 			stage.setOnCloseRequest(e -> J_M.save());
 	    } catch (IOException e) {
-			e.printStackTrace();
+			MainApp.getLogger().severe(e.getMessage());
 			throw new Error("Erreur de chargement de la scène : /fxml/canvas.fxml");
 	    }
 	} public static void main(String[] args) {
@@ -58,7 +62,6 @@ public class MainApp extends Application {
 			"Loading FXML document with JavaFX API of version"
 		);
 
-		PrintStream originalErr = System.err;
 		System.setErr(new PrintStream(new OutputStream() {
 			private final StringBuilder sb = new StringBuilder();
 
@@ -71,7 +74,7 @@ public class MainApp extends Application {
 					// Vérifie si la ligne contient un des motifs à supprimer
 					boolean shouldDelete = toDelete.stream().anyMatch(line::contains);
 					if (!shouldDelete) {
-						originalErr.println(line);
+						System.err.println(line);
 					}
 				} else {
 					sb.append((char)b);

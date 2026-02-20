@@ -331,7 +331,7 @@ public class MldController extends View {
     //             }
 
     //         } catch (IOException e) {
-    //             e.printStackTrace();
+    //             MainApp.getLogger().severe(e.getMessage());
     //             CanvasController.showWarningAlert("Erreur", "Impossible de créer la table visuellement.");
     //         }
     //     }
@@ -373,7 +373,7 @@ public class MldController extends View {
                 this.open(schema);
 
             } catch (IOException e) {
-                e.printStackTrace();
+                MainApp.getLogger().severe(e.getMessage());
                 CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
             }
         }
