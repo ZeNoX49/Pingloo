@@ -1,5 +1,0 @@
-[roles] id_role -> name, created_at
-[products] id_product -> name, description, price, stock, created_at
-[users] id_user -> email, password, first_name, last_name, {roles}id_role, created_at
-[orders] id_order -> {users}id_user, order_date
-[order_items] id_order_item -> {orders}id_order, {products}id_product, quantity, unit_price

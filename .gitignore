@@ -3,4 +3,4 @@ src/main/resources/userPreferences.json
 __temp__/
 target/
 *.sql
-dfexample.txt
+df_example.txt
