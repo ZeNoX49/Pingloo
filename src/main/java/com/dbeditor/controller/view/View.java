@@ -27,17 +27,6 @@ public abstract class View {
 
     public enum ViewType {
         MCD, MLD, DF, DD, SDF, VALUE;
-
-        public FXMLLoader getFxmlloader(ViewType viewType) {
-            return switch (viewType) {
-                case VALUE -> new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
-                case SDF -> new FXMLLoader(getClass().getResource("/fxml/view/sdf.fxml"));
-                case DD -> new FXMLLoader(getClass().getResource("/fxml/view/dd.fxml"));
-                case DF -> new FXMLLoader(getClass().getResource("/fxml/view/df.fxml"));
-                case MLD -> new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
-                default -> new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
-            };
-        }
     }
 
     /**
@@ -140,8 +129,8 @@ public abstract class View {
         try {
             Parent parentNode = this.viewPane.getParent();
 
-            ViewType viewType = this.getViewType();
-            FXMLLoader loader = viewType.getFxmlloader(viewType);
+            String viewTypeName = this.getViewType().toString().toLowerCase();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/" + viewTypeName + ".fxml"));
             Pane newPane = loader.load();
             View newController = loader.getController();
 
