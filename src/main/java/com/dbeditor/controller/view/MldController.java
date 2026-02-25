@@ -36,6 +36,11 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 public class MldController extends View {
+    @Override
+    public ViewType getViewType() {
+        return ViewType.MLD;
+    }
+
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private BorderPane root;
@@ -57,7 +62,8 @@ public class MldController extends View {
 
     @FXML
     void initialize() throws IOException {
-        super.setupCombobowView(this.cb, ViewType.MLD);
+        super.setupCombobowView(this.cb, this.getViewType());
+        super.createSplit(this.pane);
 
         // visualizer appelle setSelected sur TableController
         this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));

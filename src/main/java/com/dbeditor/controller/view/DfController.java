@@ -1,7 +1,6 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
-import java.util.List;
 
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.util.DbManager;
@@ -14,6 +13,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 
 public class DfController extends View {
+    @Override
+    public ViewType getViewType() {
+        return ViewType.DF;
+    }
+
     private static final DbManager D_M = DbManager.getInstance();
 
     @FXML private BorderPane root;
@@ -24,8 +28,8 @@ public class DfController extends View {
 
     // @FXML
     // void initialize() {
+    //     super.setupCombobowView(this.cb, this.getViewType());
     //     super.createSplit(this.pane);
-    //     super.setupCombobowView(this.cb, View.DF);
 
     //     this.updateStyle();
     // }

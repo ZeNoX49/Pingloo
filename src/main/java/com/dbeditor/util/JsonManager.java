@@ -126,15 +126,15 @@ public class JsonManager {
         root.put("id_theme", 2);
 
         Map<String, String> themes = new HashMap<>();
-        themes.put("background_color", "#333333");
-        themes.put("card_color", "#333333");
-        themes.put("border_color", "#333333");
-        themes.put("selection_border_color", "#333333");
-        themes.put("header_color", "#333333");
-        themes.put("text_color", "#333333");
-        themes.put("secondary_text_color", "#333333");
-        themes.put("toolbar_color", "#333333");
-        themes.put("toolbar_border_color", "#333333");
+        themes.put("background_color", "#333");
+        themes.put("card_color", "#444");
+        themes.put("border_color", "#555");
+        themes.put("selection_border_color", "#666");
+        themes.put("header_color", "#777");
+        themes.put("text_color", "#888");
+        themes.put("secondary_text_color", "#999");
+        themes.put("toolbar_color", "#aaa");
+        themes.put("toolbar_border_color", "#bbb");
         root.put("perso_theme", themes);
 
         Map<String, Map<String, Object>> db = new HashMap<>();

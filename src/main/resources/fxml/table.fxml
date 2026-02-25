@@ -22,7 +22,7 @@
                   </Label>
                </children>
             </HBox>
-            <GridPane fx:id="grid" alignment="CENTER_LEFT">
+            <GridPane fx:id="grid" alignment="CENTER_LEFT" minWidth="100.0">
               <columnConstraints>
                 <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
                 <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />

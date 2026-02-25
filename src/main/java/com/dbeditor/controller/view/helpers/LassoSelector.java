@@ -19,12 +19,12 @@ import javafx.scene.shape.Rectangle;
 public class LassoSelector {
     private final Pane viewportPane;   // reçoit les events (scene coords)
     private final Group content;   // parent local pour le rectangle
-    private final SelectionModel selectionModel;
+    private final SelectionModel<TableController> selectionModel;
     private final Rectangle rect;
     private Point2D startLocal;
     private final List<TableController> tableNodes;
 
-    public LassoSelector(Pane viewportPane, Group content, List<TableController> tableNodes, SelectionModel selectionModel) {
+    public LassoSelector(Pane viewportPane, Group content, List<TableController> tableNodes, SelectionModel<TableController> selectionModel) {
         this.viewportPane = viewportPane;
         this.content = content;
         this.selectionModel = selectionModel;
@@ -57,6 +57,8 @@ public class LassoSelector {
 
         // si le clic n'est pas dans cette vue (le pane parent)
         if (e.getTarget() != this.viewportPane) return;
+
+        this.rect.toFront();
 
         this.selectionModel.clear();
         startLocal = this.content.sceneToLocal(e.getSceneX(), e.getSceneY());

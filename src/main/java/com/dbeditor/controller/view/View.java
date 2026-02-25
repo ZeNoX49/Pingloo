@@ -3,23 +3,53 @@ package com.dbeditor.controller.view;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.model.DatabaseSchema;
 
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.SplitPane;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Popup;
 import javafx.util.Pair;
 
 public abstract class View {
 
     public enum ViewType {
         MCD, MLD, DF, DD, SDF, VALUE;
+
+        public FXMLLoader getFxmlloader(ViewType viewType) {
+            return switch (viewType) {
+                case VALUE -> new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
+                case SDF -> new FXMLLoader(getClass().getResource("/fxml/view/sdf.fxml"));
+                case DD -> new FXMLLoader(getClass().getResource("/fxml/view/dd.fxml"));
+                case DF -> new FXMLLoader(getClass().getResource("/fxml/view/df.fxml"));
+                case MLD -> new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
+                default -> new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
+            };
+        }
     }
+
+    /**
+     * Donne le ViewType de la vue actuelle
+     */
+    public abstract ViewType getViewType();
 
     private Pane parent;
     private Pane viewPane;
     private Consumer<Pair<View, Pane>> registrar; // callback pour enregistrer la vue dans CanvasController
-    // private Popup popup;
-
+    private Popup popup;
+    
     /**
      * Permet de charger les données à la création de la vue
      * @param parent le Canvas Controller et le conteneur parent
@@ -49,226 +79,228 @@ public abstract class View {
      */
     public abstract void onChange();
     
-    // public void createSplit(Node backgroundNode) {
-    //     // écoute uniquement les clics droits sur le backgroundNode
-    //     backgroundNode.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-    //         // n'ouvrir que si clic droit ET que le target est bien le backgroundNode
-    //         // (donc pas quand on clique sur une table/child)
-    //         if (e.getButton() != MouseButton.SECONDARY) return;
+    public void createSplit(Node backgroundNode) {
+        // écoute uniquement les clics droits sur le backgroundNode
+        backgroundNode.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            // n'ouvrir que si clic droit ET que le target est bien le backgroundNode
+            // (donc pas quand on clique sur une table/child)
+            if (e.getButton() != MouseButton.SECONDARY) return;
 
-    //         // On vérifie que le clic a touché directement le backgroundNode (pas un enfant)
-    //         if (e.getTarget() != backgroundNode) return;
+            // On vérifie que le clic a touché directement le backgroundNode (pas un enfant)
+            if (e.getTarget() != backgroundNode) return;
 
-    //         // si déjà affiché -> masquer
-    //         if (this.popup != null && this.popup.isShowing()) {
-    //             this.popup.hide();
-    //             e.consume();
-    //             return;
-    //         }
+            // si déjà affiché -> masquer
+            if (this.popup != null && this.popup.isShowing()) {
+                this.popup.hide();
+                e.consume();
+                return;
+            }
 
-    //         // créer le popup
-    //         this.popup = new Popup();
-    //         this.popup.setAutoHide(true);
-    //         this.popup.setAutoFix(true);
+            // créer le popup
+            this.popup = new Popup();
+            this.popup.setAutoHide(true);
+            this.popup.setAutoFix(true);
 
-    //         VBox content = new VBox(8);
-    //         content.setStyle(
-    //             "-fx-background-color: #333333; " +
-    //             "-fx-padding: 10; " +
-    //             "-fx-background-radius: 6; " +
-    //             "-fx-border-radius: 6; " +
-    //             "-fx-border-color: #444444;"
-    //         );
+            VBox content = new VBox(8);
+            content.setStyle(
+                "-fx-background-color: #333333; " +
+                "-fx-padding: 10; " +
+                "-fx-background-radius: 6; " +
+                "-fx-border-radius: 6; " +
+                "-fx-border-color: #444444;"
+            );
 
-    //         Button splitVertical = new Button("séparation verticale");
-    //         splitVertical.setFont(new Font(13));
-    //         splitVertical.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
-    //         splitVertical.setOnAction(esv -> {
-    //             this.popup.hide();
-    //             doSplit(Orientation.HORIZONTAL);
-    //         });
+            content.getChildren().addAll(
+                this.createSplitButton("verticale", Orientation.HORIZONTAL),
+                this.createSplitButton("horizontal", Orientation.VERTICAL)
+            );
+            this.popup.getContent().add(content);
 
-    //         Button splitHorizontal = new Button("séparation horizontal");
-    //         splitHorizontal.setFont(new Font(13));
-    //         splitHorizontal.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
-    //         splitHorizontal.setOnAction(esh -> {
-    //             this.popup.hide();
-    //             doSplit(Orientation.VERTICAL);
-    //         });
+            // Positionner le popup à l'endroit du clic (coordonnées écran direct)
+            this.popup.show(backgroundNode.getScene().getWindow(), e.getScreenX(), e.getScreenY());
+            e.consume();
+        });
+    }
 
-    //         content.getChildren().addAll(splitVertical, splitHorizontal);
-    //         this.popup.getContent().add(content);
+    private Button createSplitButton(String separationAxe, Orientation orientation) {
+        Button splitBtn = new Button("séparation " + separationAxe);
+        splitBtn.setFont(new Font(13));
+        splitBtn.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
+        splitBtn.setOnAction(esh -> {
+            this.popup.hide();
+            this.doSplit(orientation);
+        });
+        return splitBtn;
+    }
 
-    //         // Positionner le popup à l'endroit du clic (coordonnées écran direct)
-    //         this.popup.show(backgroundNode.getScene().getWindow(), e.getScreenX(), e.getScreenY());
-    //         e.consume();
-    //     });
-    // }
+    /**
+     *  méthode utilitaire à appeler depuis le bouton splitVertical.setOnAction(...)
+     */
+    private void doSplit(Orientation orientation) {
+        try {
+            Parent parentNode = this.viewPane.getParent();
 
-    // /**
-    //  *  méthode utilitaire à appeler depuis le bouton splitVertical.setOnAction(...)
-    //  */
-    // private void doSplit(Orientation orientation) {
-    //     try {
-    //         Parent parentNode = this.viewPane.getParent();
+            ViewType viewType = this.getViewType();
+            FXMLLoader loader = viewType.getFxmlloader(viewType);
+            Pane newPane = loader.load();
+            View newController = loader.getController();
 
-    //         // Charger la nouvelle vue
-    //         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mld.fxml"));
-    //         Pane newPane = loader.load();
-    //         View newController = loader.getController();
+            // Fournir setData à la nouvelle vue
+            if (this.registrar != null) {
+                newController.setData((Pane) parentNode, newPane, this.registrar);
+            } else {
+                newController.setData((Pane) parentNode, newPane, null);
+            }
 
-    //         // Fournir setData à la nouvelle vue
-    //         if (this.registrar != null) {
-    //             newController.setData((Pane) parentNode, newPane, this.registrar);
-    //         } else {
-    //             newController.setData((Pane) parentNode, newPane, null);
-    //         }
+            // Politique de taille
+            newPane.setMinSize(0, 0);
+            newPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            this.viewPane.setMinSize(0, 0);
+            this.viewPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-    //         // Politique de taille
-    //         newPane.setMinSize(0, 0);
-    //         newPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-    //         this.viewPane.setMinSize(0, 0);
-    //         this.viewPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            // Enregistrer la nouvelle vue dans CanvasController
+            if (this.registrar != null) {
+                this.registrar.accept(new Pair<>(newController, newPane));
+            }
 
-    //         // Enregistrer la nouvelle vue dans CanvasController
-    //         if (this.registrar != null) {
-    //             this.registrar.accept(new Pair<>(newController, newPane));
-    //         }
+            if (MainApp.getSchema() != null) {
+                newController.open(MainApp.getSchema());
+            }
 
-    //         if (MainApp.getSchema() != null) {
-    //             newController.open(MainApp.getSchema());
-    //         }
+            // ------------------------------
+            // CASE A : parent est un Pane simple -> créer un SplitPane
+            // ------------------------------
+            if (parentNode instanceof Pane p) {
+                int idx = p.getChildren().indexOf(this.viewPane);
 
-    //         // ------------------------------
-    //         // CASE A : parent est un Pane simple -> créer un SplitPane
-    //         // ------------------------------
-    //         if (parentNode instanceof Pane p) {
-    //             int idx = p.getChildren().indexOf(this.viewPane);
+                SplitPane sp = new SplitPane();
+                sp.setOrientation(orientation);
+                sp.getItems().addAll(this.viewPane, newPane);
 
-    //             SplitPane sp = new SplitPane();
-    //             sp.setOrientation(orientation);
-    //             sp.getItems().addAll(this.viewPane, newPane);
+                if (idx < 0) {
+                    p.getChildren().add(sp);
+                } else {
+                    p.getChildren().remove(idx);
+                    p.getChildren().add(idx, sp);
+                }
 
-    //             if (idx < 0) {
-    //                 p.getChildren().add(sp);
-    //             } else {
-    //                 p.getChildren().remove(idx);
-    //                 p.getChildren().add(idx, sp);
-    //             }
+                // IMPORTANT : initialiser les dividers après que le SplitPane soit dans le scene graph
+                Platform.runLater(() -> this.setupSplitMerge(sp));
 
-    //             // IMPORTANT : initialiser les dividers après que le SplitPane soit dans le scene graph
-    //             Platform.runLater(() -> setupSplitMerge(sp));
+                return;
+            }
 
-    //             return;
-    //         }
+            // ------------------------------
+            // CASE B : parent est déjà un SplitPane -> ajouter à côté
+            // ------------------------------
+            if (parentNode instanceof SplitPane spParent) {
+                int i = spParent.getItems().indexOf(this.viewPane);
+                if (i >= 0) {
+                    spParent.getItems().add(i + 1, newPane);
+                } else {
+                    spParent.getItems().add(newPane);
+                }
 
-    //         // ------------------------------
-    //         // CASE B : parent est déjà un SplitPane -> ajouter à côté
-    //         // ------------------------------
-    //         if (parentNode instanceof SplitPane spParent) {
-    //             int i = spParent.getItems().indexOf(this.viewPane);
-    //             if (i >= 0) {
-    //                 spParent.getItems().add(i + 1, newPane);
-    //             } else {
-    //                 spParent.getItems().add(newPane);
-    //             }
+                // initialiser les dividers du SplitPane parent existant
+                Platform.runLater(() -> this.setupSplitMerge(spParent));
 
-    //             // initialiser les dividers du SplitPane parent existant
-    //             Platform.runLater(() -> setupSplitMerge(spParent));
+                return;
+            }
 
-    //             return;
-    //         }
+            // ------------------------------
+            // fallback : ajouter au parent stocké
+            // ------------------------------
+            if (this.parent != null) {
+                this.parent.getChildren().add(newPane);
+            }
 
-    //         // ------------------------------
-    //         // fallback : ajouter au parent stocké
-    //         // ------------------------------
-    //         if (this.parent != null) {
-    //             this.parent.getChildren().add(newPane);
-    //         }
+        } catch (IOException ioe) {
+            MainApp.getLogger().severe(ioe.getMessage());
+        }
+    }
 
-    //     } catch (IOException ioe) {
-    //         ioe.printStackTrace();
-    //     }
-    // }
+    private void setupSplitMerge(SplitPane sp) {
+        sp.applyCss(); // important pour s'assurer que les dividers existent
+        sp.layout();   // calculer la position des dividers
 
-    // private void setupSplitMerge(SplitPane sp) {
-    //     sp.applyCss(); // important pour s'assurer que les dividers existent
-    //     sp.layout();   // calculer la position des dividers
+        for (Node divider : sp.lookupAll(".split-pane-divider")) {
+            divider.setOnMouseClicked(e -> {
+                if (e.getButton() != MouseButton.SECONDARY) return;
 
-    //     for (Node divider : sp.lookupAll(".split-pane-divider")) {
-    //         divider.setOnMouseClicked(e -> {
-    //             if (e.getButton() != MouseButton.SECONDARY) return;
+                if (this.popup != null && this.popup.isShowing()) {
+                    this.popup.hide();
+                }
 
-    //             if (this.popup != null && this.popup.isShowing()) {
-    //                 this.popup.hide();
-    //             }
+                this.popup = new Popup();
+                this.popup.setAutoHide(true);
+                this.popup.setAutoFix(true);
 
-    //             this.popup = new Popup();
-    //             this.popup.setAutoHide(true);
-    //             this.popup.setAutoFix(true);
+                VBox content = new VBox(8);
+                content.setStyle(
+                    "-fx-background-color: #333333; " +
+                    "-fx-padding: 10; " +
+                    "-fx-background-radius: 6; " +
+                    "-fx-border-radius: 6; " +
+                    "-fx-border-color: #444444;"
+                );
 
-    //             VBox content = new VBox(8);
-    //             content.setStyle(
-    //                 "-fx-background-color: #333333; " +
-    //                 "-fx-padding: 10; " +
-    //                 "-fx-background-radius: 6; " +
-    //                 "-fx-border-radius: 6; " +
-    //                 "-fx-border-color: #444444;"
-    //             );
+                Button mergeFirst = new Button(); // garder la première partie
+                Button mergeSecond = new Button(); // garder la deuxième partie
 
-    //             Button mergeFirst = new Button(); // garder la première partie
-    //             Button mergeSecond = new Button(); // garder la deuxième partie
+                if (sp.getOrientation() == Orientation.HORIZONTAL) {
+                    mergeFirst.setText("Garder la partie gauche");
+                    mergeSecond.setText("Garder la partie droite");
+                } else {
+                    mergeFirst.setText("Garder la partie haute");
+                    mergeSecond.setText("Garder la partie basse");
+                }
 
-    //             if (sp.getOrientation() == Orientation.HORIZONTAL) {
-    //                 mergeFirst.setText("Garder la partie gauche");
-    //                 mergeSecond.setText("Garder la partie droite");
-    //             } else {
-    //                 mergeFirst.setText("Garder la partie haute");
-    //                 mergeSecond.setText("Garder la partie basse");
-    //             }
+                mergeFirst.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
+                mergeSecond.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
 
-    //             mergeFirst.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
-    //             mergeSecond.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
+                mergeFirst.setOnAction(ev -> {
+                    this.popup.hide();
+                    mergeSplitPane(sp, true); // garder premier enfant
+                });
 
-    //             mergeFirst.setOnAction(ev -> {
-    //                 this.popup.hide();
-    //                 mergeSplitPane(sp, true); // garder premier enfant
-    //             });
+                mergeSecond.setOnAction(ev -> {
+                    this.popup.hide();
+                    mergeSplitPane(sp, false); // garder deuxième enfant
+                });
 
-    //             mergeSecond.setOnAction(ev -> {
-    //                 this.popup.hide();
-    //                 mergeSplitPane(sp, false); // garder deuxième enfant
-    //             });
+                content.getChildren().addAll(mergeFirst, mergeSecond);
+                this.popup.getContent().add(content);
 
-    //             content.getChildren().addAll(mergeFirst, mergeSecond);
-    //             this.popup.getContent().add(content);
+                this.popup.show(divider.getScene().getWindow(), e.getScreenX(), e.getScreenY());
+                e.consume();
+            });
+        }
+    }
 
-    //             Bounds screenBounds = divider.localToScreen(divider.getBoundsInLocal());
-    //             this.popup.show(divider.getScene().getWindow(), screenBounds.getMinX(), screenBounds.getMinY());
-    //             e.consume();
-    //         });
-    //     }
-    // }
+    private void mergeSplitPane(SplitPane sp, boolean keepFirst) {
+        if (sp.getItems().size() < 2) return;
 
-    // private void mergeSplitPane(SplitPane sp, boolean keepFirst) {
-    //     if (sp.getItems().size() < 2) return;
+        Pane parent = (Pane) sp.getParent();
+        int index = parent.getChildren().indexOf(sp);
+        if (index < 0) return;
 
-    //     Pane parent = (Pane) sp.getParent();
-    //     int index = parent.getChildren().indexOf(sp);
-    //     if (index < 0) return;
+        Node keep = keepFirst ? sp.getItems().get(0) : sp.getItems().get(1);
+        sp.getItems().clear();
 
-    //     Node keep = keepFirst ? sp.getItems().get(0) : sp.getItems().get(1);
-    //     sp.getItems().clear();
+        parent.getChildren().remove(index);
+        parent.getChildren().add(index, keep);
 
-    //     parent.getChildren().remove(index);
-    //     parent.getChildren().add(index, keep);
+        if (keep instanceof Region r) {
+            r.setMinSize(0, 0);
+            r.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        }
+    }
 
-    //     if (keep instanceof Region r) {
-    //         r.setMinSize(0, 0);
-    //         r.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-    //     }
-    // }
-
+    /**
+     * Met a jour la combobox pour le changement de vue
+     * @param cb -> ComboBox<String> de la toolbar
+     * @param value -> Type de la vue actuelle
+     */
     public void setupCombobowView(ComboBox<String> cb, ViewType value) {
         cb.getItems().clear();
         cb.getItems().addAll(
@@ -336,7 +368,7 @@ public abstract class View {
     //                     try {
     //                         newController.open(MainApp.getSchema());
     //                     } catch (IOException ex) {
-    //                         ex.printStackTrace();
+    //                         MainApp.getLogger().severe(ex.getMessage());
     //                     }
     //                 }
     //                 newController.updateStyle();
@@ -346,7 +378,7 @@ public abstract class View {
 
     //             } catch (IOException ex) {
     //                 System.err.println("Erreur lors du chargement du FXML pour " + newValue);
-    //                 ex.printStackTrace();
+    //                 MainApp.getLogger().severe(ex.getMessage());
     //             }
     //         });
     //     });

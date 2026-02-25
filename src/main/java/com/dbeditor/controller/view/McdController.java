@@ -45,6 +45,11 @@ import javafx.util.Pair;
  * Version complète avec gestionnaire de connexions
  */
 public class McdController extends View {
+    @Override
+    public ViewType getViewType() {
+        return ViewType.MCD;
+    }
+    
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private BorderPane root;
@@ -69,7 +74,10 @@ public class McdController extends View {
     private MultiDragManager multiDrag;
     @FXML
     void initialize() throws IOException {
-        super.setupCombobowView(this.cb, ViewType.MCD);
+        this.conceptualSchema = new ConceptualSchema(MainApp.getSchema());
+
+        super.setupCombobowView(this.cb, this.getViewType());
+        super.createSplit(this.pane);
 
         // Initialiser le modèle de sélection -> visualizer appelle setSelected sur TableController
         this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
@@ -89,6 +97,7 @@ public class McdController extends View {
         this.pane.setClip(clip);
 
         // Initialiser le lasso
+        // TODO: ne fonctionne pas car ce n'est pas une référence a la liste elle même (je pense)
         List<TableController> tcList = new ArrayList<>();
         for (TableController tc : this.tableNodes.values()) {
             tcList.add(tc);

@@ -1,6 +1,7 @@
 module com.dbeditor {
+    requires transitive java.logging;
     requires javafx.controls;
-    requires javafx.fxml;
+    requires transitive javafx.fxml;
     requires transitive javafx.graphics;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
