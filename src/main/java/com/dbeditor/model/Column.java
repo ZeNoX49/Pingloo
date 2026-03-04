@@ -28,7 +28,6 @@ public class Column {
     public void setName(String name) { this.name = name; }
     public void setType(String type) { this.type = type; }
 
-
     public boolean isPrimaryKey() { return this.isPrimaryKey; }
     public boolean isNotNull() { return this.isNotNull; }
     public boolean isUnique() { return this.isUnique; }

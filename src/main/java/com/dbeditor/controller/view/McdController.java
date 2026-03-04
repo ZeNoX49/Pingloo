@@ -66,6 +66,8 @@ public class McdController extends View {
     // Nodes visuels
     private final Map<String, TableController> tableNodes = new HashMap<>();
     private final List<Line> connectionLines = new ArrayList<>();
+    // liste mutables partagée avec le lasso (pour que le lasso voit les ajouts / suppressions)
+    private final List<TableController> tcList = new ArrayList<>();
 
     // Helpers
     private ZoomPanHandler zoomPan;
@@ -96,18 +98,13 @@ public class McdController extends View {
         clip.heightProperty().bind(this.pane.heightProperty());
         this.pane.setClip(clip);
 
-        // Initialiser le lasso
-        // TODO: ne fonctionne pas car ce n'est pas une référence a la liste elle même (je pense)
-        List<TableController> tcList = new ArrayList<>();
-        for (TableController tc : this.tableNodes.values()) {
-            tcList.add(tc);
-        }
-        this.lasso = new LassoSelector(this.pane, this.group, tcList, this.selectionModel);
+        // Initialiser le lasso avec la liste partagée (vide pour l'instant)
+        this.lasso = new LassoSelector(this.pane, this.group, this.tcList, this.selectionModel);
         this.lasso.setupEvents();
 
         this.updateStyle();
 
-        // suppression
+        // suppression (touche DEL)
         Platform.runLater(() -> {
             Scene scene = root.getScene();
             if (scene != null) {
@@ -142,14 +139,18 @@ public class McdController extends View {
     public void open(DatabaseSchema dbS) throws IOException {
         if (dbS == null) return;
 
+        // Recréer le ConceptualSchema à partir du DatabaseSchema donné
         this.conceptualSchema = new ConceptualSchema(dbS);
 
         // supprime tous les nodes sauf selectionRect
         this.group.getChildren().removeIf(node -> node != this.lasso.getRect());
 
+        // vider les structures
         this.tableNodes.clear();
         this.connectionLines.clear();
+        this.tcList.clear();
 
+        // créer les nodes à partir du MCD
         this.createTableNodes(this.conceptualSchema);
         this.drawConnections();
 
@@ -191,6 +192,11 @@ public class McdController extends View {
      * Crée un node d'entité à une position donnée
      */
     private void createTableNode(Table table, double x, double y, boolean isAssociation) throws IOException {
+        // Evite double ajout si nom existant
+        if (this.tableNodes.containsKey(table.getName())) {
+            return;
+        }
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
         AnchorPane tcPane = loader.load();
         TableController tcController = loader.getController();
@@ -198,14 +204,16 @@ public class McdController extends View {
 
         this.tableNodes.put(tcController.getTable().getName(), tcController);
 
+        // Ajout dans la liste utilisée par le lasso (liste partagée)
+        this.tcList.add(tcController);
+
         // Gérer la sélection
         tcController.setOnSelect((tc, e) -> this.handleSelection(tc, e));
 
         // Menu contextuel
         tcPane.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
-                // si double clique gauche
-                // on modifie la table
+                // si double clique gauche -> modifier la table ou l'association
                 if (e.getClickCount() == 2) {
                     if(isAssociation) {
                         this.editAssociation(tcController);
@@ -237,12 +245,13 @@ public class McdController extends View {
         this.connectionLines.clear();
 
         for (Pair<Table, Table> p : this.conceptualSchema.getLinks()) {
-            // TODO: gros bourbier si le nom existe déja
+            // créer un node d'association visuel intermédiaire
             String associationName = p.getKey().getName() + "_" + p.getValue().getName();
-            // TODO: calculer la position de l'association (p1.x + p2.x)/2 | (p1.y + p2.y)/2
+            // Position provisoire (sera ajustable par l'utilisateur)
             this.createTableNode(new Table(associationName), 0, 0, true);
-            TableController ac = this.tableNodes.get(associationName); // pas optimal ca
+            TableController ac = this.tableNodes.get(associationName); // maintenant disponible
 
+            // Draw connections entity -> association
             this.drawConnection(this.tableNodes.get(p.getKey().getName()), ac);
             this.drawConnection(this.tableNodes.get(p.getValue().getName()), ac);
         }
@@ -252,6 +261,8 @@ public class McdController extends View {
      * Permet de tracer un lien entre une entité et une association
      */
     private void drawConnection(TableController from, TableController to) {
+        if (from == null || to == null) return;
+
         double fromX = from.getRoot().getLayoutX() + from.getRoot().getWidth() / 2;
         double fromY = from.getRoot().getLayoutY() + from.getRoot().getHeight() / 2;
         double toX = to.getRoot().getLayoutX() + to.getRoot().getWidth() / 2;
@@ -327,7 +338,8 @@ public class McdController extends View {
                 return;
             }
 
-            conceptualSchema.addTable(table);
+            // TODO: Mettre à jour le modèle conceptuel
+            // conceptualSchema.addTable(table);
 
             double x = (this.pane.getWidth() / 2) - 100;
             double y = (this.pane.getHeight() / 2) - 75;
@@ -384,26 +396,6 @@ public class McdController extends View {
     @FXML
     public void addAssociation() {
         CanvasController.showWarningAlert("Erreur", "pas encore fonctionnelle");
-
-        // if (this.conceptualSchema.getTables().isEmpty()) {
-        //     CanvasController.showWarningAlert("Erreur", "Créez d'abord des entités avant de créer une association.");
-        //     return;
-        // }
-
-        // List<Entity> entities = new ArrayList<>(conceptualSchema.getEntities().values());
-        // AssociationEditorDialog dialog = new AssociationEditorDialog(entities);
-        // dialog.showAndWait();
-
-        // if (dialog.isConfirmed()) {
-        //     Association newAssoc = dialog.getResultAssociation();
-        //     conceptualSchema.addAssociation(newAssoc);
-            
-        //     try {
-        //         openConceptualSchema(conceptualSchema);
-        //     } catch (IOException e) {
-        //         MainApp.getLogger().severe(e.getMessage());
-        //     }
-        // }
     }
 
     /**
@@ -416,19 +408,7 @@ public class McdController extends View {
         AssociationEditorDialog dialog = new AssociationEditorDialog(entities, oldAssoc);
         dialog.showAndWait();
 
-        // TODO: corriger ceci
-        // if (dialog.isConfirmed()) {
-        //     Table modifiedAssoc = dialog.getResultAssociation();
-            
-        //     conceptualSchema.removeAssociation(oldAssoc);
-        //     conceptualSchema.addAssociation(modifiedAssoc);
-            
-        //     try {
-        //         openConceptualSchema(conceptualSchema);
-        //     } catch (IOException e) {
-        //         MainApp.getLogger().severe(e.getMessage());
-        //     }
-        // }
+        // TODO: corriger ceci (implémenter la modification effective dans le modèle)
     }
 
     /**
@@ -455,7 +435,9 @@ public class McdController extends View {
 
                 // Supprimer le node visuel
                 this.group.getChildren().remove(tc.getRoot());
-                this.tableNodes.remove(tc);
+                // Supprimer des structures locales
+                this.tableNodes.remove(tc.getTable().getName());
+                this.tcList.remove(tc);
             }
 
             // Vider la sélection
@@ -471,23 +453,23 @@ public class McdController extends View {
      */
     @FXML
     public void convertToMLD() {
-        if (this.conceptualSchema == null || this.conceptualSchema.getTables().isEmpty()) {
-            CanvasController.showWarningAlert("Information", "Le MCD est vide. Rien à convertir.");
-            return;
-        }
+        // TODO:
+        // try {
+        //     DatabaseSchema mld = this.conceptualSchema.transformToDatabase();
+        //     if (mld == null) {
+        //         CanvasController.showWarningAlert("Erreur", "La conversion a retourné null. Vérifiez l'implémentation de transformToDatabase().");
+        //         return;
+        //     }
 
-        try {
-            DatabaseSchema mld = this.conceptualSchema.transformToDatabase();
+        //     CanvasController.showWarningAlert("Conversion réussie (MCD → MLD)",
+        //             "Le MCD a été converti en MLD avec succès !\n\n" +
+        //             "Tables créées : " + mld.getTables().size() + "\n\n" +
+        //             "Vous pouvez maintenant basculer vers la vue MLD.");
             
-            CanvasController.showWarningAlert("Conversion réussie (MCD → MLD)",
-                    "Le MCD a été converti en MLD avec succès !\n\n" +
-                    "Tables créées : " + mld.getTables().size() + "\n\n" +
-                    "Vous pouvez maintenant basculer vers la vue MLD.");
-            
-            MainApp.setSchema(mld);
-        } catch (Exception e) {
-            MainApp.getLogger().severe(e.getMessage());
-            CanvasController.showWarningAlert("Erreur", "Erreur lors de la conversion : " + e.getMessage());
-        }
+        //     MainApp.setSchema(mld);
+        // } catch (Exception e) {
+        //     MainApp.getLogger().severe(e.getMessage());
+        //     CanvasController.showWarningAlert("Erreur", "Erreur lors de la conversion : " + e.getMessage());
+        // }
     }
 }
