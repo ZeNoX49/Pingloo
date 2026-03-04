@@ -21,15 +21,17 @@ public class ConceptualSchema {
         if(schema.getTables().isEmpty()) return;
 
         // 1. Identifier les entités et les tables associatives
+        List<Table> assoToCreate = new ArrayList<>();
         for(Table table : schema.getTables().values()) {
             if(isAssociativeTable(table)) {
-                createAssociationFromTable(table);
-                System.out.println(table.getName() + " est une association");
+                assoToCreate.add(table);
             } else {
                 entities.put(table.getName(), new Entity(table));
-                System.out.println(table.getName() + " est une entité");
             }
-            System.out.println(table);
+        }
+
+        for(Table table : assoToCreate) {
+            createAssociationFromTable(table);
         }
 
         // 2. Ajouter les associations basées sur les FK des entités
@@ -37,7 +39,7 @@ public class ConceptualSchema {
             for(ForeignKey fk : entity.table.getForeignKeys()) {
                 Entity target = entities.get(fk.getReferencedTable());
                 if(target != null) {
-                    Association assoc = new Association(entity, target);
+                    Association assoc = new Association(fk.getFkName(), entity, target);
                     // Déduire cardinalité min/max
                     assoc.minFrom = entityHasNotNullFK(entity.table, fk) ? 1 : 0;
                     assoc.maxFrom = isUniqueFK(entity.table, fk) ? 1 : -1; // -1 = N
@@ -86,7 +88,9 @@ public class ConceptualSchema {
 
     public List<Table> getTables() {
         List<Table> tables = new ArrayList<>();
-        for(Entity e : entities.values()) tables.add(e.table);
+        for(Entity e : entities.values()) {
+            tables.add(e.table);
+        }
         return tables;
     }
 
@@ -98,19 +102,20 @@ public class ConceptualSchema {
         } return null;
     }
 
-    public List<Pair<Table, Table>> getLinks() {
-        List<Pair<Table, Table>> links = new ArrayList<>();
+    public Map<String, Pair<Table, Table>> getLinks() {
+        Map<String, Pair<Table, Table>> links = new HashMap<>();
         for(Association assoc : associations) {
-            if(assoc.entities.size() == 2) {
-                links.add(new Pair<>(assoc.entities.get(0).table, assoc.entities.get(1).table));
-            }
+            links.put(
+                assoc.name,
+                new Pair<>(assoc.entities.get(0).table, assoc.entities.get(1).table)
+            );
         }
         return links;
     }
 
     // ----------------- Classes internes -----------------
 
-    private class Entity {
+    public class Entity {
         public final Table table;
 
         public Entity(Table table) {
@@ -118,14 +123,15 @@ public class ConceptualSchema {
         }
     }
 
-    private class Association {
+    public class Association {
+        public String name;
         public List<Entity> entities;
         public Table associativeTable; // si M-N matérialisée
         public int minFrom = 0;
         public int maxFrom = -1; // -1 = N
 
         // Constructeur simple binaire
-        public Association(Entity e1, Entity e2) {
+        public Association(String name, Entity e1, Entity e2) {
             this.entities = Arrays.asList(e1, e2);
         }
 

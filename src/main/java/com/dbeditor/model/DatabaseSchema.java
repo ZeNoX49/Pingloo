@@ -25,4 +25,13 @@ public class DatabaseSchema {
         this.name = "db";
         this.tables.clear();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder res = new StringBuilder("DatabaseSchema tables :\n");
+        for(Table t : tables.values()) {
+            res.append("- " + t);
+        }
+        return res.toString() + "\n";
+    }
 }

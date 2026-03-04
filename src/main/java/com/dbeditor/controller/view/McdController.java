@@ -244,7 +244,9 @@ public class McdController extends View {
         this.connectionLines.forEach(line -> this.group.getChildren().remove(line));
         this.connectionLines.clear();
 
-        for (Pair<Table, Table> p : this.conceptualSchema.getLinks()) {
+        Map<String, Pair<Table, Table>> links = this.conceptualSchema.getLinks();
+        for (String name : links.keySet()) {
+            Pair<Table, Table> p = links.get(name);
             // créer un node d'association visuel intermédiaire
             String associationName = p.getKey().getName() + "_" + p.getValue().getName();
             // Position provisoire (sera ajustable par l'utilisateur)

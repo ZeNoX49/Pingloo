@@ -56,18 +56,20 @@ public class Table {
     public String toString() {
         StringBuilder res = new StringBuilder(this.getName() + "\n");
 
-        res.append("primary key : [\n");
-        for(Column col : columns) {
-            res.append("\t" + col.getName() + " | " + col.isPrimaryKey() + "\n");
+        if(!columns.isEmpty()) {
+            res.append("column | pk : [\n");
+            for(Column col : columns) {
+                res.append("\t" + col.getName() + " | " + col.isPrimaryKey() + "\n");
+            } res.append("]\n");
         }
-        res.append("]\n");
 
-        res.append("foreign key : [\n");
-        for(ForeignKey fk : foreignKeys) {
-            res.append("\t" + fk.getFkName() + "\n");
+        if(!foreignKeys.isEmpty()) {
+            res.append("foreign key : [\n");
+            for(ForeignKey fk : foreignKeys) {
+                res.append("\t" + fk.getFkName() + "\n");
+            } res.append("]\n");
         }
-        res.append("]\n");
 
-        return res.toString();
+        return res.toString() + "\n";
     }
 }
