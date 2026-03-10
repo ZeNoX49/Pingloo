@@ -27,6 +27,14 @@ public abstract class View {
 
     public enum ViewType {
         MCD, MLD, DF, DD, SDF, VALUE;
+
+        @Override
+        public String toString() {
+            if (this.equals(VALUE)) {
+                return "Value";
+            }
+            return super.toString();
+        }
     }
 
     /**
@@ -204,7 +212,7 @@ public abstract class View {
             }
 
         } catch (IOException ioe) {
-            MainApp.getLogger().severe(ioe.getMessage());
+            ioe.printStackTrace();
         }
     }
 
@@ -269,15 +277,15 @@ public abstract class View {
     private void mergeSplitPane(SplitPane sp, boolean keepFirst) {
         if (sp.getItems().size() < 2) return;
 
-        Pane parent = (Pane) sp.getParent();
-        int index = parent.getChildren().indexOf(sp);
+        Pane p = (Pane) sp.getParent();
+        int index = p.getChildren().indexOf(sp);
         if (index < 0) return;
 
         Node keep = keepFirst ? sp.getItems().get(0) : sp.getItems().get(1);
         sp.getItems().clear();
 
-        parent.getChildren().remove(index);
-        parent.getChildren().add(index, keep);
+        p.getChildren().remove(index);
+        p.getChildren().add(index, keep);
 
         if (keep instanceof Region r) {
             r.setMinSize(0, 0);
@@ -298,78 +306,51 @@ public abstract class View {
         );
 
         // affichage initial
-        if (value != null && cb.getItems().contains(value.toString())) {
-            cb.setValue(value.toString());
-        } else if (!cb.getItems().isEmpty()) {
-            cb.setValue(cb.getItems().get(0));
-        }
+        cb.setValue(value.toString());
 
-    //     cb.valueProperty().addListener((obs, oldValue, newValue) -> {
-    //         if (newValue == null || newValue.equals(oldValue)) return;
+        cb.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue.equals(oldValue)) return;
 
-    //         // exécuter sur le thread UI
-    //         Platform.runLater(() -> {
-    //             String fxmlPath = switch (newValue) {
-    //                 // case View.MCD -> "/fxml/view/mcd.fxml";
-    //                 case View.DF  -> "/fxml/view/df.fxml";
-    //                 case View.MLD -> "/fxml/view/mld.fxml";
-    //                 case View.MCD -> "/fxml/view/mcd.fxml";
-    //                 default       -> "/fxml/view/mcd.fxml";
-    //             };
+            System.out.println("Transformation en un " + newValue);
+            String fxmlPath = "/fxml/view/" + this.getViewType().toString().toLowerCase() + ".fxml";
 
-    //             // tentative robuste : essayer aussi quelques variantes de casse si le resource est null
-    //             URL resource = getClass().getResource(fxmlPath);
-    //             if (resource == null) {
-    //                 // essais communs : tout en minuscule / tout en majuscule / MLD vs mld
-    //                 String alt = fxmlPath.toLowerCase();
-    //                 resource = getClass().getResource(alt);
-    //             }
-    //             if (resource == null) {
-    //                 System.err.println("FXML introuvable pour '" + newValue + "'. Chemin essayé: " + fxmlPath);
-    //                 return;
-    //             }
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                Pane newPane = loader.load();
+                View newController = loader.getController();
 
-    //             try {
-    //                 FXMLLoader loader = new FXMLLoader(resource);
-    //                 Pane newPane = loader.load();
-    //                 View newController = loader.getController();
+                // fournir setData au nouveau controller (même parent, même registrar)
+                newController.setData(this.parent, newPane, this.registrar);
 
-    //                 // fournir setData au nouveau controller (même parent, même registrar)
-    //                 newController.setData(this.parent, newPane, this.registrar);
+                newPane.setMinSize(0, 0);
+                newPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+                
+                // remplacer la vue
+                int idx = this.parent.getChildren().indexOf(this.viewPane);
+                if (idx >= 0) {
+                    this.parent.getChildren().set(idx, newPane);
+                } else {
+                    // fallback : ajout en fin
+                    this.parent.getChildren().add(newPane);
+                }
 
-    //                 // sizing policy (si Region)
-    //                 // if (newPane instanceof Region rNew) {
-    //                 //     rNew.setMinSize(0, 0);
-    //                 //     rNew.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-    //                 // }
+                // initialiser la nouvelle vue
+                if (MainApp.getSchema() != null) {
+                    try {
+                        newController.open(MainApp.getSchema());
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                newController.updateStyle();
 
-    //                 // remplacer uniquement this.viewPane dans le parent (même position)
-    //                 int idx = this.parent.getChildren().indexOf(this.viewPane);
-    //                 if (idx >= 0) {
-    //                     this.parent.getChildren().set(idx, newPane);
-    //                 } else {
-    //                     // fallback : ajout en fin
-    //                     this.parent.getChildren().add(newPane);
-    //                 }
+                // remplacer la référence locale viewPane pour ce controller
+                this.viewPane = newPane;
 
-    //                 // initialiser la nouvelle vue (open / style)
-    //                 if (MainApp.getSchema() != null) {
-    //                     try {
-    //                         newController.open(MainApp.getSchema());
-    //                     } catch (IOException ex) {
-    //                         MainApp.getLogger().severe(ex.getMessage());
-    //                     }
-    //                 }
-    //                 newController.updateStyle();
-
-    //                 // remplacer la référence locale viewPane pour ce controller
-    //                 this.viewPane = newPane;
-
-    //             } catch (IOException ex) {
-    //                 System.err.println("Erreur lors du chargement du FXML pour " + newValue);
-    //                 MainApp.getLogger().severe(ex.getMessage());
-    //             }
-    //         });
-    //     });
+            } catch (IOException ex) {
+                System.err.println("Erreur lors du chargement du FXML pour " + newValue);
+                ex.printStackTrace();
+            }
+        });
     }
 }

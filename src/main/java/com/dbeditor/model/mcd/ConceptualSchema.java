@@ -1,7 +1,16 @@
 package com.dbeditor.model.mcd;
 
-import java.util.*;
-import com.dbeditor.model.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.dbeditor.model.Column;
+import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.model.ForeignKey;
+import com.dbeditor.model.Table;
 
 import javafx.util.Pair;
 
@@ -92,20 +101,6 @@ public class ConceptualSchema {
         }
         new Association(linkedEntitiesCard, table);
     }
-
-    // private boolean entityHasNotNullFK(Table table, ForeignKey fk) {
-    //     for(Column col : table.getColumns()) {
-    //         if(col.getName().equals(fk.getColumnName())) return col.isNotNull();
-    //     }
-    //     return false;
-    // }
-
-    // private boolean isUniqueFK(Table table, ForeignKey fk) {
-    //     for(Column col : table.getColumns()) {
-    //         if(col.getName().equals(fk.getColumnName())) return col.isUnique();
-    //     }
-    //     return false;
-    // }
 
     /**
      * Retourne toutes les tables associés aux entités

@@ -9,6 +9,7 @@ import java.util.Map;
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
+import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.controller.view.helpers.LassoSelector;
@@ -39,8 +40,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.util.Pair;
 
 /**
@@ -115,7 +114,7 @@ public class McdController extends View {
                         try {
                             this.deleteSelectedTables();
                         } catch (IOException ioe) {
-                            MainApp.getLogger().severe(ioe.getMessage());
+                            ioe.printStackTrace();
                         }
                     }
                 });
@@ -185,7 +184,7 @@ public class McdController extends View {
             double x = col * 250 + 50;
             double y = row * 200 + 50;
             
-            this.createTableNode(table, x, y, false);
+            this.createTableNode(table, x, y, TableType.Entite);
 
             col++;
             if (col >= cols) {
@@ -203,16 +202,11 @@ public class McdController extends View {
     /**
      * Crée un node d'entité à une position donnée
      */
-    private void createTableNode(Table table, double x, double y, boolean isAssociation) throws IOException {
-        // Evite double ajout si nom existant
-        if (this.tableNodes.containsKey(table.getName())) {
-            return;
-        }
-
+    private void createTableNode(Table table, double x, double y, TableType tabletype) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
         AnchorPane tcPane = loader.load();
         TableController tcController = loader.getController();
-        tcController.createTableNode(table);
+        tcController.createTableNode(table, tabletype);
 
         this.tableNodes.put(tcController.getTable().getName(), tcController);
 
@@ -227,10 +221,10 @@ public class McdController extends View {
             if (e.getButton() == MouseButton.PRIMARY) {
                 // si double clique gauche -> modifier la table ou l'association
                 if (e.getClickCount() == 2) {
-                    if(isAssociation) {
-                        this.editAssociation(tcController);
-                    } else {
+                    if(tabletype.equals(TableType.Entite)) {
                         this.editTable(tcController);
+                    } else {
+                        this.editAssociation(tcController);
                     }
                     e.consume();
                 }
@@ -259,7 +253,7 @@ public class McdController extends View {
         Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
         for (String name : links.keySet()) {
             // TODO: modifier la position de base des associations
-            this.createTableNode(this.conceptualSchema.getAssociationTable(name), 0, 0, true);
+            this.createTableNode(this.conceptualSchema.getAssociationTable(name), 0, 0, TableType.Association);
             TableController ac = this.tableNodes.get(name);
 
             for(Pair<Table, CardinalityValue> p : links.get(name)) {
@@ -361,7 +355,7 @@ public class McdController extends View {
             double x = (this.pane.getWidth() / 2) - 100;
             double y = (this.pane.getHeight() / 2) - 75;
             
-            this.createTableNode(table, x, y, false);
+            this.createTableNode(table, x, y, TableType.Entite);
         }
     }
 
@@ -401,7 +395,7 @@ public class McdController extends View {
                 this.open(schema);
 
             } catch (IOException e) {
-                MainApp.getLogger().severe(e.getMessage());
+                e.printStackTrace();
                 CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
             }
         }

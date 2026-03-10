@@ -7,6 +7,7 @@ import java.util.List;
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
+import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.controller.view.helpers.LassoSelector;
 import com.dbeditor.controller.view.helpers.MultiDragManager;
@@ -171,7 +172,7 @@ public class MldController extends View {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
         AnchorPane nodePane = loader.load();
         TableController nodeController = loader.getController();
-        nodeController.createTableNode(table);
+        nodeController.createTableNode(table, TableType.Table);
 
         this.tableNodes.add(nodeController);
 
@@ -379,7 +380,7 @@ public class MldController extends View {
                 this.open(schema);
 
             } catch (IOException e) {
-                MainApp.getLogger().severe(e.getMessage());
+                e.printStackTrace();
                 CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
             }
         }
