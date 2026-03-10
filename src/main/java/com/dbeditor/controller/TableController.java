@@ -89,14 +89,18 @@ public class TableController {
      * ou lors d'un changement de style
      */
     public void updateStyle() {
-        this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getCardColor() + 
-                "; -fx-border-color: " + T_M.getTheme().getBorderColor() + 
-                "; -fx-border-radius: 8; " +
-                "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);");
+        this.pane.setStyle(
+            "-fx-background-color: " + T_M.getTheme().getCardColor() + ";" +
+            "-fx-border-color: " + T_M.getTheme().getBorderColor() + ";" +
+            "-fx-border-radius: 8; " +
+            "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
+        );
 
-        this.hName.setStyle("-fx-background-color: " + T_M.getTheme().getHeaderColor() + 
-                    "; -fx-background-radius: 8 8 0 0;" + 
-                    "-fx-translate-x: 1px; -fx-translate-y: 1px;");
+        this.hName.setStyle(
+            "-fx-background-color: " + T_M.getTheme().getHeaderColor() + ";" + 
+            "-fx-background-radius: 8 8 0 0;" + 
+            "-fx-translate-x: 1px; -fx-translate-y: 1px;"
+        );
 
         for (Node node : grid.getChildren()) {
             if (node instanceof Label label) {

@@ -40,16 +40,6 @@ public class Table {
     public String getName() { return this.name; }
     public List<Column> getColumns() { return this.columns; }
     public List<ForeignKey> getForeignKeys() { return this.foreignKeys; }
-    
-    public List<Column> getPrimaryKeyColumns() {
-        List<Column> res = new ArrayList<>();
-        for(Column col : columns) {
-            if(col.isPrimaryKey()) {
-                res.add(col);
-            }
-        } return res;
-    }
-
     public void setName(String name) { this.name = name; }
 
     @Override

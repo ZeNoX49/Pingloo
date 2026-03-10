@@ -17,6 +17,7 @@ import com.dbeditor.controller.view.helpers.SelectionModel;
 import com.dbeditor.controller.view.helpers.ZoomPanHandler;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.model.mcd.ConceptualSchema;
 import com.dbeditor.util.ThemeManager;
 
@@ -38,6 +39,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Pair;
 
 /**
@@ -65,8 +68,7 @@ public class McdController extends View {
     
     // Nodes visuels
     private final Map<String, TableController> tableNodes = new HashMap<>();
-    private final List<Line> connectionLines = new ArrayList<>();
-    // liste mutables partagée avec le lasso (pour que le lasso voit les ajouts / suppressions)
+    private final List<Pair<Line, Label>> connectionLines = new ArrayList<>();
     private final List<TableController> tcList = new ArrayList<>();
 
     // Helpers
@@ -132,6 +134,14 @@ public class McdController extends View {
         
         for (TableController tc : this.tableNodes.values()) {
             tc.updateStyle();
+        }
+
+        for(Pair<Line, Label> p : this.connectionLines) {
+            p.getValue().setStyle(
+                "-fx-background-color: " + T_M.getTheme().getBackgroundColor() + "; " + 
+                "-fx-text-fill: " + T_M.getTheme().getTextColor() + ";" +
+                "-fx-font-size: 15;"
+            );
         }
     }
 
@@ -244,25 +254,22 @@ public class McdController extends View {
         this.connectionLines.forEach(line -> this.group.getChildren().remove(line));
         this.connectionLines.clear();
 
-        Map<String, Pair<Table, Table>> links = this.conceptualSchema.getLinks();
+        Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
         for (String name : links.keySet()) {
-            Pair<Table, Table> p = links.get(name);
-            // créer un node d'association visuel intermédiaire
-            String associationName = p.getKey().getName() + "_" + p.getValue().getName();
-            // Position provisoire (sera ajustable par l'utilisateur)
-            this.createTableNode(new Table(associationName), 0, 0, true);
-            TableController ac = this.tableNodes.get(associationName); // maintenant disponible
+            // TODO: modifier la position de base des associations
+            this.createTableNode(new Table(name), 0, 0, true);
+            TableController ac = this.tableNodes.get(name);
 
-            // Draw connections entity -> association
-            this.drawConnection(this.tableNodes.get(p.getKey().getName()), ac);
-            this.drawConnection(this.tableNodes.get(p.getValue().getName()), ac);
+            for(Pair<Table, CardinalityValue> p : links.get(name)) {
+                this.drawConnection(this.tableNodes.get(p.getKey().getName()), ac, p.getValue());
+            }
         }
     }
 
     /**
      * Permet de tracer un lien entre une entité et une association
      */
-    private void drawConnection(TableController from, TableController to) {
+    private void drawConnection(TableController from, TableController to, CardinalityValue cardinality) {
         if (from == null || to == null) return;
 
         double fromX = from.getRoot().getLayoutX() + from.getRoot().getWidth() / 2;
@@ -274,31 +281,34 @@ public class McdController extends View {
         line.setStroke(Color.web(T_M.getTheme().getSecondaryTextColor()));
         line.setStrokeWidth(2);
         line.getStrokeDashArray().addAll(5.0, 5.0);
-
-        // ajoute la ligne derrière le node
-        this.group.getChildren().add(0, line);
-        this.connectionLines.add(line);
         
         // bind la ligne aux tables
-        line.startXProperty().bind(
-            from.getRoot().layoutXProperty()
-                .add(from.getRoot().widthProperty().divide(2))
+        line.startXProperty().bind(from.getRoot().layoutXProperty().add(from.getRoot().widthProperty().divide(2)));
+        line.startYProperty().bind(from.getRoot().layoutYProperty().add(from.getRoot().heightProperty().divide(2)));
+        line.endXProperty().bind(to.getRoot().layoutXProperty().add(to.getRoot().widthProperty().divide(2)));
+        line.endYProperty().bind(to.getRoot().layoutYProperty().add(to.getRoot().heightProperty().divide(2)));
+    
+        // Texte de la cardinalité
+        Label cardinalityLabel = new Label(cardinality.toString());
+        cardinalityLabel.setStyle(
+            "-fx-text-fill: " + T_M.getTheme().getTextColor() + ";" +
+            "-fx-font-size: 15;"
         );
 
-        line.startYProperty().bind(
-            from.getRoot().layoutYProperty()
-                .add(from.getRoot().heightProperty().divide(2))
+        // Bind le Label au centre de la ligne
+        cardinalityLabel.layoutXProperty().bind(
+            line.startXProperty().add(line.endXProperty().subtract(line.startXProperty()).divide(2))
+                    .subtract(cardinalityLabel.widthProperty().divide(2)) // centrer horizontalement
+        );
+        cardinalityLabel.layoutYProperty().bind(
+            line.startYProperty().add(line.endYProperty().subtract(line.startYProperty()).divide(2))
+                    .subtract(cardinalityLabel.heightProperty().divide(2)) // centrer verticalement
         );
 
-        line.endXProperty().bind(
-            to.getRoot().layoutXProperty()
-                .add(to.getRoot().widthProperty().divide(2))
-        );
-
-        line.endYProperty().bind(
-            to.getRoot().layoutYProperty()
-                .add(to.getRoot().heightProperty().divide(2))
-        );
+        // ajoute la ligne derrière le node
+        this.group.getChildren().add(0, cardinalityLabel);
+        this.group.getChildren().add(0, line);
+        this.connectionLines.add(new Pair<>(line, cardinalityLabel));
     }
 
     /**
