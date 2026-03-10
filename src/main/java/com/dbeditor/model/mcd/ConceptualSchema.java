@@ -10,7 +10,7 @@ import javafx.util.Pair;
  */
 public class ConceptualSchema {
     private final Map<String, Entity> entities = new HashMap<>();
-    private final List<Association> associations = new ArrayList<>();
+    private final Map<String, Association> associations = new HashMap<>();
 
     public ConceptualSchema(DatabaseSchema schema) {
         if(schema.getTables().isEmpty()) return;
@@ -88,7 +88,8 @@ public class ConceptualSchema {
             CardinalityValue card = pk.isNotNull() ? CardinalityValue._1N_ : CardinalityValue._0N_;
             linkedEntitiesCard.add(new Pair<>(target, card));
         }
-        associations.add(new Association(linkedEntitiesCard, table));
+        Association association = new Association(linkedEntitiesCard, table);
+        associations.put(association.name, association);
     }
 
     // private boolean entityHasNotNullFK(Table table, ForeignKey fk) {
@@ -133,7 +134,7 @@ public class ConceptualSchema {
      */
     public Map<String, List<Pair<Table, CardinalityValue>>> getLinks() {
         Map<String, List<Pair<Table, CardinalityValue>>> links = new HashMap<>();
-        for(Association assoc : associations) {
+        for(Association assoc : associations.values()) {
             List<Pair<Table, CardinalityValue>> tablesCard = new ArrayList<>();
             for(Entity entity : assoc.linkedEntities.keySet()) {
                 tablesCard.add(new Pair<>(entity.table, assoc.linkedEntities.get(entity)));
@@ -146,6 +147,20 @@ public class ConceptualSchema {
         }
         return links;
     }
+
+    /**
+     * Retourne la table associé au nom de l'entité,
+     * null si elle n'existe pas
+     */
+    public Table getAssociationTable(String name) {
+        for(Association a : associations.values()) {
+            if(a.referencedTable.getName().equals(name)) {
+                return a.referencedTable;
+            }
+        } return null;
+    }
+
+    /* =========================================================================================== */
 
     public class Entity {
         public final Table table;

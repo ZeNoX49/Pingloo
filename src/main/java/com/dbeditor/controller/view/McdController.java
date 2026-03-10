@@ -127,9 +127,9 @@ public class McdController extends View {
     public void updateStyle() {
         this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
         this.toolbar.setStyle(
-                "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
-                "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
-                "-fx-border-width: 0 0 1 0;"
+            "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
+            "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
+            "-fx-border-width: 0 0 1 0;"
         );
         
         for (TableController tc : this.tableNodes.values()) {
@@ -167,6 +167,8 @@ public class McdController extends View {
         if (this.lasso != null) {
             this.lasso.getRect().toFront();
         }
+
+        this.updateStyle();
     }
 
     @Override
@@ -257,7 +259,7 @@ public class McdController extends View {
         Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
         for (String name : links.keySet()) {
             // TODO: modifier la position de base des associations
-            this.createTableNode(new Table(name), 0, 0, true);
+            this.createTableNode(this.conceptualSchema.getAssociationTable(name), 0, 0, true);
             TableController ac = this.tableNodes.get(name);
 
             for(Pair<Table, CardinalityValue> p : links.get(name)) {
@@ -290,10 +292,13 @@ public class McdController extends View {
     
         // Texte de la cardinalité
         Label cardinalityLabel = new Label(cardinality.toString());
-        cardinalityLabel.setStyle(
-            "-fx-text-fill: " + T_M.getTheme().getTextColor() + ";" +
-            "-fx-font-size: 15;"
-        );
+        cardinalityLabel.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY) {
+                if (e.getClickCount() == 2) {
+                    // TODO: pouvoir modifier la cardinalité
+                }
+            }
+        });
 
         // Bind le Label au centre de la ligne
         cardinalityLabel.layoutXProperty().bind(
