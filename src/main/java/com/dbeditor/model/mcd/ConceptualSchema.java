@@ -162,7 +162,7 @@ public class ConceptualSchema {
 
     /* =========================================================================================== */
 
-    public class Entity {
+    private class Entity {
         public final Table table;
 
         public Entity(Table table) {
@@ -170,7 +170,7 @@ public class ConceptualSchema {
         }
     }
 
-    public class Association {
+    private class Association {
         public String name;
         public final Map<Entity, CardinalityValue> linkedEntities = new HashMap<>();
         public final Table referencedTable;
