@@ -37,6 +37,7 @@ public class ConceptualSchema {
                 // si != null alors lien entre table hors association
                 Entity target = entities.get(fk.getReferencedTable());
                 if(target != null) {
+                    // TODO: revoir les cardinalités
                     List<Pair<Entity, CardinalityValue>> linkedEntitiesCard = new ArrayList<>();
                     linkedEntitiesCard.add(new Pair<>(entity, entity.table.getColumn(fk.getColumnName()).isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_));
                     linkedEntitiesCard.add(new Pair<>(target, entity.table.getColumn(fk.getReferencedColumn()).isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_));
@@ -85,6 +86,7 @@ public class ConceptualSchema {
             }
             if(pk == null) continue;
 
+            // TODO: revoir les cardinalités
             CardinalityValue card = pk.isNotNull() ? CardinalityValue._1N_ : CardinalityValue._0N_;
             linkedEntitiesCard.add(new Pair<>(target, card));
         }
