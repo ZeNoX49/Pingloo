@@ -15,14 +15,14 @@ public class ConceptualSchema {
     public ConceptualSchema(DatabaseSchema schema) {
         if(schema.getTables().isEmpty()) return;
 
-        // Identifier les entités et les tables associatives
+        // Identifier les entités et les associations
         // créer les tables et attendre avant de créer les assos
         List<Table> assoToCreate = new ArrayList<>();
         for(Table table : schema.getTables().values()) {
             if(isAssociativeTable(table)) {
                 assoToCreate.add(table);
             } else {
-                entities.put(table.getName(), new Entity(table));
+                new Entity(table);
             }
         }
 
@@ -31,19 +31,19 @@ public class ConceptualSchema {
             createAssociationFromTable(table);
         }
 
-        // // Ajouter les associations basées sur les FK des entités
-        // for(Entity entity : entities.values()) {
-        //     for(ForeignKey fk : entity.table.getForeignKeys()) {
-        //         Entity target = entities.get(fk.getReferencedTable());
-        //         if(target != null) {
-        //             Association assoc = new Association(fk.getFkName(), entity, target);
-        //             // Déduire cardinalité min/max
-        //             assoc.minFrom = entityHasNotNullFK(entity.table, fk) ? 1 : 0;
-        //             assoc.maxFrom = isUniqueFK(entity.table, fk) ? 1 : -1; // -1 = N
-        //             associations.add(assoc);
-        //         }
-        //     }
-        // }
+        // Ajouter les associations basées sur les FK des entités
+        for(Entity entity : entities.values()) {
+            for(ForeignKey fk : entity.table.getForeignKeys()) {
+                // si != null alors lien entre table hors association
+                Entity target = entities.get(fk.getReferencedTable());
+                if(target != null) {
+                    List<Pair<Entity, CardinalityValue>> linkedEntitiesCard = new ArrayList<>();
+                    linkedEntitiesCard.add(new Pair<>(entity, entity.table.getColumn(fk.getColumnName()).isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_));
+                    linkedEntitiesCard.add(new Pair<>(target, entity.table.getColumn(fk.getReferencedColumn()).isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_));
+                    new Association(linkedEntitiesCard, null);
+                }
+            }
+        }
     }
 
     /**
@@ -88,8 +88,7 @@ public class ConceptualSchema {
             CardinalityValue card = pk.isNotNull() ? CardinalityValue._1N_ : CardinalityValue._0N_;
             linkedEntitiesCard.add(new Pair<>(target, card));
         }
-        Association association = new Association(linkedEntitiesCard, table);
-        associations.put(association.name, association);
+        new Association(linkedEntitiesCard, table);
     }
 
     // private boolean entityHasNotNullFK(Table table, ForeignKey fk) {
@@ -167,6 +166,8 @@ public class ConceptualSchema {
 
         public Entity(Table table) {
             this.table = table;
+            // s'auto ajoute dans la map
+            entities.put(table.getName(), this);
         }
     }
 
@@ -189,6 +190,9 @@ public class ConceptualSchema {
             for(Pair<Entity, CardinalityValue> p : entitiesCard) {
                 this.linkedEntities.put(p.getKey(), p.getValue());
             }
+            
+            // s'auto ajoute dans la map
+            associations.put(this.name, this);
         }
     }
 }

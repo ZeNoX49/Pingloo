@@ -1,34 +1,23 @@
 package com.dbeditor.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Table {
     private String name;
-    private List<Column> columns;
+    private Map<String, Column> columns;
     private List<ForeignKey> foreignKeys;
     
     public Table(String name) {
         this.name = name;
-        this.columns = new ArrayList<>();
+        this.columns = new LinkedHashMap<>();
         this.foreignKeys = new ArrayList<>();
     }
     
-    /**
-     * Utilise pour la duplication de table
-     * @param table table copié
-     */
-    public Table(Table table) {
-        this.name = table.name;
-        this.columns = new ArrayList<>();
-        for (Column col : table.columns) {
-            this.columns.add(new Column(col));
-        }
-        this.foreignKeys = new ArrayList<>(table.foreignKeys);
-    }
-    
     public void addColumn(Column column) {
-        this.columns.add(column);
+        this.columns.put(column.getName(), column);
     }
     
     public void removeColumn(Column column) {
@@ -38,7 +27,8 @@ public class Table {
     public void addForeignKey(ForeignKey fk) { foreignKeys.add(fk); }
     
     public String getName() { return this.name; }
-    public List<Column> getColumns() { return this.columns; }
+    public List<Column> getColumns() { return new ArrayList<>(this.columns.values()); }
+    public Column getColumn(String name) { return this.columns.get(name); }
     public List<ForeignKey> getForeignKeys() { return this.foreignKeys; }
     public void setName(String name) { this.name = name; }
 
@@ -48,7 +38,7 @@ public class Table {
 
         if(!columns.isEmpty()) {
             res.append("column | pk : [\n");
-            for(Column col : columns) {
+            for(Column col : columns.values()) {
                 res.append("\t" + col.getName() + " | " + col.isPrimaryKey() + "\n");
             } res.append("]\n");
         }
