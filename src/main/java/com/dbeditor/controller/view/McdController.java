@@ -9,6 +9,7 @@ import java.util.Map;
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
+import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.controller.view.helpers.LassoSelector;
@@ -97,12 +98,7 @@ public class McdController extends View {
         this.pane.setClip(clip);
 
         // Initialiser le lasso
-        // TODO: ne fonctionne pas car ce n'est pas une référence a la liste elle même (je pense)
-        List<TableController> tcList = new ArrayList<>();
-        for (TableController tc : this.tableNodes.values()) {
-            tcList.add(tc);
-        }
-        this.lasso = new LassoSelector(this.pane, this.group, tcList, this.selectionModel);
+        this.lasso = new LassoSelector(this.pane, this.group, this.tableNodes.values().stream().toList(), this.selectionModel);
         this.lasso.setupEvents();
 
         this.updateStyle();
@@ -116,7 +112,7 @@ public class McdController extends View {
                         try {
                             this.deleteSelectedTables();
                         } catch (IOException ioe) {
-                            MainApp.getLogger().severe(ioe.getMessage());
+                            ioe.printStackTrace();
                         }
                     }
                 });
@@ -172,7 +168,7 @@ public class McdController extends View {
             double x = col * 250 + 50;
             double y = row * 200 + 50;
             
-            this.createTableNode(table, x, y, false);
+            this.createTableNode(table, x, y, TableType.Entite);
 
             col++;
             if (col >= cols) {
@@ -190,11 +186,11 @@ public class McdController extends View {
     /**
      * Crée un node d'entité à une position donnée
      */
-    private void createTableNode(Table table, double x, double y, boolean isAssociation) throws IOException {
+    private void createTableNode(Table table, double x, double y, TableType tabletype) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
         AnchorPane tcPane = loader.load();
         TableController tcController = loader.getController();
-        tcController.createTableNode(table);
+        tcController.createTableNode(table, tabletype);
 
         this.tableNodes.put(tcController.getTable().getName(), tcController);
 
@@ -207,10 +203,10 @@ public class McdController extends View {
                 // si double clique gauche
                 // on modifie la table
                 if (e.getClickCount() == 2) {
-                    if(isAssociation) {
-                        this.editAssociation(tcController);
-                    } else {
+                    if(tabletype.equals(TableType.Entite)) {
                         this.editTable(tcController);
+                    } else {
+                        this.editAssociation(tcController);
                     }
                     e.consume();
                 }
@@ -240,7 +236,7 @@ public class McdController extends View {
             // TODO: gros bourbier si le nom existe déja
             String associationName = p.getKey().getName() + "_" + p.getValue().getName();
             // TODO: calculer la position de l'association (p1.x + p2.x)/2 | (p1.y + p2.y)/2
-            this.createTableNode(new Table(associationName), 0, 0, true);
+            this.createTableNode(new Table(associationName), 0, 0, TableType.Association);
             TableController ac = this.tableNodes.get(associationName); // pas optimal ca
 
             this.drawConnection(this.tableNodes.get(p.getKey().getName()), ac);
@@ -332,7 +328,7 @@ public class McdController extends View {
             double x = (this.pane.getWidth() / 2) - 100;
             double y = (this.pane.getHeight() / 2) - 75;
             
-            this.createTableNode(table, x, y, false);
+            this.createTableNode(table, x, y, TableType.Entite);
         }
     }
 
@@ -372,7 +368,7 @@ public class McdController extends View {
                 this.open(schema);
 
             } catch (IOException e) {
-                MainApp.getLogger().severe(e.getMessage());
+                e.printStackTrace();
                 CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
             }
         }
@@ -486,7 +482,7 @@ public class McdController extends View {
             
             MainApp.setSchema(mld);
         } catch (Exception e) {
-            MainApp.getLogger().severe(e.getMessage());
+            e.printStackTrace();
             CanvasController.showWarningAlert("Erreur", "Erreur lors de la conversion : " + e.getMessage());
         }
     }

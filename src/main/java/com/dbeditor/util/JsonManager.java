@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dbeditor.MainApp;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -110,7 +109,7 @@ public class JsonManager {
             System.out.println("Sauvegarde JSON réussie vers " + PATH_TO_FILE_USER_DATA);
         } catch (IOException e) {
             System.err.println("Erreur lors de l'écriture du fichier JSON : " + e.getMessage());
-            MainApp.getLogger().severe(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -152,7 +151,7 @@ public class JsonManager {
             System.out.println("Sauvegarde JSON réussie vers " + PATH_TO_FILE_USER_DATA);
         } catch (IOException e) {
             System.err.println("Erreur lors de l'écriture du fichier JSON : " + e.getMessage());
-            MainApp.getLogger().severe(e.getMessage());
+            e.printStackTrace();
         }
     }
     

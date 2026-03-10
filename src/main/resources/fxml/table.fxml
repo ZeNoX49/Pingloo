@@ -7,10 +7,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Ellipse?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.TableController">
    <children>
+      <Ellipse fx:id="ellipse" fill="DODGERBLUE" stroke="BLACK" strokeType="INSIDE" />
       <VBox alignment="TOP_CENTER">
          <children>
             <HBox fx:id="hName" alignment="CENTER">

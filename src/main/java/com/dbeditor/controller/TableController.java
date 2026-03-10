@@ -17,18 +17,25 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 public class TableController {
+    public enum TableType {
+        Table, Entite, Association;
+    }
+
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private AnchorPane pane;
+    @FXML private Ellipse ellipse;
     @FXML private HBox hName;
     @FXML private Label name;
     @FXML private GridPane grid;
 
     private Table table;
+    private TableType type;
 
     // callbacks fournis par CanvasController
     private BiConsumer<TableController, MouseEvent> onSelect;
@@ -39,8 +46,9 @@ public class TableController {
      * Permet de mettre en place le visuel de la table.<br>
      * Met aussi en en place l'ui et le drag
      */
-    public void createTableNode(Table table) {
+    public void createTableNode(Table table, TableType type) {
         this.table = table;
+        this.type = type;
         this.createUI();
         this.setupDragHandlers();
     }
@@ -89,14 +97,30 @@ public class TableController {
      * ou lors d'un changement de style
      */
     public void updateStyle() {
-        this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getCardColor() + 
-                "; -fx-border-color: " + T_M.getTheme().getBorderColor() + 
-                "; -fx-border-radius: 8; " +
-                "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);");
-
-        this.hName.setStyle("-fx-background-color: " + T_M.getTheme().getHeaderColor() + 
-                    "; -fx-background-radius: 8 8 0 0;" + 
-                    "-fx-translate-x: 1px; -fx-translate-y: 1px;");
+        if(this.type == TableType.Association) {
+            this.pane.setStyle("-fx-background-color: transparent");
+            this.ellipse.setStyle(
+                "-fx-background-color: " + T_M.getTheme().getCardColor() + "; " +
+                "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; " +
+                "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
+            );
+            this.hName.setStyle(
+                "-fx-translate-x: 1px; -fx-translate-y: 1px;"
+            );
+        } else {
+            this.pane.setStyle(
+                "-fx-background-color: " + T_M.getTheme().getCardColor() + "; " +
+                "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; " +
+                (this.type.equals(TableType.Table) ? "-fx-border-radius: 8; -fx-background-radius: 8; " : "") +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
+            );
+            this.ellipse.setStyle("-fx-background-color: transparent");
+            this.hName.setStyle(
+                "-fx-background-color: " + T_M.getTheme().getHeaderColor() + "; " +
+                (this.type.equals(TableType.Table) ? "-fx-background-radius: 8 8 0 0; " : "") + 
+                "-fx-translate-x: 1px; -fx-translate-y: 1px;"
+            );
+        }
 
         for (Node node : grid.getChildren()) {
             if (node instanceof Label label) {
