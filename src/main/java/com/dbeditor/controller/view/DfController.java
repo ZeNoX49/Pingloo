@@ -45,7 +45,7 @@ public class DfController extends View {
     }
 
     @Override
-    public void onChange() {
+    public void onSync() {
         this.setupText();
     }
 

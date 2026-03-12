@@ -46,7 +46,7 @@ import javafx.util.Pair;
  * McdController FINAL pour gérer un vrai MCD selon Merise
  * Version complète avec gestionnaire de connexions
  */
-public class McdController extends View {
+public class McdController extends ModelView {
     @Override
     public ViewType getViewType() {
         return ViewType.MCD;
@@ -57,7 +57,7 @@ public class McdController extends View {
     @FXML private BorderPane root;
     @FXML private ToolBar toolbar;
     @FXML private ComboBox<String> cb;
-    @FXML private Button btnEntity, btnAssociation, btnConvert;
+    @FXML private Button btnSync, btnEntity, btnAssociation, btnConvert;
     @FXML private Label zlLabel;
     @FXML private Pane pane;
     @FXML private Group group;
@@ -75,6 +75,7 @@ public class McdController extends View {
     private SelectionModel<TableController> selectionModel;
     private LassoSelector lasso;
     private MultiDragManager multiDrag;
+    
     @FXML
     void initialize() throws IOException {
         this.conceptualSchema = new ConceptualSchema(MainApp.getSchema());
@@ -171,7 +172,7 @@ public class McdController extends View {
     }
 
     @Override
-    public void onChange() {}
+    public void onSync() {}
 
     /**
      * Crée les nodes visuels pour les entités

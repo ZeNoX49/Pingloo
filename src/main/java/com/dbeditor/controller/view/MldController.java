@@ -36,7 +36,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
-public class MldController extends View {
+public class MldController extends ModelView {
     @Override
     public ViewType getViewType() {
         return ViewType.MLD;
@@ -106,9 +106,9 @@ public class MldController extends View {
     public void updateStyle() {
         this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
         this.toolbar.setStyle(
-                "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
-                "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
-                "-fx-border-width: 0 0 1 0;"
+            "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
+            "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
+            "-fx-border-width: 0 0 1 0;"
         );
         
         for (TableController tc : this.tableNodes) {
@@ -135,7 +135,7 @@ public class MldController extends View {
     }
 
     @Override
-    public void onChange() {}
+    public void onSync() {}
 
     /**
      * Permet de créer le visuel des tables à partir d'un DatabaseSchema

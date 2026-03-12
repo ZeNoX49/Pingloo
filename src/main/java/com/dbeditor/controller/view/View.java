@@ -32,8 +32,7 @@ public abstract class View {
         public String toString() {
             if (this.equals(VALUE)) {
                 return "Value";
-            }
-            return super.toString();
+            } return super.toString();
         }
     }
 
@@ -74,7 +73,7 @@ public abstract class View {
     /**
      * Permet de mettre à jour les vues lors d'un changement dans une vue
      */
-    public abstract void onChange();
+    public abstract void onSync();
     
     public void createSplit(Node backgroundNode) {
         // écoute uniquement les clics droits sur le backgroundNode
@@ -311,10 +310,31 @@ public abstract class View {
         cb.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue.equals(oldValue)) return;
 
+            cb.setValue(newValue.toString());
+
             System.out.println("Transformation en un " + newValue);
             String fxmlPath = "/fxml/view/" + this.getViewType().toString().toLowerCase() + ".fxml";
 
             try {
+
+                // FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
+                // Pane mcdPane = loader.load();
+                // View mcdController = loader.getController();
+
+                // // on fournit la fonction d'enregistrement au controller
+                // mcdController.setData(this.spPane, mcdPane, (pair) -> {
+                //     // registrar : ajoute la paire dans la liste viewsPane
+                //     this.viewsPane.add(pair);
+                // });
+                // // on enregistre explicitement la première vue aussi
+                // this.viewsPane.add(new Pair<>(mcdController, mcdPane));
+
+                // mcdPane.setMinSize(0, 0);
+                // mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+                // this.spPane.getChildren().add(mcdPane);
+
+
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
                 Pane newPane = loader.load();
                 View newController = loader.getController();
@@ -326,26 +346,16 @@ public abstract class View {
                 newPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
                 
                 // remplacer la vue
-                int idx = this.parent.getChildren().indexOf(this.viewPane);
-                if (idx >= 0) {
-                    this.parent.getChildren().set(idx, newPane);
-                } else {
-                    // fallback : ajout en fin
-                    this.parent.getChildren().add(newPane);
-                }
+                this.parent.getChildren().remove(this.viewPane);
+                this.parent.getChildren().add(newPane);
 
                 // initialiser la nouvelle vue
-                if (MainApp.getSchema() != null) {
-                    try {
-                        newController.open(MainApp.getSchema());
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                newController.updateStyle();
+                newController.open(MainApp.getSchema());
 
                 // remplacer la référence locale viewPane pour ce controller
                 this.viewPane = newPane;
+
+                System.out.println("Transformation finie");
 
             } catch (IOException ex) {
                 System.err.println("Erreur lors du chargement du FXML pour " + newValue);
