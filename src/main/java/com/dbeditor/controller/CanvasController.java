@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.dbeditor.MainApp;
-import com.dbeditor.controller.view.View;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.file.exporter.MySqlExporter;
 import com.dbeditor.sql.file.parser.MySqlParser;
@@ -36,9 +35,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Pair;
 
-public class CanvasController {
+public class CanvasController implements VisualModifier {
     private static final DbManager D_M = DbManager.getInstance();
     private static final ThemeManager T_M = ThemeManager.getInstance();
     private static final FileManager F_M = FileManager.getInstance();
@@ -51,11 +49,11 @@ public class CanvasController {
     @FXML private Menu menuOpenDbMYSQL, menuSaveDbMYSQL;
     @FXML private MenuItem miLT, miDT, miPT;
     
-    private List<Pair<View, Pane>> viewsPane;
+    private List<ViewController> views;
 
     @FXML
     private void initialize() throws IOException {
-        this.viewsPane = new ArrayList<>();
+        this.views = new ArrayList<>();
         
         this.createBaseView();
 
@@ -82,17 +80,17 @@ public class CanvasController {
      * @throws IOException
      */
     private void createBaseView() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view/mcd.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view.fxml"));
         Pane mcdPane = loader.load();
-        View mcdController = loader.getController();
+        ViewController mcdController = loader.getController();
 
-        // on fournit la fonction d'enregistrement au controller
-        mcdController.setData(this.spPane, mcdPane, (pair) -> {
-            // registrar : ajoute la paire dans la liste viewsPane
-            this.viewsPane.add(pair);
-        });
-        // on enregistre explicitement la première vue aussi
-        this.viewsPane.add(new Pair<>(mcdController, mcdPane));
+        // // on fournit la fonction d'enregistrement au controller
+        // mcdController.setData(this.spPane, mcdPane, (pair) -> {
+        //     // registrar : ajoute la paire dans la liste viewsPane
+        //     this.viewsPane.add(pair);
+        // });
+        // // on enregistre explicitement la première vue aussi
+        this.views.add(mcdController);
 
         mcdPane.setMinSize(0, 0);
         mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -100,8 +98,8 @@ public class CanvasController {
         this.spPane.getChildren().add(mcdPane);
     }
 
-    public void registerView(View v, Pane pane) {
-        this.viewsPane.add(new Pair<>(v, pane));
+    public void registerView(ViewController v) {
+        this.views.add(v);
     }
 
     private void changeTheme(int idTheme) {
@@ -109,19 +107,15 @@ public class CanvasController {
         this.updateStyle();
     }
 
-    /**
-     * Permet de mettre à jour le style au lancement de l'app
-     * ou lors d'un changement de style
-     */
-    private void updateStyle() {
+    @Override
+    public void updateStyle() {
         this.spPane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
 
         this.toolBar.setStyle("-fx-background-color: " + T_M.getTheme().getToolbarColor() + 
                         "; -fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + 
                         "; -fx-border-width: 0 0 1 0;");
 
-        for(Pair<View, Pane> p : this.viewsPane) {
-            View v = p.getKey();
+        for(ViewController v : this.views) {
             v.updateStyle();
         }
     }
@@ -174,8 +168,7 @@ public class CanvasController {
             MainApp.setSchema(dbS);
             this.tfDbName.setText(dbS.getName());
 
-            for(Pair<View, Pane> p : this.viewsPane) {
-                View v = p.getKey();
+            for(ViewController v : this.views) {
                 v.open(dbS);
             }
         }

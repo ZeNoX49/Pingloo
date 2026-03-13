@@ -88,6 +88,8 @@ public class MySqlParser implements SqlParser {
 
                 if(col.getColumnSpecs().contains("PRIMARY") && col.getColumnSpecs().contains("KEY")) {
                     column.setPrimaryKey(true);
+                    column.setUnique(true);
+                    column.setNotNull(true);
                 }
 
                 if(col.getColumnSpecs().contains("AUTO_INCREMENT")) {

@@ -1,6 +1,5 @@
 module com.dbeditor {
-    requires transitive java.logging;
-    requires javafx.controls;
+    requires transitive javafx.controls;
     requires transitive javafx.fxml;
     requires transitive javafx.graphics;
     requires com.fasterxml.jackson.core;
@@ -20,6 +19,8 @@ module com.dbeditor {
     exports com.dbeditor.controller;
     exports com.dbeditor.controller.parameter;
     exports com.dbeditor.controller.view;
+    exports com.dbeditor.controller.view.helpers;
+    exports com.dbeditor.controller.view.dialogs;
     exports com.dbeditor.model;
     exports com.dbeditor.sql.db;
     exports com.dbeditor.sql.file.exporter;

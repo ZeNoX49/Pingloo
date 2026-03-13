@@ -35,7 +35,7 @@ public class ConceptualSchema {
             }
         }
 
-        // créer les associations
+        // créer les associations (tables associatives)
         for(Table table : assoToCreate) {
             createAssociationFromTable(table);
         }
@@ -46,10 +46,36 @@ public class ConceptualSchema {
                 // si != null alors lien entre table hors association
                 Entity target = entities.get(fk.getReferencedTable());
                 if(target != null) {
-                    // TODO: revoir les cardinalités
+                    // colonne FK dans la table référençante (entity)
+                    Column referencingCol = entity.table.getColumn(fk.getColumnName());
+                    if(referencingCol == null) continue;
+
+                    // Déterminer la cardinalité côté référençant (entity)
+                    // chaque ligne référençante pointe vers une et une seule entité référence -> max = 1
+                    // min = 1 si NOT NULL sinon 0
+                    CardinalityValue referencingCard = referencingCol.isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_;
+
+                    // Déterminer la cardinalité côté référencé (target)
+                    // par défaut B peut être référencé par plusieurs A -> 0..N
+                    // si la colonne FK dans A est unique (détectée ici si elle est PK), alors max = 1
+                    CardinalityValue targetCard;
+                    if (referencingCol.isPrimaryKey()) {
+                        // FK est PK => relation 1-1 ou 0-1 selon nullabilité de la FK (dans A)
+                        targetCard = referencingCol.isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_;
+                    } else {
+                        Column fkColumn = entity.table.getColumn(fk.getColumnName());
+                        if (fkColumn.isNotNull()) {
+                            targetCard = CardinalityValue._1N_;
+                        } else {
+                            // FK non-unique => côté référencé = 0..N (par défaut pas d'obligation)
+                            targetCard = CardinalityValue._0N_;
+                        }
+                    }
+
                     List<Pair<Entity, CardinalityValue>> linkedEntitiesCard = new ArrayList<>();
-                    linkedEntitiesCard.add(new Pair<>(entity, entity.table.getColumn(fk.getColumnName()).isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_));
-                    linkedEntitiesCard.add(new Pair<>(target, entity.table.getColumn(fk.getReferencedColumn()).isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_));
+                    // ordre : premier = référençant (entity), second = référencé (target)
+                    linkedEntitiesCard.add(new Pair<>(entity, referencingCard));
+                    linkedEntitiesCard.add(new Pair<>(target, targetCard));
                     new Association(linkedEntitiesCard, null);
                 }
             }
@@ -78,7 +104,7 @@ public class ConceptualSchema {
     }
 
     /**
-     * Permet de créer les associations
+     * Permet de créer les associations (tables d'association -> relation n-n)
      */
     private void createAssociationFromTable(Table table) {
         List<Pair<Entity, CardinalityValue>> linkedEntitiesCard = new ArrayList<>();
@@ -86,18 +112,16 @@ public class ConceptualSchema {
             Entity target = entities.get(fk.getReferencedTable());
             if(target == null) continue;
             
-            Column pk = null;
-            for(Column c : target.table.getColumns()) {
-                if(c.isPrimaryKey()) {
-                    pk = c;
-                    break;
-                }
+            // Pour une table associative, côté entité la multiplicité est généralement 0..N
+            // (une entité peut ne participer à aucune association ou à plusieurs)
+            Column fkColumn = target.table.getColumn(fk.getColumnName());
+            CardinalityValue cardForEntity;
+            if (fkColumn.isNotNull()) {
+                cardForEntity = CardinalityValue._1N_;
+            } else {
+                cardForEntity = CardinalityValue._0N_;
             }
-            if(pk == null) continue;
-
-            // TODO: revoir les cardinalités
-            CardinalityValue card = pk.isNotNull() ? CardinalityValue._1N_ : CardinalityValue._0N_;
-            linkedEntitiesCard.add(new Pair<>(target, card));
+            linkedEntitiesCard.add(new Pair<>(target, cardForEntity));
         }
         new Association(linkedEntitiesCard, table);
     }
@@ -107,7 +131,7 @@ public class ConceptualSchema {
      */
     public List<Table> getTables() {
         List<Table> tables = new ArrayList<>();
-        for(Entity e : entities.values()) {
+        for(Entity e : this.entities.values()) {
             tables.add(e.table);
         }
         return tables;
@@ -118,7 +142,7 @@ public class ConceptualSchema {
      * null si elle n'existe pas
      */
     public Table getTable(String name) {
-        for(Entity e : entities.values()) {
+        for(Entity e : this.entities.values()) {
             if(e.table.getName().equals(name)) {
                 return e.table;
             }
@@ -130,7 +154,7 @@ public class ConceptualSchema {
      */
     public Map<String, List<Pair<Table, CardinalityValue>>> getLinks() {
         Map<String, List<Pair<Table, CardinalityValue>>> links = new HashMap<>();
-        for(Association assoc : associations.values()) {
+        for(Association assoc : this.associations.values()) {
             List<Pair<Table, CardinalityValue>> tablesCard = new ArrayList<>();
             for(Entity entity : assoc.linkedEntities.keySet()) {
                 tablesCard.add(new Pair<>(entity.table, assoc.linkedEntities.get(entity)));

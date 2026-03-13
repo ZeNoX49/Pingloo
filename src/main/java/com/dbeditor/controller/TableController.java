@@ -21,7 +21,7 @@ import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-public class TableController {
+public class TableController implements VisualModifier {
     public enum TableType {
         Table, Entite, Association;
     }
@@ -92,10 +92,7 @@ public class TableController {
         this.updateStyle();
     }
     
-    /**
-     * Permete de mettre à jour le style au lancement de l'app
-     * ou lors d'un changement de style
-     */
+    @Override
     public void updateStyle() {
         if(this.type == TableType.Association) {
             this.pane.setStyle("-fx-background-color: transparent");

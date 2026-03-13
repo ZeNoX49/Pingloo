@@ -2,7 +2,6 @@ package com.dbeditor.controller.view;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,36 +9,25 @@ import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
+import com.dbeditor.controller.ViewController.ViewType;
 import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
-import com.dbeditor.controller.view.helpers.LassoSelector;
-import com.dbeditor.controller.view.helpers.MultiDragManager;
-import com.dbeditor.controller.view.helpers.SelectionModel;
-import com.dbeditor.controller.view.helpers.ZoomPanHandler;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.Table;
 import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.model.mcd.ConceptualSchema;
 import com.dbeditor.util.ThemeManager;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 /**
@@ -47,102 +35,43 @@ import javafx.util.Pair;
  * Version complète avec gestionnaire de connexions
  */
 public class McdController extends ModelView {
+    private static final ThemeManager T_M = ThemeManager.getInstance();
+    
     @Override
     public ViewType getViewType() {
         return ViewType.MCD;
     }
-    
-    private static final ThemeManager T_M = ThemeManager.getInstance();
 
-    @FXML private BorderPane root;
-    @FXML private ToolBar toolbar;
-    @FXML private ComboBox<String> cb;
-    @FXML private Button btnSync, btnEntity, btnAssociation, btnConvert;
-    @FXML private Label zlLabel;
-    @FXML private Pane pane;
-    @FXML private Group group;
+    private Button btnEntity, btnAssociation;
 
     // Modèle de données MCD
     private ConceptualSchema conceptualSchema;
     
-    // Nodes visuels
-    private final Map<String, TableController> tableNodes = new HashMap<>();
-    private final List<Pair<Line, Label>> connectionLines = new ArrayList<>();
-    private final List<TableController> tcList = new ArrayList<>();
-
-    // Helpers
-    private ZoomPanHandler zoomPan;
-    private SelectionModel<TableController> selectionModel;
-    private LassoSelector lasso;
-    private MultiDragManager multiDrag;
-    
-    @FXML
-    void initialize() throws IOException {
+    @Override
+    public void initialization(ToolBar toolbar) {
         this.conceptualSchema = new ConceptualSchema(MainApp.getSchema());
 
-        super.setupCombobowView(this.cb, this.getViewType());
-        super.createSplit(this.pane);
+        this.btnEntity = super.createButton("Entité");
+        this.btnAssociation = super.createButton("Association");
+        // toolbar.getChildrenUnmodifiable().addAll(this.btnEntity, this.btnAssociation);
 
-        // Initialiser le modèle de sélection -> visualizer appelle setSelected sur TableController
-        this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
-        
-        // Initialiser le zoom/pan
-        this.zoomPan = new ZoomPanHandler(this.pane, this.group);
-        this.zoomPan.setupEvents(this.zlLabel);
-        this.zlLabel.setText("%.2f".formatted(this.zoomPan.getZoomLevel()));
+        super.initialization(toolbar);
 
-        // Initialiser le multidrag
-        this.multiDrag = new MultiDragManager(this.selectionModel);
-
-        // Permet au node de ne pas sortir du pane (pour ne pas les voir au dessus de la toolbar)
-        Rectangle clip = new Rectangle();
-        clip.widthProperty().bind(this.pane.widthProperty());
-        clip.heightProperty().bind(this.pane.heightProperty());
-        this.pane.setClip(clip);
-
-        // Initialiser le lasso avec la liste partagée (vide pour l'instant)
-        this.lasso = new LassoSelector(this.pane, this.group, this.tcList, this.selectionModel);
-        this.lasso.setupEvents();
-
-        this.updateStyle();
-
-        // suppression (touche DEL)
-        Platform.runLater(() -> {
-            Scene scene = root.getScene();
-            if (scene != null) {
-                scene.setOnKeyPressed(e -> {
-                    if (e.getCode() == KeyCode.DELETE) {
-                        try {
-                            this.deleteSelectedTables();
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    @Override
-    public void updateStyle() {
-        this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
-        this.toolbar.setStyle(
-            "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
-            "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
-            "-fx-border-width: 0 0 1 0;"
-        );
-        
-        for (TableController tc : this.tableNodes.values()) {
-            tc.updateStyle();
-        }
-
-        for(Pair<Line, Label> p : this.connectionLines) {
-            p.getValue().setStyle(
-                "-fx-background-color: " + T_M.getTheme().getBackgroundColor() + "; " + 
-                "-fx-text-fill: " + T_M.getTheme().getTextColor() + ";" +
-                "-fx-font-size: 15;"
-            );
-        }
+        // // suppression (touche DEL)
+        // Platform.runLater(() -> {
+        //     Scene scene = root.getScene();
+        //     if (scene != null) {
+        //         scene.setOnKeyPressed(e -> {
+        //             if (e.getCode() == KeyCode.DELETE) {
+        //                 try {
+        //                     this.deleteSelectedTables();
+        //                 } catch (IOException ioe) {
+        //                     ioe.printStackTrace();
+        //                 }
+        //             }
+        //         });
+        //     }
+        // });
     }
 
     @Override
@@ -153,19 +82,18 @@ public class McdController extends ModelView {
         this.conceptualSchema = new ConceptualSchema(dbS);
 
         // supprime tous les nodes sauf selectionRect
-        this.group.getChildren().removeIf(node -> node != this.lasso.getRect());
+        super.getGroup().getChildren().removeIf(node -> node != super.getLasso().getRect());
 
         // vider les structures
-        this.tableNodes.clear();
-        this.connectionLines.clear();
-        this.tcList.clear();
+        super.getTableNodes().clear();
+        super.getConnectionLines().clear();
 
         // créer les nodes à partir du MCD
         this.createTableNodes(this.conceptualSchema);
         this.drawConnections();
 
-        if (this.lasso != null) {
-            this.lasso.getRect().toFront();
+        if (super.getLasso() != null) {
+            super.getLasso().getRect().toFront();
         }
 
         this.updateStyle();
@@ -195,8 +123,8 @@ public class McdController extends ModelView {
         }
 
         // s'assure que le rectangle de séléction est devant
-        if (this.lasso != null) {
-            this.lasso.getRect().toFront();
+        if (super.getLasso() != null) {
+            super.getLasso().getRect().toFront();
         }
     }
 
@@ -209,10 +137,7 @@ public class McdController extends ModelView {
         TableController tcController = loader.getController();
         tcController.createTableNode(table, tabletype);
 
-        this.tableNodes.put(tcController.getTable().getName(), tcController);
-
-        // Ajout dans la liste utilisée par le lasso (liste partagée)
-        this.tcList.add(tcController);
+        super.getTableNodes().put(tcController.getTable().getName(), tcController);
 
         // Gérer la sélection
         tcController.setOnSelect((tc, e) -> this.handleSelection(tc, e));
@@ -233,13 +158,13 @@ public class McdController extends ModelView {
         });
 
         // attache le node pour le multidrag
-        this.multiDrag.attach(tcController);
+        super.getMultiDrag().attach(tcController);
 
         // position initiale
         tcPane.setLayoutX(x);
         tcPane.setLayoutY(y);
 
-        this.group.getChildren().add(tcPane);
+        super.getGroup().getChildren().add(tcPane);
     }
 
     /**
@@ -248,17 +173,17 @@ public class McdController extends ModelView {
      */
     private void drawConnections() throws IOException {
         // Supprimer les anciennes lignes
-        this.connectionLines.forEach(line -> this.group.getChildren().remove(line));
-        this.connectionLines.clear();
+        super.getConnectionLines().forEach(line -> super.getGroup().getChildren().remove(line));
+        super.getConnectionLines().clear();
 
         Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
         for (String name : links.keySet()) {
             // TODO: modifier la position de base des associations
             this.createTableNode(this.conceptualSchema.getAssociationTable(name), 0, 0, TableType.Association);
-            TableController ac = this.tableNodes.get(name);
+            TableController ac = super.getTableNodes().get(name);
 
             for(Pair<Table, CardinalityValue> p : links.get(name)) {
-                this.drawConnection(this.tableNodes.get(p.getKey().getName()), ac, p.getValue());
+                this.drawConnection(super.getTableNodes().get(p.getKey().getName()), ac, p.getValue());
             }
         }
     }
@@ -306,9 +231,9 @@ public class McdController extends ModelView {
         );
 
         // ajoute la ligne derrière le node
-        this.group.getChildren().add(0, cardinalityLabel);
-        this.group.getChildren().add(0, line);
-        this.connectionLines.add(new Pair<>(line, cardinalityLabel));
+        super.getGroup().getChildren().add(0, cardinalityLabel);
+        super.getGroup().getChildren().add(0, line);
+        super.getConnectionLines().add(new Pair<>(line, cardinalityLabel));
     }
 
     /**
@@ -316,18 +241,18 @@ public class McdController extends ModelView {
      */
     private void handleSelection(TableController table, MouseEvent e) {
         if (e.isControlDown()) {
-            this.selectionModel.toggle(table);
+            super.getSelectionModel().toggle(table);
             return;
         }
 
-        if (this.selectionModel.contains(table)) {
+        if (super.getSelectionModel().contains(table)) {
             // Enleve cette table du multi-drag
             table.getRoot().toFront();
             return;
         }
         
-        this.selectionModel.clear();
-        this.selectionModel.select(table);
+        super.getSelectionModel().clear();
+        super.getSelectionModel().select(table);
     }
 
     // /* ============================================
@@ -353,8 +278,8 @@ public class McdController extends ModelView {
             // TODO: Mettre à jour le modèle conceptuel
             // conceptualSchema.addTable(table);
 
-            double x = (this.pane.getWidth() / 2) - 100;
-            double y = (this.pane.getHeight() / 2) - 75;
+            double x = (super.getPane().getWidth() / 2) - 100;
+            double y = (super.getPane().getHeight() / 2) - 75;
             
             this.createTableNode(table, x, y, TableType.Entite);
         }
@@ -428,7 +353,7 @@ public class McdController extends ModelView {
      * @throws IOException 
      */
     public void deleteSelectedTables() throws IOException {
-        List<TableController> selected = new ArrayList<>(this.selectionModel.getSelected());
+        List<TableController> selected = new ArrayList<>(super.getSelectionModel().getSelected());
         
         if (selected.isEmpty()) return;
 
@@ -446,14 +371,13 @@ public class McdController extends ModelView {
                 schema.removeTable(tc.getTable().getName());
 
                 // Supprimer le node visuel
-                this.group.getChildren().remove(tc.getRoot());
+                super.getGroup().getChildren().remove(tc.getRoot());
                 // Supprimer des structures locales
-                this.tableNodes.remove(tc.getTable().getName());
-                this.tcList.remove(tc);
+                super.getTableNodes().remove(tc.getTable().getName());
             }
 
             // Vider la sélection
-            this.selectionModel.clear();
+            super.getSelectionModel().clear();
 
             // Redessiner les connexions
             this.drawConnections();

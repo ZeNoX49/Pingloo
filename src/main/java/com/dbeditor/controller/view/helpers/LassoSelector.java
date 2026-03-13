@@ -1,6 +1,6 @@
 package com.dbeditor.controller.view.helpers;
 
-import java.util.List;
+import java.util.Map;
 
 import com.dbeditor.controller.TableController;
 
@@ -22,9 +22,9 @@ public class LassoSelector {
     private final SelectionModel<TableController> selectionModel;
     private final Rectangle rect;
     private Point2D startLocal;
-    private final List<TableController> tableNodes;
+    private final Map<String, TableController> tableNodes;
 
-    public LassoSelector(Pane viewportPane, Group content, List<TableController> tableNodes, SelectionModel<TableController> selectionModel) {
+    public LassoSelector(Pane viewportPane, Group content, Map<String, TableController> tableNodes, SelectionModel<TableController> selectionModel) {
         this.viewportPane = viewportPane;
         this.content = content;
         this.selectionModel = selectionModel;
@@ -88,7 +88,7 @@ public class LassoSelector {
         // sélectionner les tables qui intersectent
         Bounds rectBounds = this.rect.getBoundsInParent();
         this.selectionModel.clear();
-        for (TableController tc : this.tableNodes) {
+        for (TableController tc : this.tableNodes.values()) {
             if (tc.getRoot().getBoundsInParent().intersects(rectBounds)) {
                 this.selectionModel.select(tc);
             }

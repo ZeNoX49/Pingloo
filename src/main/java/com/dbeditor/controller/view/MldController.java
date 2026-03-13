@@ -36,11 +36,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
-public class MldController extends ModelView {
-    @Override
-    public ViewType getViewType() {
-        return ViewType.MLD;
-    }
+public class MldController {
+    // @Override
+    // public ViewType getViewType() {
+    //     return ViewType.MLD;
+    // }
 
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
@@ -63,8 +63,8 @@ public class MldController extends ModelView {
 
     @FXML
     void initialize() throws IOException {
-        super.setupCombobowView(this.cb, this.getViewType());
-        super.createSplit(this.pane);
+        // super.setupCombobowView(this.cb, this.getViewType());
+        // super.createSplit(this.pane);
 
         // visualizer appelle setSelected sur TableController
         this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
@@ -84,10 +84,10 @@ public class MldController extends ModelView {
         this.pane.setClip(clip);
 
         // Initialiser le lasso
-        this.lasso = new LassoSelector(this.pane, this.group, this.tableNodes, this.selectionModel);
+        // this.lasso = new LassoSelector(this.pane, this.group, this.tableNodes, this.selectionModel);
         this.lasso.setupEvents();
 
-        this.updateStyle();
+        // this.updateStyle();
 
         // suppression de table(s)
         Platform.runLater(() -> {
@@ -102,64 +102,64 @@ public class MldController extends ModelView {
         });
     }
 
-    @Override
-    public void updateStyle() {
-        this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
-        this.toolbar.setStyle(
-            "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
-            "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
-            "-fx-border-width: 0 0 1 0;"
-        );
+    // @Override
+    // public void updateStyle() {
+    //     this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
+    //     this.toolbar.setStyle(
+    //         "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
+    //         "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
+    //         "-fx-border-width: 0 0 1 0;"
+    //     );
         
-        for (TableController tc : this.tableNodes) {
-            tc.updateStyle();
-        }
-    }
+    //     for (TableController tc : this.tableNodes) {
+    //         tc.updateStyle();
+    //     }
+    // }
 
-    @Override
-    public void open(DatabaseSchema dbS) throws IOException {
-        if (dbS == null) return;
+    // @Override
+    // public void open(DatabaseSchema dbS) throws IOException {
+    //     if (dbS == null) return;
 
-        // supprime tous les nodes sauf selectionRect
-        this.group.getChildren().removeIf(node -> node != this.lasso.getRect());
+    //     // supprime tous les nodes sauf selectionRect
+    //     this.group.getChildren().removeIf(node -> node != this.lasso.getRect());
 
-        this.tableNodes.clear();
-        this.connectionLines.clear();
+    //     this.tableNodes.clear();
+    //     this.connectionLines.clear();
 
-        this.createTableNodes(dbS);
-        this.drawConnections();
+    //     this.createTableNodes(dbS);
+    //     this.drawConnections();
 
-        if (this.lasso != null) {
-            this.lasso.getRect().toFront();
-        }
-    }
+    //     if (this.lasso != null) {
+    //         this.lasso.getRect().toFront();
+    //     }
+    // }
 
-    @Override
-    public void onSync() {}
+    // @Override
+    // public void onSync() {}
 
-    /**
-     * Permet de créer le visuel des tables à partir d'un DatabaseSchema
-     * @param dbS
-     */
-    private void createTableNodes(DatabaseSchema dbS) throws IOException {
-        int col = 0, row = 0;
-        int cols = (int) Math.ceil(Math.sqrt(dbS.getTables().size()));
+    // /**
+    //  * Permet de créer le visuel des tables à partir d'un DatabaseSchema
+    //  * @param dbS
+    //  */
+    // private void createTableNodes(DatabaseSchema dbS) throws IOException {
+    //     int col = 0, row = 0;
+    //     int cols = (int) Math.ceil(Math.sqrt(dbS.getTables().size()));
 
-        for (Table table : dbS.getTables().values()) {
-            this.createTableNode(table, col * 350 + 50, row * 250 + 50);
+    //     for (Table table : dbS.getTables().values()) {
+    //         this.createTableNode(table, col * 350 + 50, row * 250 + 50);
 
-            col++;
-            if (col >= cols) {
-                col = 0;
-                row++;
-            }
-        }
+    //         col++;
+    //         if (col >= cols) {
+    //             col = 0;
+    //             row++;
+    //         }
+    //     }
 
-        // s'assure que le rectangle de séléction est devant
-        if (this.lasso != null) {
-            this.lasso.getRect().toFront();
-        }
-    }
+    //     // s'assure que le rectangle de séléction est devant
+    //     if (this.lasso != null) {
+    //         this.lasso.getRect().toFront();
+    //     }
+    // }
 
     /**
      * Crée un node de table à une position donnée
@@ -369,20 +369,20 @@ public class MldController extends ModelView {
                 return;
             }
 
-            try {
-                // Supprimer l'ancienne table du schéma
-                schema.removeTable(oldName);
+            // try {
+            //     // Supprimer l'ancienne table du schéma
+            //     schema.removeTable(oldName);
                 
-                // Ajouter la table modifiée
-                schema.addTable(modifiedTable);
+            //     // Ajouter la table modifiée
+            //     schema.addTable(modifiedTable);
 
-                // Recréer tout le visuel (pour simplifier)
-                this.open(schema);
+            //     // Recréer tout le visuel (pour simplifier)
+            //     // this.open(schema);
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
-            }
+            // } catch (IOException e) {
+            //     e.printStackTrace();
+            //     CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
+            // }
         }
     }
 
