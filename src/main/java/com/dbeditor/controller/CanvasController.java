@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.dbeditor.MainApp;
+import com.dbeditor.controller.ViewController.ViewType;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.file.exporter.MySqlExporter;
 import com.dbeditor.sql.file.parser.MySqlParser;
@@ -84,12 +85,11 @@ public class CanvasController implements VisualModifier {
         Pane mcdPane = loader.load();
         ViewController mcdController = loader.getController();
 
-        // // on fournit la fonction d'enregistrement au controller
-        // mcdController.setData(this.spPane, mcdPane, (pair) -> {
-        //     // registrar : ajoute la paire dans la liste viewsPane
-        //     this.viewsPane.add(pair);
-        // });
-        // // on enregistre explicitement la première vue aussi
+        // on fournit la fonction d'enregistrement au controller
+        mcdController.setData(this.spPane, mcdPane, ViewType.MCD, (view) -> {
+            this.views.add(view);
+        });
+        
         this.views.add(mcdController);
 
         mcdPane.setMinSize(0, 0);

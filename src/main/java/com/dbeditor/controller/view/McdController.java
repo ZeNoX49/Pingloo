@@ -18,13 +18,15 @@ import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.model.mcd.ConceptualSchema;
 import com.dbeditor.util.ThemeManager;
 
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -53,25 +55,31 @@ public class McdController extends ModelView {
 
         this.btnEntity = super.createButton("Entité");
         this.btnAssociation = super.createButton("Association");
-        // toolbar.getChildrenUnmodifiable().addAll(this.btnEntity, this.btnAssociation);
+        toolbar.getItems().addAll(this.btnEntity, this.btnAssociation);
 
         super.initialization(toolbar);
 
-        // // suppression (touche DEL)
-        // Platform.runLater(() -> {
-        //     Scene scene = root.getScene();
-        //     if (scene != null) {
-        //         scene.setOnKeyPressed(e -> {
-        //             if (e.getCode() == KeyCode.DELETE) {
-        //                 try {
-        //                     this.deleteSelectedTables();
-        //                 } catch (IOException ioe) {
-        //                     ioe.printStackTrace();
-        //                 }
-        //             }
-        //         });
-        //     }
-        // });
+        // when the pane's scene becomes available attach the delete key handler
+        ChangeListener<Scene> sceneListener = (obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.setOnKeyPressed(e -> {
+                    if (e.getCode() == KeyCode.DELETE) {
+                        try {
+                            deleteSelectedTables();
+                        } catch (IOException ioe) {
+                            ioe.printStackTrace();
+                        }
+                    }
+                });
+            }
+        };
+        this.getRoot().sceneProperty().addListener(sceneListener);
+
+        // basic button handlers (could be expanded)
+        this.btnEntity.setOnAction(e -> {
+            try { addEntity(); } catch (IOException ex) { ex.printStackTrace(); }
+        });
+        this.btnAssociation.setOnAction(e -> addAssociation());
     }
 
     @Override
@@ -100,7 +108,9 @@ public class McdController extends ModelView {
     }
 
     @Override
-    public void onSync() {}
+    public void onSync() {
+        // TODO
+    }
 
     /**
      * Crée les nodes visuels pour les entités
@@ -112,7 +122,6 @@ public class McdController extends ModelView {
         for (Table table : schema.getTables()) {
             double x = col * 250 + 50;
             double y = row * 200 + 50;
-            
             this.createTableNode(table, x, y, TableType.Entite);
 
             col++;
@@ -140,7 +149,7 @@ public class McdController extends ModelView {
         super.getTableNodes().put(tcController.getTable().getName(), tcController);
 
         // Gérer la sélection
-        tcController.setOnSelect((tc, e) -> this.handleSelection(tc, e));
+        tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
 
         // Menu contextuel
         tcPane.setOnMouseClicked(e -> {
@@ -234,25 +243,6 @@ public class McdController extends ModelView {
         super.getGroup().getChildren().add(0, cardinalityLabel);
         super.getGroup().getChildren().add(0, line);
         super.getConnectionLines().add(new Pair<>(line, cardinalityLabel));
-    }
-
-    /**
-     * Gère la sélection d'une entité
-     */
-    private void handleSelection(TableController table, MouseEvent e) {
-        if (e.isControlDown()) {
-            super.getSelectionModel().toggle(table);
-            return;
-        }
-
-        if (super.getSelectionModel().contains(table)) {
-            // Enleve cette table du multi-drag
-            table.getRoot().toFront();
-            return;
-        }
-        
-        super.getSelectionModel().clear();
-        super.getSelectionModel().select(table);
     }
 
     // /* ============================================

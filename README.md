@@ -4,8 +4,8 @@
 
 ### Système de base
 - [X] Pouvoir nommer et modifier le nom de la bdd
-- [ ] Créer une table
-- [ ] Créer les attributs d'une table
+- [X] Créer une table
+- [X] Créer les attributs d'une table
 
 #### Chargement
 - [ ] charger un fichier
@@ -35,13 +35,15 @@
 
 ### Vues
 - [X] MLD
-- [ ] MCD
+- [X] MCD
 - [ ] dictionnaire des données + dépendances fonctionnelles
 - [ ] schéma des dépendances fonctionnelles
 - [ ] visualisation des données des tables + modification
+- [ ] SQL
+- [ ] Autres : trigger, ...
 
 ### Autres
-- [ ] style des pages comme blender (pour les vues)
+- [X] style des pages comme blender (pour les vues)
 - [ ] les types de données
 - [ ] contraintes de tables
 - [ ] foreign keys

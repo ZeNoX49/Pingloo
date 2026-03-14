@@ -15,6 +15,7 @@ import com.dbeditor.util.ThemeManager;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -40,12 +41,12 @@ public abstract class ModelView extends View {
     @Override
     public void initialization(ToolBar toolbar) {
         this.zlLabel = new Label("");
-        // toolbar.getChildrenUnmodifiable().add(this.zlLabel);
+        toolbar.getItems().add(this.zlLabel);
 
         this.pane = new Pane();
         this.group = new Group();
         this.pane.getChildren().add(this.group);
-
+        
         // Initialiser le modèle de sélection -> visualizer appelle setSelected sur TableController
         this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
         
@@ -85,6 +86,25 @@ public abstract class ModelView extends View {
                 "-fx-font-size: 15;"
             );
         }
+    }
+
+    /**
+     * Gère la sélection d'une entité
+     */
+    public void handleSelection(TableController table, MouseEvent e) {
+        if (e.isControlDown()) {
+            this.selectionModel.toggle(table);
+            return;
+        }
+
+        if (this.selectionModel.contains(table)) {
+            // Enleve cette table du multi-drag
+            table.getRoot().toFront();
+            return;
+        }
+        
+        this.selectionModel.clear();
+        this.selectionModel.select(table);
     }
 
     /* ========================= Utilitaire  ========================= */

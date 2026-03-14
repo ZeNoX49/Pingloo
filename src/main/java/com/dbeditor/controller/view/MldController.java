@@ -1,165 +1,87 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
+import com.dbeditor.controller.ViewController.ViewType;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
-import com.dbeditor.controller.view.helpers.LassoSelector;
-import com.dbeditor.controller.view.helpers.MultiDragManager;
-import com.dbeditor.controller.view.helpers.SelectionModel;
-import com.dbeditor.controller.view.helpers.ZoomPanHandler;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
 
-import javafx.application.Platform;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
+import javafx.util.Pair;
 
-public class MldController {
-    // @Override
-    // public ViewType getViewType() {
-    //     return ViewType.MLD;
-    // }
-
+public class MldController extends ModelView {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
-    @FXML private BorderPane root;
-    @FXML private ToolBar toolbar;
-    @FXML private ComboBox<String> cb;
-    @FXML private Label zlLabel;
-    @FXML private Pane pane;
-    @FXML private Group group;
-
-    // modèle de données / noeuds
-    private final List<TableController> tableNodes = new ArrayList<>();
-    private final List<Line> connectionLines = new ArrayList<>();
-
-    // helpers
-    private ZoomPanHandler zoomPan;
-    private SelectionModel<TableController> selectionModel;
-    private LassoSelector lasso;
-    private MultiDragManager multiDrag;
-
-    @FXML
-    void initialize() throws IOException {
-        // super.setupCombobowView(this.cb, this.getViewType());
-        // super.createSplit(this.pane);
-
-        // visualizer appelle setSelected sur TableController
-        this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
-
-        // Initialiser le zoom/pan
-        this.zoomPan = new ZoomPanHandler(this.pane, this.group);
-        this.zoomPan.setupEvents(this.zlLabel);
-        this.zlLabel.setText("%.2f".formatted(this.zoomPan.getZoomLevel()));
-
-        // Initialiser le multidrag
-        this.multiDrag = new MultiDragManager(this.selectionModel);
-
-        // Permet au node de ne pas sortir du pane (pour ne pas les voir au dessus de la toolbar)
-        Rectangle clip = new Rectangle();
-        clip.widthProperty().bind(this.pane.widthProperty());
-        clip.heightProperty().bind(this.pane.heightProperty());
-        this.pane.setClip(clip);
-
-        // Initialiser le lasso
-        // this.lasso = new LassoSelector(this.pane, this.group, this.tableNodes, this.selectionModel);
-        this.lasso.setupEvents();
-
-        // this.updateStyle();
-
-        // suppression de table(s)
-        Platform.runLater(() -> {
-            Scene scene = root.getScene();
-            if (scene != null) {
-                scene.setOnKeyPressed(e -> {
-                    if (e.getCode() == KeyCode.DELETE) {
-                        this.deleteSelectedTables();
-                    }
-                });
-            }
-        });
+    @Override
+    public ViewType getViewType() {
+        return ViewType.MLD;
     }
 
-    // @Override
-    // public void updateStyle() {
-    //     this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
-    //     this.toolbar.setStyle(
-    //         "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; " + 
-    //         "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
-    //         "-fx-border-width: 0 0 1 0;"
-    //     );
-        
-    //     for (TableController tc : this.tableNodes) {
-    //         tc.updateStyle();
-    //     }
-    // }
+    @Override
+    public void initialization(ToolBar toolbar) {
+        super.initialization(toolbar);
+    }
 
-    // @Override
-    // public void open(DatabaseSchema dbS) throws IOException {
-    //     if (dbS == null) return;
+    @Override
+    public void open(DatabaseSchema schema) throws IOException {
+        if (schema == null) return;
 
-    //     // supprime tous les nodes sauf selectionRect
-    //     this.group.getChildren().removeIf(node -> node != this.lasso.getRect());
+        // supprime tous les nodes sauf selectionRect
+        super.getGroup().getChildren().removeIf(node -> node != super.getLasso().getRect());
 
-    //     this.tableNodes.clear();
-    //     this.connectionLines.clear();
+        super.getTableNodes().clear();
+        super.getConnectionLines().clear();
 
-    //     this.createTableNodes(dbS);
-    //     this.drawConnections();
+        this.createTableNodes(schema);
+        this.drawConnections();
 
-    //     if (this.lasso != null) {
-    //         this.lasso.getRect().toFront();
-    //     }
-    // }
+        if (super.getLasso() != null) {
+            super.getLasso().getRect().toFront();
+        }
+    }
 
-    // @Override
-    // public void onSync() {}
+    @Override
+    public void onSync() {
+        // TODO
+    }
 
-    // /**
-    //  * Permet de créer le visuel des tables à partir d'un DatabaseSchema
-    //  * @param dbS
-    //  */
-    // private void createTableNodes(DatabaseSchema dbS) throws IOException {
-    //     int col = 0, row = 0;
-    //     int cols = (int) Math.ceil(Math.sqrt(dbS.getTables().size()));
+    /**
+     * Permet de créer le visuel des tables à partir d'un DatabaseSchema
+     * @param schema
+     */
+    private void createTableNodes(DatabaseSchema schema) throws IOException {
+        int col = 0, row = 0;
+        int cols = (int) Math.ceil(Math.sqrt(schema.getTables().size()));
 
-    //     for (Table table : dbS.getTables().values()) {
-    //         this.createTableNode(table, col * 350 + 50, row * 250 + 50);
+        for (Table table : schema.getTables().values()) {
+            double x = col * 250 + 50;
+            double y = row * 200 + 50;
+            this.createTableNode(table, x, y);
 
-    //         col++;
-    //         if (col >= cols) {
-    //             col = 0;
-    //             row++;
-    //         }
-    //     }
+            col++;
+            if (col >= cols) {
+                col = 0;
+                row++;
+            }
+        }
 
-    //     // s'assure que le rectangle de séléction est devant
-    //     if (this.lasso != null) {
-    //         this.lasso.getRect().toFront();
-    //     }
-    // }
+        // s'assure que le rectangle de séléction est devant
+        if (super.getLasso() != null) {
+            super.getLasso().getRect().toFront();
+        }
+    }
 
     /**
      * Crée un node de table à une position donnée
@@ -170,34 +92,34 @@ public class MldController {
      */
     private void createTableNode(Table table, double x, double y) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
-        AnchorPane nodePane = loader.load();
-        TableController nodeController = loader.getController();
-        nodeController.createTableNode(table, TableType.Table);
+        AnchorPane tcPane = loader.load();
+        TableController tcController = loader.getController();
+        tcController.createTableNode(table, TableType.Table);
 
-        this.tableNodes.add(nodeController);
+        super.getTableNodes().put(tcController.getTable().getName(), tcController);
 
         // gérer la sélection d'un table lorsqu'elle est cliquée
-        nodeController.setOnSelect((tc, e) -> this.handleSelection(tc, e));
+        tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
 
         // Ajouter le menu contextuel avec clic droit
-        nodePane.setOnMouseClicked(e -> {
+        tcPane.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
                 // si double clique gauche -> on modifie la table
                 if (e.getClickCount() == 2) {
-                    this.editTable(nodeController);
+                    this.editTable(tcController);
                     e.consume();
                 }
             }
         });
 
         // attache le node pour le multidrag
-        this.multiDrag.attach(nodeController);
+        super.getMultiDrag().attach(tcController);
 
         // position initiale
-        nodePane.setLayoutX(x);
-        nodePane.setLayoutY(y);
+        tcPane.setLayoutX(x);
+        tcPane.setLayoutY(y);
 
-        this.group.getChildren().add(nodePane);
+        super.getGroup().getChildren().add(tcPane);
     }
 
     /**
@@ -205,13 +127,13 @@ public class MldController {
      */
     private void drawConnections() {
         // Supprimer les anciennes lignes
-        this.connectionLines.forEach(line -> this.group.getChildren().remove(line));
-        this.connectionLines.clear();
+        super.getConnectionLines().forEach(line -> super.getGroup().getChildren().remove(line));
+        super.getConnectionLines().clear();
 
-        for (TableController fromNode : this.tableNodes) {
+        for (TableController fromNode : super.getTableNodes().values()) {
             Table fromTable = fromNode.getTable();
             for (ForeignKey fk : fromTable.getForeignKeys()) {
-                TableController toNode = this.findTableNode(fk.getReferencedTable());
+                TableController toNode = super.getTableNodes().get(fk.getReferencedTable());
                 if (toNode != null) {
                     this.drawConnection(fromNode, toNode);
                 }
@@ -225,6 +147,8 @@ public class MldController {
      * @param to -> table 2
      */
     private void drawConnection(TableController from, TableController to) {
+        if (from == null || to == null) return;
+        
         double fromX = from.getRoot().getLayoutX() + from.getRoot().getWidth() / 2;
         double fromY = from.getRoot().getLayoutY() + from.getRoot().getHeight() / 2;
         double toX = to.getRoot().getLayoutX() + to.getRoot().getWidth() / 2;
@@ -236,113 +160,15 @@ public class MldController {
         line.getStrokeDashArray().addAll(5.0, 5.0);
 
         // ajoute la ligne derrière le node
-        this.group.getChildren().add(0, line);
-        this.connectionLines.add(line);
+        super.getGroup().getChildren().add(0, line);
+        super.getConnectionLines().add(new Pair<>(line, null));
         
         // bind la ligne aux tables
-        line.startXProperty().bind(
-            from.getRoot().layoutXProperty()
-                .add(from.getRoot().widthProperty().divide(2))
-        );
-
-        line.startYProperty().bind(
-            from.getRoot().layoutYProperty()
-                .add(from.getRoot().heightProperty().divide(2))
-        );
-
-        line.endXProperty().bind(
-            to.getRoot().layoutXProperty()
-                .add(to.getRoot().widthProperty().divide(2))
-        );
-
-        line.endYProperty().bind(
-            to.getRoot().layoutYProperty()
-                .add(to.getRoot().heightProperty().divide(2))
-        );
+        line.startXProperty().bind(from.getRoot().layoutXProperty().add(from.getRoot().widthProperty().divide(2)));
+        line.startYProperty().bind(from.getRoot().layoutYProperty().add(from.getRoot().heightProperty().divide(2)));
+        line.endXProperty().bind(to.getRoot().layoutXProperty().add(to.getRoot().widthProperty().divide(2)));
+        line.endYProperty().bind(to.getRoot().layoutYProperty().add(to.getRoot().heightProperty().divide(2)));
     }
-
-    /**
-     * Trouver une table avec son nom
-     * @param tableName -> nom de la table
-     * @return table trouvée, null sinon
-     */
-    private TableController findTableNode(String tableName) {
-        for (TableController tc : tableNodes) {
-            if (tc.getTable().getName().equals(tableName)) {
-                return tc;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * S'occupe de gérer la sélection d'une table
-     * @param table
-     * @param e
-     */
-    private void handleSelection(TableController table, MouseEvent e) {
-        if (e.isControlDown()) {
-            this.selectionModel.toggle(table);
-            return;
-        }
-
-        if (this.selectionModel.contains(table)) {
-            // Enleve cette table du multi-drag
-            table.getRoot().toFront();
-            return;
-        }
-        
-        this.selectionModel.clear();
-        this.selectionModel.select(table);
-    }
-
-    // /**
-    //  * Ajoute une nouvelle table
-    //  */
-    // @FXML
-    // private void addTable() {
-    //     DatabaseSchema schema = MainApp.getSchema();
-
-    //     // Ouvrir le dialogue d'édition
-    //     TableEditorDialog dialog = new TableEditorDialog();
-    //     dialog.showAndWait();
-
-    //     if (dialog.isConfirmed()) {
-    //         Table newTable = dialog.getResultTable();
-            
-    //         // Vérifier si une table avec ce nom existe déjà
-    //         if (schema.getTable(newTable.getName()) != null) {
-    //             CanvasController.showWarningAlert("Erreur", "Une table avec ce nom existe déjà.");
-    //             return;
-    //         }
-
-    //         // Ajouter la table au schéma
-    //         schema.addTable(newTable);
-
-    //         try {
-    //             // Créer le node visuel
-    //             // Position au centre de la vue visible
-    //             double x = (this.pane.getWidth() / 2) - 150;
-    //             double y = (this.pane.getHeight() / 2) - 100;
-                
-    //             TableController newNode = createTableNode(newTable, x, y);
-    //             this.tableNodes.add(newNode);
-
-    //             // Sélectionne la nouvelle table
-    //             this.selectionModel.clear();
-    //             this.selectionModel.select(newNode);
-
-    //             // Mettre le rectangle de sélection devant
-    //             if (this.lasso != null) {
-    //                 this.lasso.getRect().toFront();
-    //             }
-
-    //         } catch (IOException e) {
-    //             MainApp.getLogger().severe(e.getMessage());
-    //             CanvasController.showWarningAlert("Erreur", "Impossible de créer la table visuellement.");
-    //         }
-    //     }
-    // }
 
     /**
      * Modifie une table existante
@@ -385,39 +211,4 @@ public class MldController {
             // }
         }
     }
-
-    /**
-     * Supprime les tables sélectionnées (touche Suppr)
-     */
-    public void deleteSelectedTables() {
-        List<TableController> selected = new ArrayList<>(this.selectionModel.getSelected());
-        
-        if (selected.isEmpty()) return;
-
-        // Demander confirmation
-        String message = selected.size() == 1 
-            ? "Êtes-vous sûr de vouloir supprimer la table '" + selected.get(0).getTable().getName() + "' ?"
-            : "Êtes-vous sûr de vouloir supprimer " + selected.size() + " tables ?";
-
-        boolean res = CanvasController.showConfirmationAlert("Confirmation", "Supprimer les tables", message);
-        if (res) {
-            DatabaseSchema schema = MainApp.getSchema();
-
-            for (TableController tc : selected) {
-                // Supprimer du schéma
-                schema.removeTable(tc.getTable().getName());
-
-                // Supprimer le node visuel
-                this.group.getChildren().remove(tc.getRoot());
-                this.tableNodes.remove(tc);
-            }
-
-            // Vider la sélection
-            this.selectionModel.clear();
-
-            // Redessiner les connexions
-            this.drawConnections();
-        }
-    }
-
 }
