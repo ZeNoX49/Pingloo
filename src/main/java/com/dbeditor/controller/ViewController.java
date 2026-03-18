@@ -100,7 +100,12 @@ public class ViewController implements VisualModifier {
     public void setupCombobox() {
         this.cb.getItems().setAll(
             ViewType.MCD.toString(),
-            ViewType.MLD.toString()
+            ViewType.MLD.toString(),
+            ViewType.DF.toString(),
+            ViewType.DD.toString(),
+            ViewType.SDF.toString(),
+            ViewType.VALUE.toString(),
+            ViewType.SQL.toString()
         );
 
         this.cb.valueProperty().addListener((obs, oldValue, newValue) -> {
