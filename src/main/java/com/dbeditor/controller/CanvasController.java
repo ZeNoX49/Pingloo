@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.dbeditor.MainApp;
-import com.dbeditor.controller.ViewController.ViewType;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.file.exporter.MySqlExporter;
 import com.dbeditor.sql.file.parser.MySqlParser;

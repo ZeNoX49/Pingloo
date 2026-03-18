@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import com.dbeditor.MainApp;
-import com.dbeditor.controller.view.McdController;
-import com.dbeditor.controller.view.MldController;
 import com.dbeditor.controller.view.View;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.util.ThemeManager;
@@ -14,57 +12,19 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 
 public class ViewController implements VisualModifier {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
-    public enum ViewType {
-        MCD, MLD, DF, DD, SDF, VALUE;
-
-        @Override
-        public String toString() {
-            if (this.equals(VALUE)) {
-                return "Value";
-            } return super.toString();
-        }
-
-        public static ViewType toEnum(String value) {
-            switch (value) {
-                case "MCD" : return MCD;
-                case "MLD" : return MLD;
-                case "DF" : return DF;
-                case "DD" : return DD;
-                case "SDF" : return SDF;
-                case "Value" : return VALUE;
-            } return null;
-        }
-
-        public View getController() {
-            switch (this) {
-                case MCD : return new McdController();
-                case MLD : return new MldController();
-                // case DF : return DF;
-                // case DD : return DD;
-                // case SDF : return SDF;
-                // case Value : return VALUE;
-            } return null;
-        }
-    }
-
+    @FXML private BorderPane root;
     @FXML private ToolBar toolbar;
     @FXML private ComboBox<String> cb;
     @FXML private Button btnSync;
@@ -105,16 +65,17 @@ public class ViewController implements VisualModifier {
         newPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         
         this.spPane.getChildren().add(newPane);
-        this.viewPane = newPane;
+        this.viewPane = newPane;   // TODO: a verif
 
         // initialiser la nouvelle vue
         this.view.open(MainApp.getSchema());
 
-        this.setupCombobowView();
-        this.setupSplitHandlersOnViewRoot();
+        this.setupCombobox();
+        // this.setupSplit();
     }
 
     public ToolBar getToolBar() { return this.toolbar; }
+    public Pane getRoot() { return this.root; }
 
     @Override
     public void updateStyle() {
@@ -136,7 +97,7 @@ public class ViewController implements VisualModifier {
     /**
      * gère la logique de changement de vue
      */
-    public void setupCombobowView() {
+    public void setupCombobox() {
         this.cb.getItems().setAll(
             ViewType.MCD.toString(),
             ViewType.MLD.toString()
@@ -156,8 +117,6 @@ public class ViewController implements VisualModifier {
     public void createView(ViewType viewType) throws IOException {
         if (viewType == null) return;
         this.cb.setValue(viewType.toString());
-
-        System.out.println("Transformation en un " + viewType);
 
         this.toolbar.getItems().setAll(this.baseItemToolbar);
 
@@ -179,204 +138,185 @@ public class ViewController implements VisualModifier {
                 ex.printStackTrace();
             }
 
-            // re-attach view-root handlers for background clicks
-            this.setupSplitHandlersOnViewRoot();
+            // this.setupSplit();
         });
     }
 
-    private void setupSplitHandlersOnViewRoot() {
-        if (this.view == null || this.view.getRoot() == null) return;
+    // private void setupSplit() {
+    //     if (this.view == null || this.view.getRoot() == null) return;
 
-        Pane rootPane = this.view.getRoot();
+    //     Pane rootPane = this.view.getRoot();
 
-        // Remove previous handler(s) if any to avoid duplicates
-        rootPane.removeEventFilter(MouseEvent.MOUSE_CLICKED, this::onBackgroundClicked);
-        rootPane.addEventFilter(MouseEvent.MOUSE_CLICKED, this::onBackgroundClicked);
-    }
+    //     // Remove previous handler(s) if any to avoid duplicates
+    //     rootPane.removeEventFilter(MouseEvent.MOUSE_CLICKED, this::onBackgroundClicked);
+    //     rootPane.addEventFilter(MouseEvent.MOUSE_CLICKED, this::onBackgroundClicked);
+    // }
 
-    private void onBackgroundClicked(MouseEvent e) {
-        if (e.getButton() != MouseButton.SECONDARY) return;
+    // private void onBackgroundClicked(MouseEvent e) {
+    //     if (e.getButton() != MouseButton.SECONDARY) return;
 
-        // Only open when clicking on the pane itself (empty space), not on children
-        if (e.getTarget() != this.view.getRoot()) return;
+    //     // Only open when clicking on the pane itself (empty space), not on children
+    //     if (e.getTarget() != this.view.getRoot()) return;
 
-        if (this.popup != null && this.popup.isShowing()) {
-            this.popup.hide();
-            e.consume();
-            return;
-        }
+    //     if (this.popup != null && this.popup.isShowing()) {
+    //         this.popup.hide();
+    //         e.consume();
+    //         return;
+    //     }
 
-        this.popup = new Popup();
-        this.popup.setAutoHide(true);
-        this.popup.setAutoFix(true);
+    //     this.popup = new Popup();
+    //     this.popup.setAutoHide(true);
+    //     this.popup.setAutoFix(true);
 
-        VBox content = new VBox(8);
-        content.setStyle("-fx-background-color: #333333; -fx-padding: 10; -fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #444444;");
+    //     VBox content = new VBox(8);
+    //     content.setStyle("-fx-background-color: #333333; -fx-padding: 10; -fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #444444;");
 
-        Button vBtn = new Button("séparation verticale");
-        vBtn.setOnAction(a -> { this.popup.hide(); this.doSplit(Orientation.HORIZONTAL); });
-        Button hBtn = new Button("séparation horizontale");
-        hBtn.setOnAction(a -> { this.popup.hide(); this.doSplit(Orientation.VERTICAL); });
+    //     Button vBtn = new Button("séparation verticale");
+    //     vBtn.setOnAction(a -> { this.popup.hide(); this.doSplit(Orientation.HORIZONTAL); });
+    //     Button hBtn = new Button("séparation horizontale");
+    //     hBtn.setOnAction(a -> { this.popup.hide(); this.doSplit(Orientation.VERTICAL); });
 
-        content.getChildren().addAll(vBtn, hBtn);
-        this.popup.getContent().add(content);
+    //     content.getChildren().addAll(vBtn, hBtn);
+    //     this.popup.getContent().add(content);
 
-        if (this.view.getRoot().getScene() != null && this.view.getRoot().getScene().getWindow() != null) {
-            this.popup.show(this.view.getRoot().getScene().getWindow(), e.getScreenX(), e.getScreenY());
-        }
+    //     if (this.view.getRoot().getScene() != null && this.view.getRoot().getScene().getWindow() != null) {
+    //         this.popup.show(this.view.getRoot().getScene().getWindow(), e.getScreenX(), e.getScreenY());
+    //     }
 
-        e.consume();
-    }
+    //     e.consume();
+    // }
     
-    private void doSplit(Orientation orientation)  {
-        try {
-            if (this.viewPane == null) return;
+    // private void doSplit(Orientation orientation)  {
+    //     try {
+    //         if (this.viewPane == null) return;
 
-            Parent parentNode = this.viewPane.getParent();
+    //         Parent parentNode = this.root.getParent();
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view.fxml"));
-            Pane newPane = loader.load();
-            ViewController newController = loader.getController();
+    //         SplitPane sp = new SplitPane();
+    //         sp.setOrientation(orientation);
 
-            // Provide the View instance to the new controller (create same view type)
-            View newView = this.view.getViewType().getController();
-            newController.setData((Pane) parentNode, newPane, newView.getViewType(), this.registrar);
+    //         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view.fxml"));
+    //         Pane newPane = loader.load();
+    //         ViewController newController = loader.getController();
+            
+    //         View newView = this.view.getViewType().getController();
+    //         newController.setData((Pane) parentNode, newPane, newView.getViewType(), this.registrar);
+    //         newController.updateStyle();
 
-            newPane.setMinSize(0, 0);
-            newPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            this.viewPane.setMinSize(0, 0);
-            this.viewPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+    //         newPane.setMinSize(0, 0);
+    //         newPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+    //         this.viewPane.setMinSize(0, 0);
+    //         this.viewPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-            if (this.registrar != null) {
-                this.registrar.accept(newController);
-            }
+    //         if (this.registrar != null) {
+    //             this.registrar.accept(newController);
+    //         }
 
-            if (MainApp.getSchema() != null) {
-                newController.open(MainApp.getSchema());
-            }
+    //         if (MainApp.getSchema() != null) {
+    //             newController.open(MainApp.getSchema());
+    //         }
 
-            if (parentNode instanceof Pane p) {
-                int idx = p.getChildren().indexOf(this.viewPane);
+    //         sp.getItems().addAll(this.root, newController.getRoot());
 
-                SplitPane sp = new SplitPane();
-                sp.setOrientation(orientation);
-                sp.getItems().addAll(this.viewPane, newPane);
+    //         if (parentNode instanceof Pane p) {
+    //             int idx = p.getChildren().indexOf(this.root);
+    //             p.getChildren().remove(idx);
+    //             p.getChildren().add(idx, sp);
 
-                if (idx < 0) {
-                    p.getChildren().add(sp);
-                } else {
-                    p.getChildren().remove(idx);
-                    p.getChildren().add(idx, sp);
-                }
+    //             Platform.runLater(() -> setupSplitMerge(sp));
+    //             return;
+    //         }
 
-                Platform.runLater(() -> setupSplitMerge(sp));
-                return;
-            }
+    //         if (parentNode instanceof SplitPane spParent) {
+    //             int idx = spParent.getItems().indexOf(this.root);
+    //             if (idx >= 0) spParent.getItems().add(idx + 1, newPane);
+    //             else spParent.getItems().add(newPane);
 
-            if (parentNode instanceof SplitPane spParent) {
-                int i = spParent.getItems().indexOf(this.viewPane);
-                if (i >= 0) spParent.getItems().add(i + 1, newPane);
-                else spParent.getItems().add(newPane);
+    //             Platform.runLater(() -> setupSplitMerge(sp));
+    //             return;
+    //         }
 
-                Platform.runLater(() -> setupSplitMerge(spParent));
-                return;
-            }
+    //         if (this.parent != null) this.parent.getChildren().add(newPane);
 
-            if (this.parent != null) this.parent.getChildren().add(newPane);
+    //     } catch (IOException ioe) {
+    //         ioe.printStackTrace();
+    //     }
+    // }
 
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-    }
+    // private void setupSplitMerge(SplitPane sp) {
+    //     sp.applyCss(); // important pour s'assurer que les dividers existent
+    //     sp.layout();   // calculer la position des dividers
 
-    private void setupSplitMerge(SplitPane sp) {
-        if (sp == null) return;
+    //     for (Node divider : sp.lookupAll(".split-pane-divider")) {
+    //         divider.setOnMouseClicked(e -> {
+    //             if (e.getButton() != MouseButton.SECONDARY) return;
 
-        Platform.runLater(() -> {
-            sp.applyCss();
-            sp.layout();
+    //             if (this.popup != null && this.popup.isShowing()) {
+    //                 this.popup.hide();
+    //             }
 
-            // Add a single event filter on the splitpane to detect clicks near dividers
-            sp.removeEventFilter(MouseEvent.MOUSE_PRESSED, this::onSplitPanePressed);
-            sp.addEventFilter(MouseEvent.MOUSE_PRESSED, this::onSplitPanePressed);
-        });
-    }
+    //             this.popup = new Popup();
+    //             this.popup.setAutoHide(true);
+    //             this.popup.setAutoFix(true);
 
-    private void onSplitPanePressed(MouseEvent e) {
-        if (e.getButton() != MouseButton.SECONDARY) return;
+    //             VBox content = new VBox(8);
+    //             content.setStyle(
+    //                 "-fx-background-color: #333333; " +
+    //                 "-fx-padding: 10; " +
+    //                 "-fx-background-radius: 6; " +
+    //                 "-fx-border-radius: 6; " +
+    //                 "-fx-border-color: #444444;"
+    //             );
 
-        Object src = e.getSource();
-        if (!(src instanceof SplitPane sp)) return;
+    //             Button mergeFirst = new Button(); // garder la première partie
+    //             Button mergeSecond = new Button(); // garder la deuxième partie
 
-        Node closestDivider = null;
-        double minDist = Double.MAX_VALUE;
+    //             if (sp.getOrientation() == Orientation.HORIZONTAL) {
+    //                 mergeFirst.setText("Garder la partie gauche");
+    //                 mergeSecond.setText("Garder la partie droite");
+    //             } else {
+    //                 mergeFirst.setText("Garder la partie haute");
+    //                 mergeSecond.setText("Garder la partie basse");
+    //             }
 
-        for (Node divider : sp.lookupAll(".split-pane-divider")) {
-            double dx = e.getSceneX() - (divider.localToScene(divider.getBoundsInLocal()).getCenterX());
-            double dy = e.getSceneY() - (divider.localToScene(divider.getBoundsInLocal()).getCenterY());
-            double dist = Math.hypot(dx, dy);
-            if (dist < minDist) {
-                minDist = dist;
-                closestDivider = divider;
-            }
-        }
+    //             mergeFirst.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
+    //             mergeSecond.setStyle("-fx-text-fill: white; -fx-background-color: transparent;");
 
-        if (closestDivider != null && minDist < 20) { // tolerance in pixels
-            showDividerPopup((SplitPane) e.getSource(), closestDivider, e.getScreenX(), e.getScreenY());
-            e.consume();
-        }
-    }
+    //             mergeFirst.setOnAction(ev -> {
+    //                 this.popup.hide();
+    //                 mergeSplitPane(sp, true); // garder premier enfant
+    //             });
 
-    private void showDividerPopup(SplitPane sp, Node divider, double screenX, double screenY) {
-        if (this.popup != null && this.popup.isShowing()) this.popup.hide();
+    //             mergeSecond.setOnAction(ev -> {
+    //                 this.popup.hide();
+    //                 mergeSplitPane(sp, false); // garder deuxième enfant
+    //             });
 
-        this.popup = new Popup();
-        this.popup.setAutoHide(true);
-        this.popup.setAutoFix(true);
+    //             content.getChildren().addAll(mergeFirst, mergeSecond);
+    //             this.popup.getContent().add(content);
 
-        VBox content = new VBox(8);
-        content.setStyle("-fx-background-color: #333333; -fx-padding: 10; -fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #444444;");
+    //             this.popup.show(divider.getScene().getWindow(), e.getScreenX(), e.getScreenY());
+    //             e.consume();
+    //         });
+    //     }
+    // }
 
-        Button mergeFirst = new Button(sp.getOrientation() == Orientation.HORIZONTAL ? "Garder la partie gauche" : "Garder la partie haute");
-        Button mergeSecond = new Button(sp.getOrientation() == Orientation.HORIZONTAL ? "Garder la partie droite" : "Garder la partie basse");
+    // private void mergeSplitPane(SplitPane sp, boolean keepFirst) {
+    //     if (sp.getItems().size() < 2) return;
 
-        mergeFirst.setOnAction(ev -> { this.popup.hide(); mergeSplitPane(sp, true); });
-        mergeSecond.setOnAction(ev -> { this.popup.hide(); mergeSplitPane(sp, false); });
+    //     Pane p = (Pane) sp.getParent();
+    //     int index = p.getChildren().indexOf(sp);
+    //     if (index < 0) return;
 
-        content.getChildren().addAll(mergeFirst, mergeSecond);
-        this.popup.getContent().add(content);
+    //     Node keep = keepFirst ? sp.getItems().get(0) : sp.getItems().get(1);
+    //     sp.getItems().clear();
 
-        if (sp.getScene() != null && sp.getScene().getWindow() != null) this.popup.show(sp.getScene().getWindow(), screenX, screenY);
-    }
+    //     p.getChildren().remove(index);
+    //     p.getChildren().add(index, keep);
 
-    private void mergeSplitPane(SplitPane sp, boolean keepFirst) {
-        if (sp == null) return;
-        if (sp.getItems().size() < 2) return;
-
-        Parent par = sp.getParent();
-        if (!(par instanceof Pane p)) return;
-
-        int index = p.getChildren().indexOf(sp);
-        if (index < 0) return;
-
-        Node keep = keepFirst ? sp.getItems().get(0) : sp.getItems().get(1);
-
-        sp.getItems().clear();
-        p.getChildren().remove(index);
-        p.getChildren().add(index, keep);
-
-        if (keep instanceof Pane p_) {
-            p_.setMinSize(0, 0);
-            p_.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            // update local reference if we merged the view that contained this controller
-            this.viewPane = p_;
-        }
-
-        // If we have a registrar, re-register the remaining view controller later (CanvasController manages registry)
-        Platform.runLater(() -> {
-            if (this.registrar != null && keep.getUserData() instanceof ViewController) {
-                this.registrar.accept((ViewController) keep.getUserData());
-            }
-        });
-    }
+    //     if (keep instanceof Region r) {
+    //         r.setMinSize(0, 0);
+    //         r.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+    //     }
+    // }
 }

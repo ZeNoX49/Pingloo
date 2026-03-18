@@ -2,7 +2,7 @@ package com.dbeditor.controller.view;
 
 import java.io.IOException;
 
-import com.dbeditor.controller.ViewController.ViewType;
+import com.dbeditor.controller.ViewType;
 import com.dbeditor.controller.VisualModifier;
 import com.dbeditor.model.DatabaseSchema;
 
@@ -17,7 +17,7 @@ public abstract class View implements VisualModifier {
     public abstract ViewType getViewType();
 
     /**
-     * Permet d'initialiser les bases de la vaue,
+     * Permet d'initialiser les bases de la vue,
      * remplace le initialize FXML
      */
     public abstract void initialization(ToolBar toolbar);

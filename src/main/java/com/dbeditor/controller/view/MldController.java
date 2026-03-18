@@ -6,13 +6,14 @@ import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
-import com.dbeditor.controller.ViewController.ViewType;
+import com.dbeditor.controller.ViewType;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
 
+import javafx.css.converter.PaintConverter;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseButton;
@@ -127,7 +128,7 @@ public class MldController extends ModelView {
      */
     private void drawConnections() {
         // Supprimer les anciennes lignes
-        super.getConnectionLines().forEach(line -> super.getGroup().getChildren().remove(line));
+        super.getConnectionLines().forEach(pair -> super.getGroup().getChildren().remove(pair.getKey()));
         super.getConnectionLines().clear();
 
         for (TableController fromNode : super.getTableNodes().values()) {

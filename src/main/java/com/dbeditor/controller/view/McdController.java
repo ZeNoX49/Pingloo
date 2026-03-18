@@ -9,7 +9,7 @@ import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
-import com.dbeditor.controller.ViewController.ViewType;
+import com.dbeditor.controller.ViewType;
 import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.model.DatabaseSchema;
@@ -97,7 +97,7 @@ public class McdController extends ModelView {
         super.getConnectionLines().clear();
 
         // créer les nodes à partir du MCD
-        this.createTableNodes(this.conceptualSchema);
+        this.createTableNodes();
         this.drawConnections();
 
         if (super.getLasso() != null) {
@@ -115,11 +115,11 @@ public class McdController extends ModelView {
     /**
      * Crée les nodes visuels pour les entités
      */
-    private void createTableNodes(ConceptualSchema schema) throws IOException {
+    private void createTableNodes() throws IOException {
         int col = 0, row = 0;
-        int cols = (int) Math.ceil(Math.sqrt(schema.getTables().size()));
+        int cols = (int) Math.ceil(Math.sqrt(this.conceptualSchema.getTables().size()));
 
-        for (Table table : schema.getTables()) {
+        for (Table table : this.conceptualSchema.getTables()) {
             double x = col * 250 + 50;
             double y = row * 200 + 50;
             this.createTableNode(table, x, y, TableType.Entite);
@@ -182,7 +182,7 @@ public class McdController extends ModelView {
      */
     private void drawConnections() throws IOException {
         // Supprimer les anciennes lignes
-        super.getConnectionLines().forEach(line -> super.getGroup().getChildren().remove(line));
+        super.getConnectionLines().forEach(pair -> super.getGroup().getChildren().remove(pair.getKey()));
         super.getConnectionLines().clear();
 
         Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
