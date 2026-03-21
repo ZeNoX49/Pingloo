@@ -2,46 +2,48 @@ package com.dbeditor.controller.view;
 
 import java.io.IOException;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.DatabaseSchema;
 
+import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.Pane;
-
+import javafx.scene.layout.GridPane;
 
 public class DdController extends GridView {
 
-    public DdController() {
-    }
-
     @Override
     public ViewType getViewType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return ViewType.DD;
     }
 
     @Override
     public void initialization(ToolBar toolbar) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        super.initialization(toolbar);
+
+        GridPane gridPane = (GridPane) this.getRoot();
+        gridPane.addColumn(0, new Label("Nom"));
+        gridPane.addColumn(1, new Label("Description"));
+        gridPane.addColumn(2, new Label("Nature"));
+        gridPane.addColumn(3, new Label("Type"));
+
+        this.updateStyle();
     }
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO
     }
 
     @Override
-    public void onSync() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public DatabaseSchema onSyncGoing(View view) {
+        // TODO
+        return MainApp.getSchema();
     }
 
     @Override
-    public Pane getRoot() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void updateStyle() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void onSyncComing(DatabaseSchema dbS) {
+        // TODO
     }
     
 }

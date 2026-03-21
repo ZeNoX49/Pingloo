@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.dbeditor.MainApp;
+import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.file.exporter.MySqlExporter;
 import com.dbeditor.sql.file.parser.MySqlParser;
@@ -20,6 +21,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
@@ -36,7 +38,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class CanvasController implements VisualModifier {
+public class CanvasController implements Visual {
     private static final DbManager D_M = DbManager.getInstance();
     private static final ThemeManager T_M = ThemeManager.getInstance();
     private static final FileManager F_M = FileManager.getInstance();
@@ -48,7 +50,8 @@ public class CanvasController implements VisualModifier {
     @FXML private Region spacer1, spacer2;
     @FXML private Menu menuOpenDbMYSQL, menuSaveDbMYSQL;
     @FXML private MenuItem miLT, miDT, miPT;
-    
+    @FXML private Label appNameLabel;
+
     private List<ViewController> views;
 
     @FXML
@@ -110,9 +113,13 @@ public class CanvasController implements VisualModifier {
     public void updateStyle() {
         this.spPane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
 
-        this.toolBar.setStyle("-fx-background-color: " + T_M.getTheme().getToolbarColor() + 
-                        "; -fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + 
-                        "; -fx-border-width: 0 0 1 0;");
+        this.toolBar.setStyle(
+            "-fx-background-color: " + T_M.getTheme().getToolbarColor() + 
+            "; -fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + 
+            "; -fx-border-width: 0 0 1 0;"
+        );
+
+        this.appNameLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
 
         for(ViewController v : this.views) {
             v.updateStyle();

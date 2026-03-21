@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import com.dbeditor.MainApp;
+import com.dbeditor.controller.modifier.Update;
+import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.controller.view.View;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.util.ThemeManager;
@@ -21,7 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 
-public class ViewController implements VisualModifier {
+public class ViewController implements Visual, Update {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private BorderPane root;
@@ -84,14 +86,23 @@ public class ViewController implements VisualModifier {
             "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; " + 
             "-fx-border-width: 0 0 1 0;"
         );
+        this.view.updateStyle();
     }
 
-    /**
-     * Permet de charger une bdd
-     * @param dbS -> le DatabaseSchema de la bdd
-     */
+    @Override
     public void open(DatabaseSchema dbS) throws IOException {
         view.open(dbS);
+    }
+
+    @Override
+    public DatabaseSchema onSyncGoing(View view) {
+        // TODO
+        return MainApp.getSchema();
+    }
+
+    @Override
+    public void onSyncComing(DatabaseSchema dbS) {
+        // TODO
     }
 
     /**

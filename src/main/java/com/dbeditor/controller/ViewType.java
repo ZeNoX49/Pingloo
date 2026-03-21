@@ -34,8 +34,8 @@ public enum ViewType {
         switch (this) {
             case MCD : return new McdController();
             case MLD : return new MldController();
-            case DF : return new DdController();
-            case DD : return new DfController();
+            case DF : return new DfController();
+            case DD : return new DdController();
             case SDF : return new SdfController();
             case VALUE : return new ValueController();
             case SQL : return new SqlController();

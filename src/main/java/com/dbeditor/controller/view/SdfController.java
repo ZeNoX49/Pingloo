@@ -2,6 +2,7 @@ package com.dbeditor.controller.view;
 
 import java.io.IOException;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.DatabaseSchema;
 
@@ -12,32 +13,39 @@ public class SdfController extends View {
 
     @Override
     public ViewType getViewType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return ViewType.SDF;
     }
 
     @Override
     public void initialization(ToolBar toolbar) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO
     }
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO
     }
 
     @Override
-    public void onSync() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public DatabaseSchema onSyncGoing(View view) {
+        // TODO
+        return MainApp.getSchema();
+    }
+
+    @Override
+    public void onSyncComing(DatabaseSchema dbS) {
+        // TODO
     }
 
     @Override
     public Pane getRoot() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO
+        return null;
     }
 
     @Override
     public void updateStyle() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO
     }
     
 }

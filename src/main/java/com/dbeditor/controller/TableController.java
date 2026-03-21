@@ -2,6 +2,7 @@ package com.dbeditor.controller;
 
 import java.util.function.BiConsumer;
 
+import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
@@ -21,7 +22,7 @@ import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-public class TableController implements VisualModifier {
+public class TableController implements Visual {
     public enum TableType {
         Table, Entite, Association;
     }

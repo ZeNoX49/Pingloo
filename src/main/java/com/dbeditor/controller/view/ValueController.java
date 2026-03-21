@@ -2,42 +2,56 @@ package com.dbeditor.controller.view;
 
 import java.io.IOException;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.model.Table;
 
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.Pane;
 
 public class ValueController extends GridView {
 
     @Override
     public ViewType getViewType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return ViewType.VALUE;
     }
+
+    private ComboBox<String> combobox;
 
     @Override
     public void initialization(ToolBar toolbar) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+        this.combobox = new ComboBox<>();
 
-    @Override
-    public void open(DatabaseSchema dbS) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+        for(Table table : MainApp.getSchema().getTables().values()) {
+            this.combobox.getItems().add(
+                table.getName()
+            );
+        }
 
-    @Override
-    public void onSync() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+        toolbar.getItems().add(this.combobox);
 
-    @Override
-    public Pane getRoot() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        super.initialization(toolbar);
     }
 
     @Override
     public void updateStyle() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO
     }
-    
+
+    @Override
+    public void open(DatabaseSchema dbS) throws IOException {
+        // TODO
+    }
+
+    @Override
+    public DatabaseSchema onSyncGoing(View view) {
+        // TODO
+        return MainApp.getSchema();
+    }
+
+    @Override
+    public void onSyncComing(DatabaseSchema dbS) {
+        // TODO
+    }
 }

@@ -14,7 +14,7 @@ public class LightTheme implements Theme {
     public String getBorderColor() { return "#3b82f6"; }
 
     @Override
-    public String getSelectionBorderColor() { return "#a81fde"; }
+    public String getSelectionBorderColor() { return "#ff2525"; }
     
     @Override
     public String getHeaderColor() { return "#3b82f6"; }

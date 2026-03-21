@@ -75,6 +75,8 @@ public abstract class ModelView extends View {
     public void updateStyle() {
         this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
         
+        this.zlLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
+        
         for (TableController tc : this.tableNodes.values()) {
             tc.updateStyle();
         }

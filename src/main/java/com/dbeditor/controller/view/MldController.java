@@ -13,9 +13,7 @@ import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
 
-import javafx.css.converter.PaintConverter;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ToolBar;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -28,11 +26,6 @@ public class MldController extends ModelView {
     @Override
     public ViewType getViewType() {
         return ViewType.MLD;
-    }
-
-    @Override
-    public void initialization(ToolBar toolbar) {
-        super.initialization(toolbar);
     }
 
     @Override
@@ -54,7 +47,13 @@ public class MldController extends ModelView {
     }
 
     @Override
-    public void onSync() {
+    public DatabaseSchema onSyncGoing(View view) {
+        // TODO
+        return MainApp.getSchema();
+    }
+
+    @Override
+    public void onSyncComing(DatabaseSchema dbS) {
         // TODO
     }
 

@@ -32,10 +32,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.util.Pair;
 
-/**
- * McdController FINAL pour gérer un vrai MCD selon Merise
- * Version complète avec gestionnaire de connexions
- */
 public class McdController extends ModelView {
     private static final ThemeManager T_M = ThemeManager.getInstance();
     
@@ -104,11 +100,17 @@ public class McdController extends ModelView {
             super.getLasso().getRect().toFront();
         }
 
-        this.updateStyle();
+        super.updateStyle();
     }
 
     @Override
-    public void onSync() {
+    public DatabaseSchema onSyncGoing(View view) {
+        // TODO
+        return MainApp.getSchema();
+    }
+
+    @Override
+    public void onSyncComing(DatabaseSchema dbS) {
         // TODO
     }
 

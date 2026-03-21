@@ -2,43 +2,56 @@ package com.dbeditor.controller.view;
 
 import java.io.IOException;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.sql.DbType;
 
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.Pane;
 
 
-public class SqlController extends ModelView {
+public class SqlController extends TextView {
 
     @Override
     public ViewType getViewType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return ViewType.SQL;
     }
+
+    private ComboBox<String> combobox;
 
     @Override
     public void initialization(ToolBar toolbar) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+        this.combobox = new ComboBox<>();
+        this.combobox.getItems().setAll(
+            DbType.MySql.toString(),
+            DbType.MsSql.toString(),
+            DbType.PostgreSql.toString()
+        );
+        toolbar.getItems().add(this.combobox);
 
-    @Override
-    public void open(DatabaseSchema dbS) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void onSync() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Pane getRoot() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        super.initialization(toolbar);
     }
 
     @Override
     public void updateStyle() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO
+    }
+    
+    @Override
+    public void open(DatabaseSchema dbS) throws IOException {
+        // TODO
+    }
+
+    @Override
+    public DatabaseSchema onSyncGoing(View view) {
+        // TODO
+        return MainApp.getSchema();
+    }
+
+    @Override
+    public void onSyncComing(DatabaseSchema dbS) {
+        // TODO
     }
     
 }
