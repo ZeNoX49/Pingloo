@@ -46,17 +46,6 @@ public class MldController extends ModelView {
         }
     }
 
-    @Override
-    public DatabaseSchema onSyncGoing(View view) {
-        // TODO
-        return MainApp.getSchema();
-    }
-
-    @Override
-    public void onSyncComing(DatabaseSchema dbS) {
-        // TODO
-    }
-
     /**
      * Permet de créer le visuel des tables à partir d'un DatabaseSchema
      * @param schema

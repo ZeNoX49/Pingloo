@@ -21,8 +21,10 @@ public class LassoSelector {
     private final Group content;   // parent local pour le rectangle
     private final SelectionModel<TableController> selectionModel;
     private final Rectangle rect;
-    private Point2D startLocal;
     private final Map<String, TableController> tableNodes;
+
+    private Point2D startLocal;
+    private boolean dragging = false;
 
     public LassoSelector(Pane viewportPane, Group content, Map<String, TableController> tableNodes, SelectionModel<TableController> selectionModel) {
         this.viewportPane = viewportPane;
@@ -49,6 +51,18 @@ public class LassoSelector {
         this.viewportPane.setOnMousePressed(this::onPressed);
         this.viewportPane.setOnMouseDragged(this::onDragged);
         this.viewportPane.setOnMouseReleased(this::onReleased);
+
+        // Filet de sécurité : si la souris est relâchée hors du pane,
+        // la scène envoie quand même un MOUSE_RELEASED — on le capte ici.
+        this.viewportPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.addEventFilter(MouseEvent.MOUSE_RELEASED, e -> {
+                    if (this.dragging && e.getButton() == MouseButton.PRIMARY) {
+                        this.hide();
+                    }
+                });
+            }
+        });
     }
 
     private void onPressed(MouseEvent e) {
@@ -58,21 +72,21 @@ public class LassoSelector {
         // si le clic n'est pas dans cette vue (le pane parent)
         if (e.getTarget() != this.viewportPane) return;
 
-        this.rect.toFront();
-
         this.selectionModel.clear();
         startLocal = this.content.sceneToLocal(e.getSceneX(), e.getSceneY());
+        
         this.rect.setX(startLocal.getX());
         this.rect.setY(startLocal.getY());
         this.rect.setWidth(0);
         this.rect.setHeight(0);
         this.rect.setVisible(true);
+        this.rect.toFront();
+        this.dragging = true;
 
         e.consume();
     }
 
     private void onDragged(MouseEvent e) {
-        // sécurité
         if (!this.rect.isVisible()) return;
 
         Point2D cur = this.content.sceneToLocal(e.getSceneX(), e.getSceneY());
@@ -80,6 +94,7 @@ public class LassoSelector {
         double y = Math.min(startLocal.getY(), cur.getY());
         double w = Math.abs(cur.getX() - startLocal.getX());
         double h = Math.abs(cur.getY() - startLocal.getY());
+
         this.rect.setX(x);
         this.rect.setY(y);
         this.rect.setWidth(w);
@@ -99,9 +114,14 @@ public class LassoSelector {
 
     private void onReleased(MouseEvent e) {
         if (this.rect.isVisible()) {
-            this.rect.setVisible(false);
+            this.hide();
             e.consume();
         }
+    }
+
+    private void hide() {
+        this.rect.setVisible(false);
+        this.dragging = false;
     }
 
     public Rectangle getRect() { return this.rect; }

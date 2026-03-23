@@ -94,16 +94,7 @@ public class ViewController implements Visual, Update {
         view.open(dbS);
     }
 
-    @Override
-    public DatabaseSchema onSyncGoing(View view) {
-        // TODO
-        return MainApp.getSchema();
-    }
-
-    @Override
-    public void onSyncComing(DatabaseSchema dbS) {
-        // TODO
-    }
+    // TODO: sync
 
     /**
      * gère la logique de changement de vue

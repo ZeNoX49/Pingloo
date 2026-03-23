@@ -22,9 +22,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Pair;
 
 /**
  * Dialogue pour créer ou modifier une association MCD
+ * TODO: a refaire (c'est pas moi qui ait fait ca)
  */
 public class AssociationEditorDialog {
     private static final ThemeManager T_M = ThemeManager.getInstance();
@@ -322,7 +324,8 @@ public class AssociationEditorDialog {
     /**
      * Retourne l'association créée/modifiée
      */
-    public Table getResultAssociation() {
-        return resultAssociation;
+    public Pair<String, List<Pair<String, CardinalityValue>>> getResultAssociation() {
+        // TODO
+        return new Pair<String, List<Pair<String, CardinalityValue>>>("", List.of());
     }
 }

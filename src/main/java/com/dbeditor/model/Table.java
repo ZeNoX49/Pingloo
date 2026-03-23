@@ -52,4 +52,14 @@ public class Table {
 
         return res.toString() + "\n";
     }
+
+    /* ================================================== */
+    // pour que les tables ait la même position sur un changement de vue
+    /* ================================================== */
+    private float posX = 0;
+    private float posY = 0;
+    public void setPosX(float x) { this.posX = x; }
+    public void setPosY(float y) { this.posY = y; }
+    public float getPosX() { return this.posX; }
+    public float getPosY() { return this.posY; }
 }

@@ -42,6 +42,8 @@ public class ZoomPanHandler {
         this.viewportPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::onDragged);
         this.viewportPane.addEventFilter(MouseEvent.MOUSE_RELEASED, this::onReleased);
 
+        zlLabel.setText("%.2f".formatted(this.zoomLevel));
+
         // scroll zoom
         this.viewportPane.setOnScroll(e -> {
             e.consume();
@@ -66,35 +68,35 @@ public class ZoomPanHandler {
     }
 
     private void onPressed(MouseEvent e) {
-        if (e.getButton() == MouseButton.MIDDLE) {
-            middleMouseDown = true;
-            lastMouseX = e.getSceneX();
-            lastMouseY = e.getSceneY();
-            this.viewportPane.setCursor(Cursor.CLOSED_HAND);
-            e.consume();
-        }
+        if (e.getButton() != MouseButton.MIDDLE) return;
+
+        this.middleMouseDown = true;
+        this.lastMouseX = e.getSceneX();
+        this.lastMouseY = e.getSceneY();
+        this.viewportPane.setCursor(Cursor.CLOSED_HAND);
+        e.consume();
     }
 
     private void onDragged(MouseEvent e) {
-        if (middleMouseDown && e.isMiddleButtonDown()) {
-            double dx = e.getSceneX() - lastMouseX;
-            double dy = e.getSceneY() - lastMouseY;
-            this.content.setTranslateX(this.content.getTranslateX() + dx);
-            this.content.setTranslateY(this.content.getTranslateY() + dy);
-            lastMouseX = e.getSceneX();
-            lastMouseY = e.getSceneY();
-            e.consume();
-        }
+        if (!this.middleMouseDown || !e.isMiddleButtonDown()) return;
+        
+        double dx = e.getSceneX() - lastMouseX;
+        double dy = e.getSceneY() - lastMouseY;
+        this.content.setTranslateX(this.content.getTranslateX() + dx);
+        this.content.setTranslateY(this.content.getTranslateY() + dy);
+        lastMouseX = e.getSceneX();
+        lastMouseY = e.getSceneY();
+        e.consume();
     }
 
     private void onReleased(MouseEvent e) {
-        if (middleMouseDown && e.getButton() == MouseButton.MIDDLE) {
-            middleMouseDown = false;
-            this.viewportPane.setCursor(Cursor.DEFAULT);
-            e.consume();
-        }
+        if (!this.middleMouseDown || e.getButton() != MouseButton.MIDDLE) return;
+
+        this.middleMouseDown = false;
+        this.viewportPane.setCursor(Cursor.DEFAULT);
+        e.consume();
     }
 
-    public double getZoomLevel() { return this.zoomLevel; }
-    public Scale getScale() { return this.scale; }
+    // public double getZoomLevel() { return this.zoomLevel; }
+    // public Scale getScale() { return this.scale; }
 }

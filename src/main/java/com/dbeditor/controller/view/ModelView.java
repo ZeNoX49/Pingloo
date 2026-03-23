@@ -53,7 +53,6 @@ public abstract class ModelView extends View {
         // Initialiser le zoom/pan
         this.zoomPan = new ZoomPanHandler(this.pane, this.group);
         this.zoomPan.setupEvents(this.zlLabel);
-        this.zlLabel.setText("%.2f".formatted(this.zoomPan.getZoomLevel()));
 
         // Initialiser le multidrag
         this.multiDrag = new MultiDragManager(this.selectionModel);

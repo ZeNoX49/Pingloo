@@ -27,17 +27,6 @@ public class SdfController extends View {
     }
 
     @Override
-    public DatabaseSchema onSyncGoing(View view) {
-        // TODO
-        return MainApp.getSchema();
-    }
-
-    @Override
-    public void onSyncComing(DatabaseSchema dbS) {
-        // TODO
-    }
-
-    @Override
     public Pane getRoot() {
         // TODO
         return null;

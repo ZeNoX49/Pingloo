@@ -55,13 +55,12 @@ public class McdController extends ModelView {
 
         super.initialization(toolbar);
 
-        // when the pane's scene becomes available attach the delete key handler
         ChangeListener<Scene> sceneListener = (obs, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.setOnKeyPressed(e -> {
                     if (e.getCode() == KeyCode.DELETE) {
                         try {
-                            deleteSelectedTables();
+                            this.deleteSelected();
                         } catch (IOException ioe) {
                             ioe.printStackTrace();
                         }
@@ -75,14 +74,15 @@ public class McdController extends ModelView {
         this.btnEntity.setOnAction(e -> {
             try { addEntity(); } catch (IOException ex) { ex.printStackTrace(); }
         });
-        this.btnAssociation.setOnAction(e -> addAssociation());
+        this.btnAssociation.setOnAction(e -> {
+            try { addAssociation(); } catch (IOException ex) { ex.printStackTrace(); }
+        });
     }
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
         if (dbS == null) return;
 
-        // Recréer le ConceptualSchema à partir du DatabaseSchema donné
         this.conceptualSchema = new ConceptualSchema(dbS);
 
         // supprime tous les nodes sauf selectionRect
@@ -94,7 +94,7 @@ public class McdController extends ModelView {
 
         // créer les nodes à partir du MCD
         this.createTableNodes();
-        this.drawConnections();
+        this.drawLinks();
 
         if (super.getLasso() != null) {
             super.getLasso().getRect().toFront();
@@ -103,34 +103,13 @@ public class McdController extends ModelView {
         super.updateStyle();
     }
 
-    @Override
-    public DatabaseSchema onSyncGoing(View view) {
-        // TODO
-        return MainApp.getSchema();
-    }
-
-    @Override
-    public void onSyncComing(DatabaseSchema dbS) {
-        // TODO
-    }
-
     /**
      * Crée les nodes visuels pour les entités
      */
     private void createTableNodes() throws IOException {
-        int col = 0, row = 0;
-        int cols = (int) Math.ceil(Math.sqrt(this.conceptualSchema.getTables().size()));
-
+        // TODO: script de rangement automatique
         for (Table table : this.conceptualSchema.getTables()) {
-            double x = col * 250 + 50;
-            double y = row * 200 + 50;
-            this.createTableNode(table, x, y, TableType.Entite);
-
-            col++;
-            if (col >= cols) {
-                col = 0;
-                row++;
-            }
+            this.createTableNode(table, TableType.Entite);
         }
 
         // s'assure que le rectangle de séléction est devant
@@ -142,7 +121,7 @@ public class McdController extends ModelView {
     /**
      * Crée un node d'entité à une position donnée
      */
-    private void createTableNode(Table table, double x, double y, TableType tabletype) throws IOException {
+    private void createTableNode(Table table, TableType tabletype) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
         AnchorPane tcPane = loader.load();
         TableController tcController = loader.getController();
@@ -159,9 +138,9 @@ public class McdController extends ModelView {
                 // si double clique gauche -> modifier la table ou l'association
                 if (e.getClickCount() == 2) {
                     if(tabletype.equals(TableType.Entite)) {
-                        this.editTable(tcController);
+                        // this.editTable(tcController);
                     } else {
-                        this.editAssociation(tcController);
+                        // this.editAssociation(tcController);
                     }
                     e.consume();
                 }
@@ -171,10 +150,6 @@ public class McdController extends ModelView {
         // attache le node pour le multidrag
         super.getMultiDrag().attach(tcController);
 
-        // position initiale
-        tcPane.setLayoutX(x);
-        tcPane.setLayoutY(y);
-
         super.getGroup().getChildren().add(tcPane);
     }
 
@@ -182,19 +157,31 @@ public class McdController extends ModelView {
      * Tracer tout les liens entre les tables
      * @throws IOException 
      */
-    private void drawConnections() throws IOException {
+    private void drawLinks() throws IOException {
         // Supprimer les anciennes lignes
-        super.getConnectionLines().forEach(pair -> super.getGroup().getChildren().remove(pair.getKey()));
+        super.getConnectionLines().forEach(pair -> {
+            super.getGroup().getChildren().remove(pair.getKey());
+            super.getGroup().getChildren().remove(pair.getValue());
+        });
         super.getConnectionLines().clear();
 
         Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
         for (String name : links.keySet()) {
-            // TODO: modifier la position de base des associations
-            this.createTableNode(this.conceptualSchema.getAssociationTable(name), 0, 0, TableType.Association);
+            Table table = this.conceptualSchema.getAssociationTable(name);
+
+            // centre l'association
+            for(Pair<Table, CardinalityValue> p : links.get(name)) {
+                table.setPosX(table.getPosX() + p.getKey().getPosX());
+                table.setPosY(table.getPosY() + p.getKey().getPosY());
+            }
+            table.setPosX(table.getPosX() / links.get(name).size());
+            table.setPosY(table.getPosY() / links.get(name).size());
+
+            this.createTableNode(table, TableType.Association);
             TableController ac = super.getTableNodes().get(name);
 
             for(Pair<Table, CardinalityValue> p : links.get(name)) {
-                this.drawConnection(super.getTableNodes().get(p.getKey().getName()), ac, p.getValue());
+                this.drawLink(super.getTableNodes().get(p.getKey().getName()), ac, p.getValue());
             }
         }
     }
@@ -202,7 +189,7 @@ public class McdController extends ModelView {
     /**
      * Permet de tracer un lien entre une entité et une association
      */
-    private void drawConnection(TableController from, TableController to, CardinalityValue cardinality) {
+    private void drawLink(TableController from, TableController to, CardinalityValue cardinality) {
         if (from == null || to == null) return;
 
         double fromX = from.getRoot().getLayoutX() + from.getRoot().getWidth() / 2;
@@ -226,7 +213,7 @@ public class McdController extends ModelView {
         cardinalityLabel.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
                 if (e.getClickCount() == 2) {
-                    // TODO: pouvoir modifier la cardinalité
+                    this.editCardinality(cardinalityLabel, from, to);
                 }
             }
         });
@@ -247,9 +234,37 @@ public class McdController extends ModelView {
         super.getConnectionLines().add(new Pair<>(line, cardinalityLabel));
     }
 
-    // /* ============================================
-    //    ACTIONS : Ajouter, Modifier, Supprimer
-    //    ============================================ */
+    /**
+     *   // Édition inline de la cardinalité (double-clic sur le label).
+     *   // Change la cardinalité dans le ConceptualSchema et rafraîchit.
+     */
+    private void editCardinality(Label cardLabel, TableController entityNode, TableController assocNode) {
+        // CardinalityValue[] values = CardinalityValue.values();
+        // String current = cardLabel.getText();
+        // CardinalityValue currentCard = CardinalityValue.getCardinalityValue(current);
+        // int idx = 0;
+        // for (int i = 0; i < values.length; i++) {
+        //     if (values[i] == currentCard) { idx = i; break; }
+        // }
+        // CardinalityValue next = values[(idx + 1) % values.length];
+
+        // // Mettre à jour dans le modèle
+        // String entityName = entityNode.getTable().getName();
+        // String assocName  = assocNode.getTable().getName();
+
+        // // for (ConceptualSchema.Association assoc : this.conceptualSchema.getAssociations()) {
+        // //     if (assoc.name.equals(assocName)) {
+        // //         for (ConceptualSchema.Entity e : assoc.linkedEntities.keySet()) {
+        // //             if (e.table.getName().equals(entityName)) {
+        // //                 assoc.linkedEntities.put(e, next);
+        // //                 break;
+        // //             }
+        // //         }
+        // //     }
+        // // }
+
+        // cardLabel.setText(next.toString());
+    }
 
     /**
      * Ajoute une nouvelle entité
@@ -258,146 +273,139 @@ public class McdController extends ModelView {
     public void addEntity() throws IOException {
         TableEditorDialog dialog = new TableEditorDialog();
         dialog.showAndWait();
-
-        if (dialog.isConfirmed()) {
-            Table table = dialog.getResultTable();
-            
-            if (conceptualSchema.getTable(table.getName()) != null) {
-                CanvasController.showWarningAlert("Erreur", "Une entité avec ce nom existe déjà.");
-                return;
-            }
-
-            // TODO: Mettre à jour le modèle conceptuel
-            // conceptualSchema.addTable(table);
-
-            double x = (super.getPane().getWidth() / 2) - 100;
-            double y = (super.getPane().getHeight() / 2) - 75;
-            
-            this.createTableNode(table, x, y, TableType.Entite);
-        }
-    }
-
-    /**
-     * Modifie une table existante
-     * @param tableController le contrôleur de la table à modifier
-     */
-    private void editTable(TableController tableController) {
-        DatabaseSchema schema = MainApp.getSchema();
-        if (schema == null) return;
-
-        Table oldTable = tableController.getTable();
-        String oldName = oldTable.getName();
-
-        // Ouvrir le dialogue avec les données existantes
-        TableEditorDialog dialog = new TableEditorDialog(oldTable);
-        dialog.showAndWait();
-
-        if (dialog.isConfirmed()) {
-            Table modifiedTable = dialog.getResultTable();
-            String newName = modifiedTable.getName();
-
-            // Si le nom a changé, vérifier qu'il n'existe pas déjà
-            if (!oldName.equals(newName) && schema.getTable(newName) != null) {
-                CanvasController.showWarningAlert("Erreur", "Une table avec ce nom existe déjà.");
-                return;
-            }
-
-            try {
-                // Supprimer l'ancienne table du schéma
-                schema.removeTable(oldName);
-                
-                // Ajouter la table modifiée
-                schema.addTable(modifiedTable);
-
-                // Recréer tout le visuel (pour simplifier)
-                this.open(schema);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
-            }
-        }
-    }
-
-    /**
-     * Ajoute une nouvelle association
-     */
-    @FXML
-    public void addAssociation() {
-        CanvasController.showWarningAlert("Erreur", "pas encore fonctionnelle");
-    }
-
-    /**
-     * Modifie une association
-     */
-    private void editAssociation(TableController ac) {
-        Table oldAssoc = ac.getTable();
+        if (!dialog.isConfirmed()) return;
         
-        List<Table> entities = new ArrayList<>(conceptualSchema.getTables());
-        AssociationEditorDialog dialog = new AssociationEditorDialog(entities, oldAssoc);
-        dialog.showAndWait();
+        Table table = dialog.getResultTable();
+        
+        if (this.conceptualSchema.nameExists(table.getName())) {
+            CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
+            return;
+        }
 
-        // TODO: corriger ceci (implémenter la modification effective dans le modèle)
+        this.conceptualSchema.addEntity(table);
+        
+        this.createTableNode(table, TableType.Entite);
     }
 
+    // /**
+    //  * Édite une entité existante.
+    //  */
+    // private void editEntity(TableController tc) {
+    //     Table oldTable = tc.getTable();
+    //     String oldName = oldTable.getName();
+
+    //     TableEditorDialog dialog = new TableEditorDialog(oldTable);
+    //     dialog.showAndWait();
+    //     if (!dialog.isConfirmed()) return;
+
+    //     Table modifiedTable = dialog.getResultTable();
+    //     String newName = modifiedTable.getName();
+
+    //     if (!oldName.equals(newName) && this.conceptualSchema.getEntityTable(newName) != null) {
+    //         CanvasController.showWarningAlert("Erreur", "Une entité nommée « " + newName + " » existe déjà.");
+    //         return;
+    //     }
+
+    //     // Mettre à jour dans le ConceptualSchema (gère aussi les associations)
+    //     this.conceptualSchema.renameEntity(oldName, modifiedTable);
+
+    //     // Mettre à jour dans le DatabaseSchema global
+    //     MainApp.getSchema().removeTable(oldName);
+    //     MainApp.getSchema().addTable(modifiedTable);
+
+    //     try { this.rebuildView(); } catch (IOException e) { e.printStackTrace(); }
+    // }
+
     /**
-     * Supprime les tables sélectionnées (touche Suppr)
-     * @throws IOException 
+     * Ajoute une nouvelle association.
      */
-    public void deleteSelectedTables() throws IOException {
+    public void addAssociation() throws IOException {
+        List<Table> entities = this.conceptualSchema.getTables();
+        if (entities.size() < 1) {
+            CanvasController.showWarningAlert("Erreur", "Il faut au moins 1 entité pour créer une association.");
+            return;
+        }
+
+        AssociationEditorDialog dialog = new AssociationEditorDialog(entities);
+        dialog.showAndWait();
+        if (!dialog.isConfirmed()) return;
+
+        Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
+
+        if (this.conceptualSchema.nameExists(result.getKey())) {
+            CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
+            return;
+        }
+
+        Table asso = this.conceptualSchema.addAssociation(result.getKey(), result.getValue());
+        this.createTableNode(asso, TableType.Association);
+        TableController assoCon = this.getTableNodes().get(asso.getName());
+
+        for(Pair<String, CardinalityValue> p : result.getValue()) {
+            this.drawLink(this.getTableNodes().get(p.getKey()), assoCon, p.getValue());
+        }
+
+        super.getLasso().getRect().toFront();
+    }
+
+    // /**
+    //  * Édite une association existante (double-clic sur son node).
+    //  */
+    // private void editAssociation(TableController assocTc) {
+    //     String oldName = assocTc.getTable().getName();
+
+    //     // Trouver l'association dans le modèle
+    //     ConceptualSchema.Association target = null;
+    //     for (ConceptualSchema.Association a : this.conceptualSchema.getAssociations()) {
+    //         if (a.name.equals(oldName)) { target = a; break; }
+    //     }
+    //     if (target == null) return;
+
+    //     List<ConceptualSchema.Entity> entities = this.conceptualSchema.getEntities();
+    //     AssociationEditorDialog dialog = new AssociationEditorDialog(
+    //             entities, oldName, target.linkedEntities);
+    //     dialog.showAndWait();
+    //     if (!dialog.isConfirmed()) return;
+
+    //     String newName = dialog.getResultName();
+    //     Map<ConceptualSchema.Entity, CardinalityValue> newParticipants = dialog.getResultParticipants();
+
+    //     this.conceptualSchema.updateAssociation(oldName, newName, newParticipants);
+
+    //     try { this.drawAssociations(); } catch (IOException e) { e.printStackTrace(); }
+    //     if (super.getLasso() != null) super.getLasso().getRect().toFront();
+    // }
+
+    /**
+     * Supprime les entités et associations sélectionnées
+     */
+    public void deleteSelected() throws IOException {
         List<TableController> selected = new ArrayList<>(super.getSelectionModel().getSelected());
-        
         if (selected.isEmpty()) return;
 
-        // Demander confirmation
-        String message = selected.size() == 1 
-            ? "Êtes-vous sûr de vouloir supprimer la table '" + selected.get(0).getTable().getName() + "' ?"
-            : "Êtes-vous sûr de vouloir supprimer " + selected.size() + " tables ?";
+        String message = selected.size() == 1
+            ? "Supprimer « " + selected.get(0).getTable().getName() + " » ?"
+            : "Supprimer " + selected.size() + " éléments ?";
 
-        boolean res = CanvasController.showConfirmationAlert("Confirmation", "Supprimer les tables", message);
-        if (res) {
-            DatabaseSchema schema = MainApp.getSchema();
+        if (!CanvasController.showConfirmationAlert("Confirmation", "Supprimer", message)) return;
 
-            for (TableController tc : selected) {
-                // Supprimer du schéma
-                schema.removeTable(tc.getTable().getName());
+        for (TableController tc : selected) {
+            String name = tc.getTable().getName();
 
-                // Supprimer le node visuel
-                super.getGroup().getChildren().remove(tc.getRoot());
-                // Supprimer des structures locales
-                super.getTableNodes().remove(tc.getTable().getName());
+            if (this.conceptualSchema.getTable(name) != null) {
+                // Entité : supprimer du MCD et du schema global
+                this.conceptualSchema.removeEntity(name);
+                MainApp.getSchema().removeTable(name);
+            } else {
+                // Association
+                this.conceptualSchema.removeAssociation(name);
             }
 
-            // Vider la sélection
-            super.getSelectionModel().clear();
-
-            // Redessiner les connexions
-            this.drawConnections();
+            super.getGroup().getChildren().remove(tc.getRoot());
+            super.getTableNodes().remove(name);
         }
-    }
 
-    /**
-     * Convertit le MCD en MLD
-     */
-    @FXML
-    public void convertToMLD() {
-        // TODO:
-        // try {
-        //     DatabaseSchema mld = this.conceptualSchema.transformToDatabase();
-        //     if (mld == null) {
-        //         CanvasController.showWarningAlert("Erreur", "La conversion a retourné null. Vérifiez l'implémentation de transformToDatabase().");
-        //         return;
-        //     }
-
-        //     CanvasController.showWarningAlert("Conversion réussie (MCD → MLD)",
-        //             "Le MCD a été converti en MLD avec succès !\n\n" +
-        //             "Tables créées : " + mld.getTables().size() + "\n\n" +
-        //             "Vous pouvez maintenant basculer vers la vue MLD.");
-            
-        //     MainApp.setSchema(mld);
-        // } catch (Exception e) {
-        //     MainApp.getLogger().severe(e.getMessage());
-        //     CanvasController.showWarningAlert("Erreur", "Erreur lors de la conversion : " + e.getMessage());
-        // }
+        super.getSelectionModel().clear();
+        // this.drawAssociations();
     }
 }

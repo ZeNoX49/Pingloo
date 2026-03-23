@@ -28,6 +28,7 @@ import javafx.stage.StageStyle;
 
 /**
  * Dialogue pour créer ou modifier une table
+ * TODO: a refaire (c'est pas moi qui ait fait ca)
  */
 public class TableEditorDialog {
     private static final ThemeManager T_M = ThemeManager.getInstance();

@@ -27,7 +27,9 @@ public enum ViewType {
             case "DD" : return DD;
             case "SDF" : return SDF;
             case "Value" : return VALUE;
-        } return null;
+            case "SQL" : return SQL;
+            default: return null;
+        }
     }
 
     public View getController() {
@@ -39,6 +41,7 @@ public enum ViewType {
             case SDF : return new SdfController();
             case VALUE : return new ValueController();
             case SQL : return new SqlController();
-        } return null;
+            default: return null;
+        }
     }
 }
