@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.fxml.FXML;
@@ -83,7 +84,7 @@ public class TableController implements Visual {
             this.grid.add(colName, 0, i);
             GridPane.setMargin(colName, new Insets(1, 1, 1, 3));
             
-            Label colType = new Label(col.getType());
+            Label colType = new Label(col.getType().getRepr(DbType.MsSql));
             if(col.isPrimaryKey() || col.isNotNull()) {
                 colType.setFont(Font.font("System", FontWeight.BOLD, 11));
             } else {
