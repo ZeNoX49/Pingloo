@@ -1,8 +1,10 @@
 package com.dbeditor.model;
 
+import com.dbeditor.model.type.SqlType;
+
 public class Column {
     private String name;
-    private String type;
+    private SqlType type;
     private boolean isPrimaryKey;
     private boolean isNotNull;
     private boolean isUnique;
@@ -10,7 +12,7 @@ public class Column {
     
     public Column(String name, String type) {
         this.name = name;
-        this.type = type.replace(" ", "");
+        this.type = SqlType.get(type.replace(" ", ""));
     }
     
     public Column(Column other) {
@@ -23,10 +25,10 @@ public class Column {
     }
     
     public String getName() { return name; }
-    public String getType() { return type; }
+    public SqlType getType() { return type; }
 
     public void setName(String name) { this.name = name; }
-    public void setType(String type) { this.type = type; }
+    public void setType(SqlType type) { this.type = type; }
 
     public boolean isPrimaryKey() { return this.isPrimaryKey; }
     public boolean isNotNull() { return this.isNotNull; }

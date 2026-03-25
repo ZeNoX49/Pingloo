@@ -1,12 +1,11 @@
 package com.dbeditor.controller.view.dialogs;
 
 import com.dbeditor.controller.CanvasController;
+import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
 
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -30,7 +29,7 @@ import javafx.stage.StageStyle;
  * Dialogue pour créer ou modifier une table
  * TODO: a refaire (c'est pas moi qui ait fait ca)
  */
-public class TableEditorDialog {
+public class TableEditorDialog extends EditorDialog {
     private static final ThemeManager T_M = ThemeManager.getInstance();
     
     private Stage stage;
@@ -41,60 +40,8 @@ public class TableEditorDialog {
     private boolean confirmed = false;
 
     /**
-     * Classe interne pour représenter une ligne de colonne dans la TableView
-     */
-    public static class ColumnRow {
-        private final SimpleStringProperty name;
-        private final SimpleStringProperty type;
-        private final SimpleBooleanProperty primaryKey;
-        private final SimpleBooleanProperty notNull;
-        private final SimpleBooleanProperty unique;
-        private final SimpleBooleanProperty autoIncrement;
-
-        public ColumnRow(String name, String type, boolean pk, boolean nn, boolean uq, boolean ai) {
-            this.name = new SimpleStringProperty(name);
-            this.type = new SimpleStringProperty(type);
-            this.primaryKey = new SimpleBooleanProperty(pk);
-            this.notNull = new SimpleBooleanProperty(nn);
-            this.unique = new SimpleBooleanProperty(uq);
-            this.autoIncrement = new SimpleBooleanProperty(ai);
-        }
-
-        public String getName() { return name.get(); }
-        public void setName(String value) { name.set(value); }
-        public SimpleStringProperty nameProperty() { return name; }
-
-        public String getType() { return type.get(); }
-        public void setType(String value) { type.set(value); }
-        public SimpleStringProperty typeProperty() { return type; }
-
-        public boolean isPrimaryKey() { return primaryKey.get(); }
-        public void setPrimaryKey(boolean value) { primaryKey.set(value); }
-        public SimpleBooleanProperty primaryKeyProperty() { return primaryKey; }
-
-        public boolean isNotNull() { return notNull.get(); }
-        public void setNotNull(boolean value) { notNull.set(value); }
-        public SimpleBooleanProperty notNullProperty() { return notNull; }
-
-        public boolean isUnique() { return unique.get(); }
-        public void setUnique(boolean value) { unique.set(value); }
-        public SimpleBooleanProperty uniqueProperty() { return unique; }
-
-        public boolean isAutoIncrement() { return autoIncrement.get(); }
-        public void setAutoIncrement(boolean value) { autoIncrement.set(value); }
-        public SimpleBooleanProperty autoIncrementProperty() { return autoIncrement; }
-    }
-
-    /**
-     * Constructeur pour créer une nouvelle table
-     */
-    public TableEditorDialog() {
-        this(null);
-    }
-
-    /**
      * Constructeur pour modifier une table existante
-     * @param table la table à modifier (null pour créer une nouvelle)
+     * @param table la table à modifier, null pour créer une nouvelle
      */
     public TableEditorDialog(Table table) {
         this.columnData = FXCollections.observableArrayList();
@@ -102,7 +49,7 @@ public class TableEditorDialog {
         // Si on modifie une table existante, charger ses données
         if (table != null) {
             for (Column col : table.getColumns()) {
-                columnData.add(new ColumnRow(
+                this.columnData.add(new ColumnRow(
                     col.getName(),
                     col.getType(),
                     col.isPrimaryKey(),
@@ -113,10 +60,10 @@ public class TableEditorDialog {
             }
         } else {
             // Ajouter une ligne vide par défaut pour une nouvelle table
-            columnData.add(new ColumnRow("id", "INT", true, true, false, true));
+            this.columnData.add(new ColumnRow("id", "INT", true, true, false, true));
         }
         
-        initUI(table != null ? table.getName() : "");
+        this.initUI(table != null ? table.getName() : "");
     }
 
     /**
@@ -167,11 +114,11 @@ public class TableEditorDialog {
         columnActions.setAlignment(Pos.CENTER_LEFT);
         
         Button btnAddColumn = new Button("Ajouter colonne");
-        styleButton(btnAddColumn, T_M.getTheme().getHeaderColor());
+        this.styleButton(btnAddColumn, T_M.getTheme().getHeaderColor());
         btnAddColumn.setOnAction(e -> addColumn());
         
         Button btnRemoveColumn = new Button("Supprimer colonne");
-        styleButton(btnRemoveColumn, "#c44545");
+        this.styleButton(btnRemoveColumn, "#c44545");
         btnRemoveColumn.setOnAction(e -> removeSelectedColumn());
         
         columnActions.getChildren().addAll(btnAddColumn, btnRemoveColumn);
@@ -181,14 +128,14 @@ public class TableEditorDialog {
         footer.setAlignment(Pos.CENTER_RIGHT);
         
         Button btnCancel = new Button("Annuler");
-        styleButton(btnCancel, "#666666");
+        this.styleButton(btnCancel, "#666666");
         btnCancel.setOnAction(e -> {
             confirmed = false;
             stage.close();
         });
         
         Button btnConfirm = new Button("Confirmer");
-        styleButton(btnConfirm, "#4a9eff");
+        this.styleButton(btnConfirm, "#4a9eff");
         btnConfirm.setOnAction(e -> {
             if (validateAndSave()) {
                 confirmed = true;
@@ -203,6 +150,11 @@ public class TableEditorDialog {
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
+    }
+
+    @Override
+    public void updateStyle() {
+        // TODO
     }
 
     /**

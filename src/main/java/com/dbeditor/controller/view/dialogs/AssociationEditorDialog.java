@@ -28,7 +28,7 @@ import javafx.util.Pair;
  * Dialogue pour créer ou modifier une association MCD
  * TODO: a refaire (c'est pas moi qui ait fait ca)
  */
-public class AssociationEditorDialog {
+public class AssociationEditorDialog extends EditorDialog {
     private static final ThemeManager T_M = ThemeManager.getInstance();
     
     private Stage stage;

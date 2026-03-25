@@ -1,5 +1,5 @@
 package com.dbeditor.sql;
 
 public enum DbType {
-    MySql, MsSql, PostgreSql
+    MySql, MsSql, PostgreSql, Oracle
 }

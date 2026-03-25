@@ -271,7 +271,7 @@ public class McdController extends ModelView {
      */
     @FXML
     public void addEntity() throws IOException {
-        TableEditorDialog dialog = new TableEditorDialog();
+        TableEditorDialog dialog = new TableEditorDialog(null);
         dialog.showAndWait();
         if (!dialog.isConfirmed()) return;
         

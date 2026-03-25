@@ -7,6 +7,7 @@ import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.DatabaseSchema;
 
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.GridPane;
 
@@ -20,6 +21,9 @@ public class DdController extends GridView {
     @Override
     public void initialization(ToolBar toolbar) {
         super.initialization(toolbar);
+
+        TableView tableView = super.getTableView();
+        tableView.add
 
         GridPane gridPane = (GridPane) this.getRoot();
         gridPane.addColumn(0, new Label("Nom"));
