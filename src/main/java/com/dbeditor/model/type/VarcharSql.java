@@ -6,7 +6,11 @@ public class VarcharSql extends SqlType {
 
     private int size;
 
+    /**
+     * @param size > 0
+     */
     public VarcharSql(int size) {
+        if (size <= 0) return;
         this.size = size;
     }
 

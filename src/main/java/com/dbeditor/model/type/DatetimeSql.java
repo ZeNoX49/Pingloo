@@ -4,12 +4,6 @@ import com.dbeditor.sql.DbType;
 
 public class DatetimeSql extends SqlType {
 
-    private int size;
-
-    public VarcharSql(int size) {
-        this.size = size;
-    }
-
     @Override
     public boolean isConform(String data) {
         // TODO
@@ -20,7 +14,7 @@ public class DatetimeSql extends SqlType {
     public String getRepr(DbType dbType) {
         // TODO
         switch (dbType) {
-            case MySql : return "VARCHAR(%d)".formatted(this.size);
+            case MySql : return "DATETIME";
             case MsSql : return "";
             case PostgreSql : return "";
             case Oracle : return "";        

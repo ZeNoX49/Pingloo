@@ -3,17 +3,16 @@ package com.dbeditor.model;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Table {
     private String name;
-    private Map<String, Column> columns;
-    private List<ForeignKey> foreignKeys;
+    private LinkedHashMap<String, Column> columns;
+    private LinkedHashMap<String, ForeignKey> foreignKeys;
     
     public Table(String name) {
         this.name = name;
         this.columns = new LinkedHashMap<>();
-        this.foreignKeys = new ArrayList<>();
+        this.foreignKeys = new LinkedHashMap<>();
     }
     
     public void addColumn(Column column) {
@@ -21,7 +20,7 @@ public class Table {
     }
     
     public void removeColumn(Column column) {
-        this.columns.remove(column);
+        this.columns.remove(column.getName());
     }
     
     public void addForeignKey(ForeignKey fk) { foreignKeys.add(fk); }
@@ -54,7 +53,7 @@ public class Table {
     }
 
     /* ================================================== */
-    // pour que les tables ait la même position sur un changement de vue
+    // pour que les tables aient la même position sur un changement de vue
     /* ================================================== */
     private float posX = 0;
     private float posY = 0;

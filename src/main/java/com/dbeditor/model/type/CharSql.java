@@ -6,7 +6,11 @@ public class CharSql extends SqlType {
 
     private int size;
 
+    /**
+     * @param size > 0
+     */
     public CharSql(int size) {
+        if (size <= 0) return;
         this.size = size;
     }
 

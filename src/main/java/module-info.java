@@ -25,6 +25,7 @@ module com.dbeditor {
     exports com.dbeditor.model;
     exports com.dbeditor.model.mcd;
     exports com.dbeditor.model.type;
+    exports com.dbeditor.sql;
     exports com.dbeditor.sql.db;
     exports com.dbeditor.sql.file.exporter;
     exports com.dbeditor.sql.file.parser;

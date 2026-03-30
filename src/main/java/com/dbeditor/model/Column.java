@@ -10,9 +10,13 @@ public class Column {
     private boolean isUnique;
     private boolean isAutoIncrementing;
     
-    public Column(String name, String type) {
+    /**
+     * TODO: temp
+     * @param type = SqlType.get(type.replace(" ", ""), DbType.___);
+     */
+    public Column(String name, SqlType type) {
         this.name = name;
-        this.type = SqlType.get(type.replace(" ", ""));
+        this.type = type;
     }
     
     public Column(Column other) {

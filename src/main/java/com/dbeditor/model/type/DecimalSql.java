@@ -2,12 +2,19 @@ package com.dbeditor.model.type;
 
 import com.dbeditor.sql.DbType;
 
-public class VarcharSql extends SqlType {
+public class DecimalSql extends SqlType {
 
-    private int size;
+    private int before;
+    private int after;
 
-    public VarcharSql(int size) {
-        this.size = size;
+    /**
+     * @param before > 0
+     * @param after > 0
+     */
+    public DecimalSql(int before, int after) {
+        if (before <= 0 || after <= 0) return;
+        this.before = before;
+        this.after = after;
     }
 
     @Override
@@ -20,7 +27,7 @@ public class VarcharSql extends SqlType {
     public String getRepr(DbType dbType) {
         // TODO
         switch (dbType) {
-            case MySql : return "VARCHAR(%d)".formatted(this.size);
+            case MySql : return "DECIMAL(%d, %d)".formatted(this.before, this.after);
             case MsSql : return "";
             case PostgreSql : return "";
             case Oracle : return "";        
