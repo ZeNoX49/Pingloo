@@ -12,6 +12,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 
+// TODO
 public abstract class GridView extends View {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
@@ -79,9 +80,10 @@ public abstract class GridView extends View {
         // TODO
     }
 
-    public TableView getTableView() {
-        return this.tableView;
-    }
+    // TODO
+    // public TableView getTableView() {
+    //     return this.tableView;
+    // }
 
     @Override
     public Pane getRoot() {

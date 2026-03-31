@@ -16,19 +16,19 @@ import com.dbeditor.model.Table;
 import javafx.util.Pair;
 
 /**
- * Transforme un MLD (DatabaseSchema) en MCD (ConceptualSchema)
+ * Permet de représenter un MCD
  */
 public class ConceptualSchema {
     private final Map<String, Entity> entities = new HashMap<>();
     private final Map<String, Association> associations = new HashMap<>();
 
     public ConceptualSchema(DatabaseSchema schema) {
-        if(schema.getTables().isEmpty()) return;
+        if(schema.tables.isEmpty()) return;
 
         // Identifier les entités et les associations
         // créer les tables et attendre avant de créer les assos
         List<Table> assoToCreate = new ArrayList<>();
-        for(Table table : schema.getTables().values()) {
+        for(Table table : schema.tables.values()) {
             if(this.isAssociativeTable(table)) {
                 assoToCreate.add(table);
             } else {
@@ -45,27 +45,27 @@ public class ConceptualSchema {
         for(Entity entity : entities.values()) {
             for(ForeignKey fk : entity.table.getForeignKeys()) {
                 // si != null alors lien entre table hors association
-                Entity target = entities.get(fk.getReferencedTable());
+                Entity target = entities.get(fk.referencedTable);
                 if(target != null) {
                     // colonne FK dans la table référençante (entity)
-                    Column referencingCol = entity.table.getColumn(fk.getColumnName());
+                    Column referencingCol = entity.table.columns.get(fk.columnName);
                     if(referencingCol == null) continue;
 
                     // Déterminer la cardinalité côté référençant (entity)
                     // chaque ligne référençante pointe vers une et une seule entité référence -> max = 1
                     // min = 1 si NOT NULL sinon 0
-                    CardinalityValue referencingCard = referencingCol.isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_;
+                    CardinalityValue referencingCard = referencingCol.isNotNull ? CardinalityValue._11_ : CardinalityValue._01_;
 
                     // Déterminer la cardinalité côté référencé (target)
                     // par défaut B peut être référencé par plusieurs A -> 0..N
                     // si la colonne FK dans A est unique (détectée ici si elle est PK), alors max = 1
                     CardinalityValue targetCard;
-                    if (referencingCol.isPrimaryKey()) {
+                    if (referencingCol.isPrimaryKey) {
                         // FK est PK => relation 1-1 ou 0-1 selon nullabilité de la FK (dans A)
-                        targetCard = referencingCol.isNotNull() ? CardinalityValue._11_ : CardinalityValue._01_;
+                        targetCard = referencingCol.isNotNull ? CardinalityValue._11_ : CardinalityValue._01_;
                     } else {
-                        Column fkColumn = entity.table.getColumn(fk.getColumnName());
-                        if (fkColumn.isNotNull()) {
+                        Column fkColumn = entity.table.columns.get(fk.columnName);
+                        if (fkColumn.isNotNull) {
                             targetCard = CardinalityValue._1N_;
                         } else {
                             // FK non-unique => côté référencé = 0..N (par défaut pas d'obligation)
@@ -90,16 +90,16 @@ public class ConceptualSchema {
     private boolean isAssociativeTable(Table table) {
         List<Column> tablePkList = new ArrayList<>();
         for(Column col : table.getColumns()) {
-            if(col.isPrimaryKey()) {
+            if(col.isPrimaryKey) {
                 tablePkList.add(col);
             }
         }
 
         if(tablePkList.isEmpty()) return false;
         Set<String> pkCols = new HashSet<>();
-        for(Column c : tablePkList) pkCols.add(c.getName());
+        for(Column c : tablePkList) pkCols.add(c.name);
         Set<String> fkCols = new HashSet<>();
-        for(ForeignKey fk : table.getForeignKeys()) fkCols.add(fk.getColumnName());
+        for(ForeignKey fk : table.getForeignKeys()) fkCols.add(fk.columnName);
 
         return pkCols.equals(fkCols) && fkCols.size() >= 2;
     }
@@ -110,14 +110,14 @@ public class ConceptualSchema {
     private void createAssociationFromTable(Table table) {
         List<Pair<Entity, CardinalityValue>> linkedEntitiesCard = new ArrayList<>();
         for(ForeignKey fk : table.getForeignKeys()) {
-            Entity target = entities.get(fk.getReferencedTable());
+            Entity target = entities.get(fk.referencedTable);
             if(target == null) continue;
             
             // Pour une table associative, côté entité la multiplicité est généralement 0..N
             // (une entité peut ne participer à aucune association ou à plusieurs)
-            Column fkColumn = target.table.getColumn(fk.getColumnName());
+            Column fkColumn = target.table.columns.get(fk.columnName);
             CardinalityValue cardForEntity;
-            if (fkColumn.isNotNull()) {
+            if (fkColumn.isNotNull) {
                 cardForEntity = CardinalityValue._1N_;
             } else {
                 cardForEntity = CardinalityValue._0N_;
@@ -133,7 +133,7 @@ public class ConceptualSchema {
      */
     public void addEntity(Table table) {
         new Entity(table);
-        MainApp.getSchema().addTable(table);
+        MainApp.schema.tables.get(table.name);
     }
 
     public boolean nameExists(String name) {
@@ -151,6 +151,7 @@ public class ConceptualSchema {
         associations.entrySet().removeIf(entry -> entry.getValue().linkedEntities.containsKey(e));
     }
 
+    // TODO
     // /**
     //  * Met à jour le nom d'une entité (et met à jour les associations).
     //  */
@@ -193,6 +194,7 @@ public class ConceptualSchema {
         if(this.nameExists(name)) associations.remove(name);
     }
 
+    // TODO
     // /**
     //  * Modifie les participants d'une association existante.
     //  * Utile après édition dans AssociationEditorDialog.
@@ -221,7 +223,7 @@ public class ConceptualSchema {
      */
     public Table getTable(String name) {
         for(Entity e : this.entities.values()) {
-            if(e.table.getName().equals(name)) {
+            if(e.table.name.equals(name)) {
                 return e.table;
             }
         } return null;
@@ -252,7 +254,7 @@ public class ConceptualSchema {
      */
     public Table getAssociationTable(String name) {
         for(Association a : associations.values()) {
-            if(a.referencedTable.getName().equals(name)) {
+            if(a.referencedTable.name.equals(name)) {
                 return a.referencedTable;
             }
         } return null;
@@ -260,7 +262,7 @@ public class ConceptualSchema {
 
     /* =========================================================================================== */
 
-    private class Entity {
+    private final class Entity {
         public final Table table;
 
         /**
@@ -268,11 +270,11 @@ public class ConceptualSchema {
          */
         public Entity(Table table) {
             this.table = table;
-            entities.put(table.getName(), this);
+            entities.put(table.name, this);
         }
     }
 
-    private class Association {
+    private final class Association {
         public String name;
         public final Map<Entity, CardinalityValue> linkedEntities = new HashMap<>();
         public final Table referencedTable;
@@ -283,10 +285,10 @@ public class ConceptualSchema {
         public Association(List<Pair<Entity, CardinalityValue>> entitiesCard, Table rfTable) {
             if(rfTable != null) {
                 this.referencedTable = rfTable;
-                this.name = rfTable.getName();
+                this.name = rfTable.name;
             } else {
                 String nom = "";
-                for(Pair<Entity, CardinalityValue> p : entitiesCard) { nom += p.getKey().table.getName() + "_"; }
+                for(Pair<Entity, CardinalityValue> p : entitiesCard) { nom += p.getKey().table.name + "_"; }
                 this.referencedTable = new Table(nom);
                 this.name = nom;
             }

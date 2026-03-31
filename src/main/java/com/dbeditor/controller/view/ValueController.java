@@ -23,9 +23,9 @@ public class ValueController extends GridView {
     public void initialization(ToolBar toolbar) {
         this.combobox = new ComboBox<>();
 
-        for(Table table : MainApp.getSchema().getTables().values()) {
+        for(Table table : MainApp.schema.getTables()) {
             this.combobox.getItems().add(
-                table.getName()
+                table.name
             );
         }
 
@@ -41,6 +41,11 @@ public class ValueController extends GridView {
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
+        // TODO
+    }
+
+    @Override
+    public void updateType(DbType type) {
         // TODO
     }
 }

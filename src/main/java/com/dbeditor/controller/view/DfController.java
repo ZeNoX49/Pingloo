@@ -63,13 +63,18 @@ public class DfController extends TextView {
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
-        List<Table> tablesSorted = D_M.sortTables(dbS.getTables().values());
+        List<Table> tablesSorted = D_M.sortTables(dbS.getTables());
 
 
         this.doTextNormal(tablesSorted);
         this.doTextExport(tablesSorted);
 
         this.updateStyle();
+    }
+
+    @Override
+    public void updateType(DbType type) {
+        // TODO
     }
 
     private void doTextNormal(List<Table> tablesSorted) {
@@ -81,15 +86,15 @@ public class DfController extends TextView {
             List<String> fk = new ArrayList<>();
 
             for (Column c : t.getColumns()) {
-                if (c.isPrimaryKey()) {
-                    pk.add(c.getName());
+                if (c.isPrimaryKey) {
+                    pk.add(c.name);
                 } else {
-                    col.add(c.getName());
+                    col.add(c.name);
                 }
             }
 
             for (ForeignKey f : t.getForeignKeys()) {
-                fk.add(f.getColumnName());
+                fk.add(f.columnName);
             }
 
             text.append(String.join(", ", pk));
@@ -115,18 +120,18 @@ public class DfController extends TextView {
             List<String> fk = new ArrayList<>();
 
             for (Column c : t.getColumns()) {
-                if (c.isPrimaryKey()) {
-                    pk.add(c.getName());
+                if (c.isPrimaryKey) {
+                    pk.add(c.name);
                 } else {
-                    col.add(c.getName());
+                    col.add(c.name);
                 }
             }
 
             for (ForeignKey f : t.getForeignKeys()) {
-                fk.add("{" + f.getReferencedTable() + "}" + f.getColumnName());
+                fk.add("{" + f.referencedTable + "}" + f.columnName);
             }
 
-            text.append("[").append(t.getName()).append("] ");
+            text.append("[").append(t.name).append("] ");
             text.append(String.join(", ", pk));
             text.append(" -> ");
 

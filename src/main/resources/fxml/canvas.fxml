@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.CanvasController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.CanvasController">
    <top>
       <ToolBar fx:id="toolBar" BorderPane.alignment="CENTER">
         <items>
@@ -64,6 +64,29 @@
                            </graphic>
                         </MenuItem>
                     </items>
+                  </Menu>
+               </items>
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </MenuButton>
+            <MenuButton fx:id="mbDatabase" mnemonicParsing="false" style="-fx-background-color: #cc0033;" text="🛠 Database" textFill="WHITE">
+               <items>
+                  <MenuItem fx:id="miLT1" mnemonicParsing="false" text="Light Theme" />
+                  <MenuItem fx:id="miDT1" mnemonicParsing="false" text="Dark Theme" />
+                  <Menu mnemonicParsing="false" text="Perso Theme">
+                     <items>
+                        <MenuItem fx:id="miPT1" mnemonicParsing="false" text="use" />
+                        <MenuItem mnemonicParsing="false" onAction="#openPersoThemeParameter">
+                           <graphic>
+                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../img/parametre.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </MenuItem>
+                     </items>
                   </Menu>
                </items>
                <font>

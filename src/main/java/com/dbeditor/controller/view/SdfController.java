@@ -27,6 +27,11 @@ public class SdfController extends View {
     }
 
     @Override
+    public void updateType(DbType type) {
+        // TODO
+    }
+
+    @Override
     public Pane getRoot() {
         // TODO
         return null;

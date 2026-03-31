@@ -50,12 +50,12 @@ public class TableEditorDialog extends EditorDialog {
         if (table != null) {
             for (Column col : table.getColumns()) {
                 this.columnData.add(new ColumnRow(
-                    col.getName(),
-                    col.getType(),
-                    col.isPrimaryKey(),
-                    col.isNotNull(),
-                    col.isUnique(),
-                    col.isAutoIncrementing()
+                    col.name,
+                    col.type,
+                    col.isPrimaryKey,
+                    col.isNotNull,
+                    col.isUnique,
+                    col.isAutoIncrementing
                 ));
             }
         } else {
@@ -63,7 +63,7 @@ public class TableEditorDialog extends EditorDialog {
             this.columnData.add(new ColumnRow("id", "INT", true, true, false, true));
         }
         
-        this.initUI(table != null ? table.getName() : "");
+        this.initUI(table != null ? table.name : "");
     }
 
     /**

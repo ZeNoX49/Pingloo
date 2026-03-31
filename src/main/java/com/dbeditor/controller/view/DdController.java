@@ -11,6 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.GridPane;
 
+// TODO
 public class DdController extends GridView {
 
     @Override
@@ -22,20 +23,25 @@ public class DdController extends GridView {
     public void initialization(ToolBar toolbar) {
         super.initialization(toolbar);
 
-        TableView tableView = super.getTableView();
-        tableView.add
+        // TableView tableView = super.getTableView();
+        // tableView.add
 
-        GridPane gridPane = (GridPane) this.getRoot();
-        gridPane.addColumn(0, new Label("Nom"));
-        gridPane.addColumn(1, new Label("Description"));
-        gridPane.addColumn(2, new Label("Nature"));
-        gridPane.addColumn(3, new Label("Type"));
+        // GridPane gridPane = (GridPane) this.getRoot();
+        // gridPane.addColumn(0, new Label("Nom"));
+        // gridPane.addColumn(1, new Label("Description"));
+        // gridPane.addColumn(2, new Label("Nature"));
+        // gridPane.addColumn(3, new Label("Type"));
 
         this.updateStyle();
     }
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
+        // TODO
+    }
+
+    @Override
+    public void updateType(DbType type) {
         // TODO
     }
     

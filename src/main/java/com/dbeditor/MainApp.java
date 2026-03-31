@@ -16,9 +16,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
-    private static DatabaseSchema schema;
-	public static void setSchema(DatabaseSchema schema) { MainApp.schema = schema; }
-	public static DatabaseSchema getSchema() { return MainApp.schema; }
+    public static DatabaseSchema schema;
 
     @Override
 	public void start(Stage stage) throws IOException {
@@ -27,7 +25,7 @@ public class MainApp extends Application {
         try {
 			J_M.load();
 
-			MainApp.setSchema(new DatabaseSchema(""));
+			MainApp.schema = new DatabaseSchema("");
 
 	        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/canvas.fxml"));
 	        Scene scene = new Scene(loader.load(), 1280, 720);

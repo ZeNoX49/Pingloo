@@ -1,10 +1,10 @@
 package com.dbeditor.model;
 
 public class ForeignKey {
-    private String fkName;
-    private String columnName;
-    private String referencedTable;
-    private String referencedColumn;
+    public String fkName;
+    public String columnName;
+    public String referencedTable;
+    public String referencedColumn;
 
     public ForeignKey(String fkName, String columnName, String referencedTable, String referencedColumn) {
         this.fkName = fkName;
@@ -13,8 +13,10 @@ public class ForeignKey {
         this.referencedColumn = referencedColumn;
     }
 
-    public String getFkName() { return this.fkName; }
-    public String getColumnName() { return this.columnName; }
-    public String getReferencedTable() { return this.referencedTable; }
-    public String getReferencedColumn() { return this.referencedColumn; }
+    public ForeignKey(ForeignKey other) {
+        this.fkName = other.fkName;
+        this.columnName = other.columnName;
+        this.referencedTable = other.referencedTable;
+        this.referencedColumn = other.referencedColumn;
+    }
 }

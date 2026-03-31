@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import com.dbeditor.MainApp;
-import com.dbeditor.controller.modifier.Update;
+import com.dbeditor.controller.modifier.DbUpdate;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.controller.view.View;
 import com.dbeditor.model.DatabaseSchema;
@@ -23,7 +23,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 
-public class ViewController implements Visual, Update {
+public class ViewController implements Visual, DbUpdate {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private BorderPane root;
@@ -70,7 +70,7 @@ public class ViewController implements Visual, Update {
         this.viewPane = newPane;   // TODO: a verif
 
         // initialiser la nouvelle vue
-        this.view.open(MainApp.getSchema());
+        this.view.open(MainApp.schema);
 
         this.setupCombobox();
         // this.setupSplit();
@@ -92,6 +92,11 @@ public class ViewController implements Visual, Update {
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
         view.open(dbS);
+    }
+
+    @Override
+    public void updateType(DbType type) {
+        // TODO
     }
 
     // TODO: sync
@@ -140,7 +145,7 @@ public class ViewController implements Visual, Update {
             this.viewPane = newPane;
 
             try {
-                newController.open(MainApp.getSchema());
+                newController.open(MainApp.schema);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

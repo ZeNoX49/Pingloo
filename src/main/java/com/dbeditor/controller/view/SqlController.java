@@ -42,5 +42,10 @@ public class SqlController extends TextView {
     public void open(DatabaseSchema dbS) throws IOException {
         // TODO
     }
+
+    @Override
+    public void updateType(DbType type) {
+        // TODO
+    }
     
 }

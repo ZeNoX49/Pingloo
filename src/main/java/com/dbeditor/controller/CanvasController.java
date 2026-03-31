@@ -23,6 +23,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
@@ -45,11 +46,12 @@ public class CanvasController implements Visual {
 
     @FXML private StackPane spPane;
     @FXML private ToolBar toolBar;
-    @FXML private Button btnRedo, btnUndo;
+    @FXML private MenuButton mbDatabase; // TODO
+    // @FXML private Button btnRedo, btnUndo;
     @FXML private TextField tfDbName;
     @FXML private Region spacer1, spacer2;
     @FXML private Menu menuOpenDbMYSQL, menuSaveDbMYSQL;
-    @FXML private MenuItem miLT, miDT, miPT;
+    @FXML private MenuItem miLightTheme, miDarkTheme, miPersoTheme;
     @FXML private Label appNameLabel;
 
     private List<ViewController> views;
@@ -60,12 +62,12 @@ public class CanvasController implements Visual {
         
         this.createBaseView();
 
-        this.miLT.setOnAction(e -> this.changeTheme(1));
-        this.miDT.setOnAction(e -> this.changeTheme(2));
-        this.miPT.setOnAction(e -> this.changeTheme(3));
+        this.miLightTheme.setOnAction(e -> this.changeTheme(1));
+        this.miDarkTheme.setOnAction(e -> this.changeTheme(2));
+        this.miPersoTheme.setOnAction(e -> this.changeTheme(3));
         this.tfDbName.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && MainApp.getSchema() != null) {
-                MainApp.getSchema().setName(this.tfDbName.getText());
+            if (!isFocused && MainApp.schema != null) {
+                MainApp.schema.name = this.tfDbName.getText();
             }
         });
 
@@ -169,13 +171,13 @@ public class CanvasController implements Visual {
      * @param dbS
      * @throws IOException
      */
-    private void open(DatabaseSchema dbS) throws IOException {
-        if(dbS != null) {
-            MainApp.setSchema(dbS);
-            this.tfDbName.setText(dbS.getName());
+    private void open(DatabaseSchema schema) throws IOException {
+        if(schema != null) {
+            MainApp.schema = schema;
+            this.tfDbName.setText(schema.name);
 
             for(ViewController v : this.views) {
-                v.open(dbS);
+                v.open(schema);
             }
         }
     }
@@ -190,7 +192,7 @@ public class CanvasController implements Visual {
         );
         fileChooser.setInitialFileName("export.sql");
 
-        F_M.exportSQL(fileChooser, MainApp.getSchema(), new MySqlExporter());
+        F_M.exportSQL(fileChooser, MainApp.schema, new MySqlExporter());
     }
 
     // void saveDbMYSQL(ActionEvent event) {

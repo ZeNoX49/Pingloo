@@ -59,12 +59,12 @@ public class TableController implements Visual {
      * Permet de créer l'UI de la table
      */
     private void createUI() {
-        this.pane.setLayoutX(table.getPosX());
-        this.pane.setLayoutY(table.getPosY());
+        this.pane.setLayoutX(table.posX);
+        this.pane.setLayoutY(table.posY);
 
         this.hName.setPadding(new Insets(2));
 
-        this.name.setText(this.table.getName());
+        this.name.setText(this.table.name);
         this.name.setFont(Font.font("System", FontWeight.BOLD, 24));
         this.name.setTextFill(Color.WHITE);
 
@@ -73,19 +73,19 @@ public class TableController implements Visual {
         for (int i = 0; i < this.table.getColumns().size(); i++) {
             Column col = this.table.getColumns().get(i);
 
-            Label colName = new Label(col.getName());
-            if(col.isPrimaryKey() || col.isUnique()) {
+            Label colName = new Label(col.name);
+            if(col.isPrimaryKey || col.isUnique) {
                 colName.setFont(Font.font("System", FontWeight.BOLD, 12));
                 // uniquement pour les clés primaire
-                if(!col.isUnique()) colName.setUnderline(true);
+                if(!col.isUnique) colName.setUnderline(true);
             } else {
                 colName.setFont(Font.font("System", 12));
             }
             this.grid.add(colName, 0, i);
             GridPane.setMargin(colName, new Insets(1, 1, 1, 3));
             
-            Label colType = new Label(col.getType().getRepr(DbType.MsSql));
-            if(col.isPrimaryKey() || col.isNotNull()) {
+            Label colType = new Label(col.type.getRepr(DbType.MsSql));
+            if(col.isPrimaryKey || col.isNotNull) {
                 colType.setFont(Font.font("System", FontWeight.BOLD, 11));
             } else {
                 colType.setFont(Font.font("System", 11));

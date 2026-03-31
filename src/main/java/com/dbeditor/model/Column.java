@@ -3,12 +3,12 @@ package com.dbeditor.model;
 import com.dbeditor.model.type.SqlType;
 
 public class Column {
-    private String name;
-    private SqlType type;
-    private boolean isPrimaryKey;
-    private boolean isNotNull;
-    private boolean isUnique;
-    private boolean isAutoIncrementing;
+    public String name;
+    public SqlType type;
+    public boolean isPrimaryKey;
+    public boolean isNotNull;
+    public boolean isUnique;
+    public boolean isAutoIncrementing;
     
     /**
      * TODO: temp
@@ -27,20 +27,4 @@ public class Column {
         this.isUnique = other.isUnique;
         this.isAutoIncrementing = other.isAutoIncrementing;
     }
-    
-    public String getName() { return name; }
-    public SqlType getType() { return type; }
-
-    public void setName(String name) { this.name = name; }
-    public void setType(SqlType type) { this.type = type; }
-
-    public boolean isPrimaryKey() { return this.isPrimaryKey; }
-    public boolean isNotNull() { return this.isNotNull; }
-    public boolean isUnique() { return this.isUnique; }
-    public boolean isAutoIncrementing() { return this.isAutoIncrementing; }
-
-    public void setPrimaryKey(boolean bool) { this.isPrimaryKey = bool; }
-    public void setNotNull(boolean bool) { this.isNotNull = bool; }
-    public void setUnique(boolean bool) { this.isUnique = bool; }
-    public void setAutoIncrementing(boolean bool) { this.isAutoIncrementing = bool; }
 }

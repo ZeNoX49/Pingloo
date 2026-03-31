@@ -46,6 +46,11 @@ public class MldController extends ModelView {
         }
     }
 
+    @Override
+    public void updateType(DbType type) {
+        // TODO
+    }
+
     /**
      * Permet de créer le visuel des tables à partir d'un DatabaseSchema
      * @param schema
@@ -54,7 +59,7 @@ public class MldController extends ModelView {
         int col = 0, row = 0;
         int cols = (int) Math.ceil(Math.sqrt(schema.getTables().size()));
 
-        for (Table table : schema.getTables().values()) {
+        for (Table table : schema.getTables()) {
             double x = col * 250 + 50;
             double y = row * 200 + 50;
             this.createTableNode(table, x, y);
@@ -85,7 +90,7 @@ public class MldController extends ModelView {
         TableController tcController = loader.getController();
         tcController.createTableNode(table, TableType.Table);
 
-        super.getTableNodes().put(tcController.getTable().getName(), tcController);
+        super.getTableNodes().put(tcController.getTable().name, tcController);
 
         // gérer la sélection d'un table lorsqu'elle est cliquée
         tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
@@ -122,7 +127,7 @@ public class MldController extends ModelView {
         for (TableController fromNode : super.getTableNodes().values()) {
             Table fromTable = fromNode.getTable();
             for (ForeignKey fk : fromTable.getForeignKeys()) {
-                TableController toNode = super.getTableNodes().get(fk.getReferencedTable());
+                TableController toNode = super.getTableNodes().get(fk.referencedTable);
                 if (toNode != null) {
                     this.drawConnection(fromNode, toNode);
                 }
@@ -164,11 +169,11 @@ public class MldController extends ModelView {
      * @param tableController le contrôleur de la table à modifier
      */
     private void editTable(TableController tableController) {
-        DatabaseSchema schema = MainApp.getSchema();
+        DatabaseSchema schema = MainApp.schema;
         if (schema == null) return;
 
         Table oldTable = tableController.getTable();
-        String oldName = oldTable.getName();
+        String oldName = oldTable.name;
 
         // Ouvrir le dialogue avec les données existantes
         TableEditorDialog dialog = new TableEditorDialog(oldTable);
@@ -176,10 +181,10 @@ public class MldController extends ModelView {
 
         if (dialog.isConfirmed()) {
             Table modifiedTable = dialog.getResultTable();
-            String newName = modifiedTable.getName();
+            String newName = modifiedTable.name;
 
             // Si le nom a changé, vérifier qu'il n'existe pas déjà
-            if (!oldName.equals(newName) && schema.getTable(newName) != null) {
+            if (!oldName.equals(newName) && schema.tables.get(newName) != null) {
                 CanvasController.showWarningAlert("Erreur", "Une table avec ce nom existe déjà.");
                 return;
             }
