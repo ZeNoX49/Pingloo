@@ -8,8 +8,7 @@ import java.util.Optional;
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.sql.file.exporter.MySqlExporter;
-import com.dbeditor.sql.file.parser.MySqlParser;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.util.DbManager;
 import com.dbeditor.util.FileManager;
 import com.dbeditor.util.ThemeManager;
@@ -19,7 +18,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -44,27 +42,35 @@ public class CanvasController implements Visual {
     private static final ThemeManager T_M = ThemeManager.getInstance();
     private static final FileManager F_M = FileManager.getInstance();
 
-    @FXML private StackPane spPane;
     @FXML private ToolBar toolBar;
+    @FXML private Menu mOpenFile, mOpenDb; // TODO
+    @FXML private Menu mSaveFile, mSaveDb; // TODO
     @FXML private MenuButton mbDatabase; // TODO
     // @FXML private Button btnRedo, btnUndo;
     @FXML private TextField tfDbName;
     @FXML private Region spacer1, spacer2;
-    @FXML private Menu menuOpenDbMYSQL, menuSaveDbMYSQL;
     @FXML private MenuItem miLightTheme, miDarkTheme, miPersoTheme;
     @FXML private Label appNameLabel;
+    @FXML private StackPane spPane;
 
     private List<ViewController> views;
 
     @FXML
     private void initialize() throws IOException {
         this.views = new ArrayList<>();
-        
-        this.createBaseView();
+
+        for(DbType type : DbType.values()) {
+            this.createMenuItemOpenFile(type);
+            this.createMenuItemOpenDb(type);
+            this.createMenuItemSaveFile(type);
+            this.createMenuItemSaveDb(type);
+            this.createMenuItemDatabse(type);
+        }
 
         this.miLightTheme.setOnAction(e -> this.changeTheme(1));
         this.miDarkTheme.setOnAction(e -> this.changeTheme(2));
         this.miPersoTheme.setOnAction(e -> this.changeTheme(3));
+
         this.tfDbName.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && MainApp.schema != null) {
                 MainApp.schema.name = this.tfDbName.getText();
@@ -74,7 +80,7 @@ public class CanvasController implements Visual {
         HBox.setHgrow(this.spacer1, Priority.ALWAYS);
         HBox.setHgrow(this.spacer2, Priority.ALWAYS);
 
-        this.createMenuItemMysql();
+        this.createBaseView();
 
         this.updateStyle();
     }
@@ -102,6 +108,7 @@ public class CanvasController implements Visual {
         this.spPane.getChildren().add(mcdPane);
     }
 
+    // utiliser lors des splits
     public void registerView(ViewController v) {
         this.views.add(v);
     }
@@ -116,9 +123,9 @@ public class CanvasController implements Visual {
         this.spPane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
 
         this.toolBar.setStyle(
-            "-fx-background-color: " + T_M.getTheme().getToolbarColor() + 
-            "; -fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + 
-            "; -fx-border-width: 0 0 1 0;"
+            "-fx-background-color: " + T_M.getTheme().getToolbarColor() + ";" +
+            "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + ";" +
+            "-fx-border-width: 0 0 1 0;"
         );
 
         this.appNameLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
@@ -154,18 +161,6 @@ public class CanvasController implements Visual {
 	    }
     }
 
-    @FXML
-    void openFileMYSQL(ActionEvent event) throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Ouvrir une base de données");
-
-        fileChooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Fichiers MYSQL", "*.sql")
-        );
-
-        this.open(F_M.openDatabase(fileChooser, new MySqlParser()));
-    }
-
     /**
      * Permet de charger un DatabaseSchema dans toutes les vues
      * @param dbS
@@ -182,29 +177,106 @@ public class CanvasController implements Visual {
         }
     }
 
-    @FXML
-    void saveFileMYSQL(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Exporter en SQL");
+    /**
+     * Creér un Menu Item pour mOpenFile
+     * @param type
+     */
+    private void createMenuItemOpenFile(DbType type) {
+        MenuItem mi = new MenuItem(type.toString());
+        mi.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Ouvrir une base de données");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers " + type.toString(), "*.sql")
+            );
 
-        fileChooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Fichiers SQL", "*.sql")
-        );
-        fileChooser.setInitialFileName("export.sql");
-
-        F_M.exportSQL(fileChooser, MainApp.schema, new MySqlExporter());
+            try {
+                this.open(F_M.openDatabase(fileChooser, D_M.getSqlParser(type)));
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        this.mOpenFile.getItems().add(mi);
     }
 
-    // void saveDbMYSQL(ActionEvent event) {
-    //     System.out.println("saveDbMYSQL");
-    // }
+    /**
+     * Creér un Menu Item pour mOpenDb
+     * @param type
+     */
+    private void createMenuItemOpenDb(DbType type) {
+        this.createMenuItemParameterDb(this.mSaveDb);
+
+        for(String dbName : D_M.getSqlTypeDatabases(DbType.MySql)) {
+            MenuItem mi = new MenuItem(dbName);
+            mi.setOnAction(e -> {
+                try {
+                    this.open(D_M.getSqlDb(DbType.MySql).loadDb(dbName));
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            });
+            this.mSaveDb.getItems().add(mi);
+        }
+    }
 
     /**
-     * Créer les MenuItem pour chaque nom des bdd mysql
-     * et leur associe l'action permettant de charger la bdd
+     * Creér un Menu Item pour mSaveFile
+     * @param type
      */
-    private void createMenuItemMysql() {
-        this.menuOpenDbMYSQL.getItems().clear();
+    private void createMenuItemSaveFile(DbType type) {
+        MenuItem mi = new MenuItem(type.toString());
+        mi.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Ouvrir une base de données");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers SQL", "*.sql")
+            );
+            fileChooser.setInitialFileName("export.sql");
+
+            F_M.exportSQL(fileChooser, MainApp.schema, D_M.getSqlExporter(type));
+        });
+        this.mOpenFile.getItems().add(mi);
+    }
+
+    /**
+     * Creér un Menu Item pour mSaveDb
+     * @param type
+     */
+    private void createMenuItemSaveDb(DbType type) {
+        this.createMenuItemParameterDb(this.mSaveDb);
+
+        for(String dbName : D_M.getSqlTypeDatabases(DbType.MySql)) {
+            MenuItem mi = new MenuItem(dbName);
+            mi.setOnAction(e -> {
+                try {
+                    D_M.getSqlDb(type).executeSqlScript(D_M.getSqlExporter(type).createSql(MainApp.schema));
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            });
+            this.mSaveDb.getItems().add(mi);
+        }
+    }
+
+    /**
+     * Creér un Menu Item pour mDatabase
+     * @param type
+     */
+    private void createMenuItemDatabse(DbType type) {
+        MenuItem mi = new MenuItem(type.toString());
+        mi.setOnAction(e -> {
+            for(ViewController v : this.views) {
+                v.updateType(type);
+            }
+        });
+        this.mbDatabase.getItems().add(mi);
+    }
+
+    /**
+     * 
+     */
+    private void createMenuItemParameterDb(Menu menu) {
+        menu.getItems().clear();
 
         MenuItem mip = new MenuItem();
         ImageView img = new ImageView(new Image(MainApp.class.getResource("/img/parametre.png").toString(), 15, 15, true, true));
@@ -221,7 +293,7 @@ public class CanvasController implements Visual {
                 modalStage.initStyle(StageStyle.UTILITY);
                 modalStage.setResizable(false);
 
-                modalStage.setOnCloseRequest(ev -> { this.createMenuItemMysql(); });
+                modalStage.setOnCloseRequest(ev -> { this.createMenuItemParameterDb(menu); });
 
                 modalStage.setScene(scene);
                 modalStage.showAndWait();
@@ -230,19 +302,7 @@ public class CanvasController implements Visual {
                 ioe.printStackTrace();
             }
         });
-        this.menuOpenDbMYSQL.getItems().add(mip);
-
-        for(String tableName : D_M.getMysqlDbTables()) {
-            MenuItem mi = new MenuItem(tableName);
-            mi.setOnAction(e -> {
-                try {
-                    this.open(D_M.getMysqlDb().loadDb(tableName));
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                }
-            });
-            this.menuOpenDbMYSQL.getItems().add(mi);
-        }
+        menu.getItems().add(mip);
     }
 
     /**

@@ -16,6 +16,7 @@ import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.Table;
 import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.model.mcd.ConceptualSchema;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.beans.value.ChangeListener;

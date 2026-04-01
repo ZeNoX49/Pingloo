@@ -11,6 +11,7 @@ import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.fxml.FXMLLoader;

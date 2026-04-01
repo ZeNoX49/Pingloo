@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dbeditor.sql.DbType;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -95,12 +96,12 @@ public class JsonManager {
         mysql.put("password", "");
         mysql.put("port", "3306");
         List<Map<String, String>> tables = new ArrayList<>();
-        for(String t : D_M.getMysqlDbTables()) {
+        for(String t : D_M.getSqlTypeDatabases(DbType.MySql)) {
             Map<String, String> map = new HashMap<>();
             map.put("name", t);
             tables.add(map);
         }
-        mysql.put("tables", tables);
+        mysql.put("databases", tables);
         db.put("mysql", mysql);
         root.put("db", db);
 
@@ -142,7 +143,7 @@ public class JsonManager {
         mysql.put("user", "root");
         mysql.put("password", "");
         mysql.put("port", "3306");
-        mysql.put("tables", new ArrayList<Map<String, String>>());
+        mysql.put("databases", new ArrayList<Map<String, String>>());
         db.put("mysql", mysql);
         root.put("db", db);
 

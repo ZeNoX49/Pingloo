@@ -13,4 +13,9 @@ public abstract class SqlExporter {
      */
     public abstract void exportToSQL(DatabaseSchema schema, String filepath) throws IOException;
     
+    /**
+     * Créer le script sql
+     * @param schema schema de la bdd
+     */
+    public abstract String createSql(DatabaseSchema schema) throws IOException;
 }

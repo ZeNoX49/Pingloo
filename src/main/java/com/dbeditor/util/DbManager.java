@@ -12,6 +12,16 @@ import com.dbeditor.model.Table;
 import com.dbeditor.sql.DbType;
 import com.dbeditor.sql.db.MySqlDb;
 import com.dbeditor.sql.db.SqlDb;
+import com.dbeditor.sql.file.exporter.MySqlExporter;
+import com.dbeditor.sql.file.exporter.MsSqlExporter;
+import com.dbeditor.sql.file.exporter.PostgreSqlExporter;
+import com.dbeditor.sql.file.exporter.OracleExporter;
+import com.dbeditor.sql.file.exporter.SqlExporter;
+import com.dbeditor.sql.file.parser.MsSqlParser;
+import com.dbeditor.sql.file.parser.MySqlParser;
+import com.dbeditor.sql.file.parser.OracleParser;
+import com.dbeditor.sql.file.parser.PostgreSqlParser;
+import com.dbeditor.sql.file.parser.SqlParser;
 
 public class DbManager {
     private static DbManager instance;
@@ -24,17 +34,31 @@ public class DbManager {
 
     /* ================================================== */
 
-    private Map<DbType, SqlDb> db;
-    private Map<DbType, List<String>> tables;
+    private final Map<DbType, SqlDb> sqlDb;
+    private final Map<DbType, SqlParser> sqlParser;
+    private final Map<DbType, SqlExporter> sqlExporter;
+    private final Map<DbType, List<String>> sqlTypeDatabases;
     // private Map<String, SQL_DbExporter> dbExporters;
 
     private DbManager() {
-        this.db = new HashMap<>();
-        this.tables = new HashMap<>();
+        this.sqlDb = new HashMap<>();
+        this.sqlTypeDatabases = new HashMap<>();
+
+        this.sqlParser = new HashMap<>();
+        this.sqlParser.put(DbType.MsSql, new MySqlParser());
+        this.sqlParser.put(DbType.MsSql, new MsSqlParser());
+        this.sqlParser.put(DbType.PostgreSql, new PostgreSqlParser());
+        this.sqlParser.put(DbType.Oracle, new OracleParser());
+
+        this.sqlExporter = new HashMap<>();
+        this.sqlExporter.put(DbType.MsSql, new MySqlExporter());
+        this.sqlExporter.put(DbType.MsSql, new MsSqlExporter());
+        this.sqlExporter.put(DbType.PostgreSql, new PostgreSqlExporter());
+        this.sqlExporter.put(DbType.Oracle, new OracleExporter());
     }
 
     public void setMysqlDbData(Map<String, Object> data) {
-        this.db.put(DbType.MySql, new MySqlDb(
+        this.sqlDb.put(DbType.MySql, new MySqlDb(
             (String) data.get("host"),
             (String) data.get("user"),
             (String) data.get("password"),
@@ -42,14 +66,16 @@ public class DbManager {
         ));
         
         List<String> t = new ArrayList<>();
-        for(Map<String, Object> table : (List<Map<String, Object>>) data.get("tables")) {
+        for(Map<String, Object> table : (List<Map<String, Object>>) data.get("databases")) {
             t.add((String) table.get("name"));
         }
-        this.tables.put(DbType.MySql, t);
+        this.sqlTypeDatabases.put(DbType.MySql, t);
     }
 
-    public MySqlDb getMysqlDb() { return (MySqlDb) this.db.get(DbType.MySql);  }
-    public List<String> getMysqlDbTables() { return this.tables.get(DbType.MySql);  }
+    public SqlDb getSqlDb(DbType type) { return this.sqlDb.get(type); }
+    public SqlParser getSqlParser(DbType type) { return this.sqlParser.get(type); }
+    public SqlExporter getSqlExporter(DbType type) { return this.sqlExporter.get(type); }
+    public List<String> getSqlTypeDatabases(DbType type) { return this.sqlTypeDatabases.get(type);  }
 
     /* ============================================================================================================================= */
 
@@ -83,14 +109,14 @@ public class DbManager {
                 boolean allFKResolved = true;
 
                 for(ForeignKey fk : t.getForeignKeys()) {
-                    String refTable = fk.getReferencedTable();
+                    String refTable = fk.referencedTable;
 
                     // si c'est notre table actuelle : on passe
-                    if(refTable.equals(t.getName())) continue;
+                    if(refTable.equals(t.name)) continue;
 
                     boolean fkFound = false;
                     for(Table r : res) {
-                        if(refTable.equals(r.getName())) {
+                        if(refTable.equals(r.name)) {
 
                             fkFound = true;
                             break;

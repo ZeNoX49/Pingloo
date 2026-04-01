@@ -3,8 +3,19 @@ package com.dbeditor.sql.db;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,14 +23,11 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.type.SqlType;
+import com.dbeditor.sql.DbType;
 
-public class PostgreSqlDb implements SqlDb {
+public class PostgreSqlDb extends SqlDb {
     private static final Logger LOGGER = Logger.getLogger(PostgreSqlDb.class.getName());
-
-    private String dbHost;
-    private String dbUser;
-    private String dbPassword;
-    private String dbPort;
 
     private Connection connection;
 
@@ -153,17 +161,17 @@ public class PostgreSqlDb implements SqlDb {
                     fullType += "(" + columnSize + ")";
                 }
 
-                Column column = new Column(colName, fullType);
+                Column column = new Column(colName, SqlType.get(fullType, DbType.PostgreSql));
                 if ("NO".equalsIgnoreCase(isNullable)) {
-                    column.setNotNull(true);
+                    column.isNotNull = true;
                 }
                 if (primaryKeys.contains(colName)) {
-                    column.setPrimaryKey(true);
+                    column.isPrimaryKey = true;
                 }
 
                 // Détection auto-increment : soit IS_AUTOINCREMENT = YES soit default contient nextval(
                 if ("YES".equalsIgnoreCase(isAuto) || (columnDef != null && columnDef.toLowerCase().contains("nextval("))) {
-                    column.setAutoIncrementing(true);
+                    column.isAutoIncrementing = true;
                 }
 
                 table.addColumn(column);
@@ -420,15 +428,4 @@ public class PostgreSqlDb implements SqlDb {
         if (success) LOGGER.info("Script exécuté avec succès.");
         return success;
     }
-
-    /* getters / setters */
-    public void setDbHost(String dbHost) { this.dbHost = dbHost; }
-    public void setDbUser(String dbUser) { this.dbUser = dbUser; }
-    public void setDbPassword(String dbPassword) { this.dbPassword = dbPassword; }
-    public void setDbPort(String dbPort) { this.dbPort = dbPort; }
-
-    public String getDbHost() { return this.dbHost; }
-    public String getDbUser() { return this.dbUser; }
-    public String getDbPassword() { return this.dbPassword; }
-    public String getDbPort() { return this.dbPort; }
 }

@@ -136,7 +136,7 @@ public class AssociationEditorDialog extends EditorDialog {
         Label lblAssociationName = new Label("Nom de l'association (verbe):");
         lblAssociationName.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + "; -fx-font-size: 14;");
         
-        tfAssociationName = new TextField(association != null ? association.getName() : "");
+        tfAssociationName = new TextField(association != null ? association.name : "");
         tfAssociationName.setPromptText("Ex: posseder, commander, appartenir");
         tfAssociationName.setStyle(
             "-fx-background-color: " + T_M.getTheme().getCardColor() + "; " +

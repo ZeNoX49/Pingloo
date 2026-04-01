@@ -24,14 +24,11 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.type.SqlType;
+import com.dbeditor.sql.DbType;
 
-public class MySqlDb implements SqlDb {
+public class MySqlDb extends SqlDb {
     private static final Logger LOGGER = Logger.getLogger(MySqlDb.class.getName());
-
-    private String dbHost;
-    private String dbUser;
-    private String dbPassword;
-    private String dbPort;
 
     private Connection connection;
 
@@ -157,15 +154,15 @@ public class MySqlDb implements SqlDb {
                     fullType += "(" + columnSize + ")";
                 }
 
-                Column column = new Column(colName, fullType);
+                Column column = new Column(colName, SqlType.get(fullType, DbType.MySql));
                 if ("NO".equalsIgnoreCase(isNullable)) {
-                    column.setNotNull(true);
+                    column.isNotNull = true;
                 }
                 if (primaryKeys.contains(colName)) {
-                    column.setPrimaryKey(true);
+                    column.isPrimaryKey = true;
                 }
                 if ("YES".equalsIgnoreCase(isAuto)) {
-                    column.setAutoIncrementing(true);
+                    column.isAutoIncrementing = true;
                 }
 
                 table.addColumn(column);
@@ -325,15 +322,4 @@ public class MySqlDb implements SqlDb {
         if (success) LOGGER.info("Script exécuté avec succès.");
         return success;
     }
-
-    /* getters / setters */
-    public void setDbHost(String dbHost) { this.dbHost = dbHost; }
-    public void setDbUser(String dbUser) { this.dbUser = dbUser; }
-    public void setDbPassword(String dbPassword) { this.dbPassword = dbPassword; }
-    public void setDbPort(String dbPort) { this.dbPort = dbPort; }
-
-    public String getDbHost() { return this.dbHost; }
-    public String getDbUser() { return this.dbUser; }
-    public String getDbPassword() { return this.dbPassword; }
-    public String getDbPort() { return this.dbPort; }
 }

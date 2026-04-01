@@ -10,10 +10,6 @@ public class Column {
     public boolean isUnique;
     public boolean isAutoIncrementing;
     
-    /**
-     * TODO: temp
-     * @param type = SqlType.get(type.replace(" ", ""), DbType.___);
-     */
     public Column(String name, SqlType type) {
         this.name = name;
         this.type = type;

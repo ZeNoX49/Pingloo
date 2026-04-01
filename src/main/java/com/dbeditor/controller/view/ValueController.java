@@ -6,6 +6,7 @@ import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.Table;
+import com.dbeditor.sql.DbType;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;

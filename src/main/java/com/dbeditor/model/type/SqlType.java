@@ -1,8 +1,8 @@
 package com.dbeditor.model.type;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.dbeditor.sql.DbType;
 
@@ -13,6 +13,7 @@ public abstract class SqlType {
 
     public static SqlType get(String type, DbType dbType) {
         // TODO: nettoyer "type"
+        type = type.trim().replace(" ", "");
 
         for(SqlType d : AllSqlType.ALL_SQL_TYPE) {
             String data = d.getRepr(dbType);

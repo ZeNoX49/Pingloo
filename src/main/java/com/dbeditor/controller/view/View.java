@@ -1,14 +1,14 @@
 package com.dbeditor.controller.view;
 
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.modifier.Update;
+import com.dbeditor.controller.modifier.DbUpdate;
 import com.dbeditor.controller.modifier.Visual;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
 
-public abstract class View implements Visual, Update {
+public abstract class View implements Visual, DbUpdate {
     /**
      * Donne le ViewType de la vue actuelle
      */

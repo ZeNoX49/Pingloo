@@ -35,14 +35,8 @@ public class ThemeManager {
     }
 
     public void changeTheme(int id) {
-        if(this.themes.containsKey(id)) {
-            this.id = id;
-            this.theme = this.themes.get(id);
-        }
-        else {
-            System.err.println("L'id du thème est incorrect");
-            this.changeTheme(1);
-        }
+        this.id = id;
+        this.theme = this.themes.get(id);
     }
 
     public PersoTheme getPersoTheme() {

@@ -2,9 +2,9 @@ package com.dbeditor.controller.view;
 
 import java.io.IOException;
 
-import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.sql.DbType;
 
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;

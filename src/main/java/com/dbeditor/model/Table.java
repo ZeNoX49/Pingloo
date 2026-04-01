@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class Table {
+public final class Table {
     public String name;
     public final LinkedHashMap<String, Column> columns;
     public final LinkedHashMap<String, ForeignKey> foreignKeys;
@@ -17,38 +17,23 @@ public class Table {
 
     public Table(Table other) {
         this(other.name);
-        for(Column col : other.columns.values()) this.columns.put(col.name, new Column(col));
-        for(ForeignKey fk : other.foreignKeys.values()) this.foreignKeys.put(fk.fkName, new ForeignKey(fk));
+        for(Column col : other.columns.values()) this.addColumn(new Column(col));
+        for(ForeignKey fk : other.foreignKeys.values()) this.addForeignKey(new ForeignKey(fk));
     }
 
+    public void addColumn(Column col) {
+        this.columns.put(col.name, col);
+    }
     public List<Column> getColumns() {
         return new ArrayList<>(this.columns.values());
     }
 
+    public void addForeignKey(ForeignKey fk) {
+        this.foreignKeys.put(fk.columnName, fk);
+    }
     public List<ForeignKey> getForeignKeys() {
         return new ArrayList<>(this.foreignKeys.values());
     }
-
-    // @Override
-    // public String toString() {
-    //     StringBuilder res = new StringBuilder(this.getName() + "\n");
-
-    //     if(!columns.isEmpty()) {
-    //         res.append("column | pk : [\n");
-    //         for(Column col : columns.values()) {
-    //             res.append("\t" + col.getName() + " | " + col.isPrimaryKey() + "\n");
-    //         } res.append("]\n");
-    //     }
-
-    //     if(!foreignKeys.isEmpty()) {
-    //         res.append("foreign key : [\n");
-    //         for(ForeignKey fk : foreignKeys) {
-    //             res.append("\t" + fk.getFkName() + "\n");
-    //         } res.append("]\n");
-    //     }
-
-    //     return res.toString() + "\n";
-    // }
 
     /* =================================================================== */
     // pour que les tables aient la même position sur un changement de vue //

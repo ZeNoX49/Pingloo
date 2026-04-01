@@ -8,6 +8,7 @@ import com.dbeditor.controller.modifier.DbUpdate;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.controller.view.View;
 import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.application.Platform;
@@ -90,13 +91,14 @@ public class ViewController implements Visual, DbUpdate {
     }
 
     @Override
-    public void open(DatabaseSchema dbS) throws IOException {
-        view.open(dbS);
+    public void open(DatabaseSchema schema) throws IOException {
+        this.view.open(schema);
     }
 
     @Override
     public void updateType(DbType type) {
         // TODO
+        this.view.updateType(type);
     }
 
     // TODO: sync

@@ -14,46 +14,35 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.CanvasController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.dbeditor.controller.CanvasController">
    <top>
       <ToolBar fx:id="toolBar" BorderPane.alignment="CENTER">
         <items>
             <MenuButton mnemonicParsing="false" style="-fx-background-color: #3b82f6;" text="📂 Ouvrir" textFill="WHITE">
               <items>
-                  <Menu mnemonicParsing="false" text="Fichier">
-                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#openFileMYSQL" text="MYSQL" />
-                     </items>
-                  </Menu>
-                  <Menu mnemonicParsing="false" text="BDD">
-                     <items>
-                        <Menu fx:id="menuOpenDbMYSQL" mnemonicParsing="false" text="MYSQL" />
-                     </items>
-                  </Menu>
+                  <Menu fx:id="mOpenFile" mnemonicParsing="false" text="Fichier" />
+                  <Menu fx:id="mOpenDb" mnemonicParsing="false" text="BDD" />
               </items>
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </MenuButton>
             <MenuButton mnemonicParsing="false" style="-fx-background-color: #10b981;" text="💾 Sauvegarder" textFill="WHITE">
-               <items>
-                  <Menu mnemonicParsing="false" text="Fichier">
-                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#saveFileMYSQL" text="MYSQL" />
-                     </items>
-                  </Menu>
-               </items>
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
+               <items>
+                  <Menu fx:id="mSaveFile" mnemonicParsing="false" text="Fichier" />
+                  <Menu fx:id="mSaveDb" mnemonicParsing="false" text="BDD" />
+               </items>
             </MenuButton>
             <MenuButton mnemonicParsing="false" style="-fx-background-color: #dd9e3f;" text="🎨 Theme" textFill="WHITE">
                <items>
-                  <MenuItem fx:id="miLT" mnemonicParsing="false" text="Light Theme" />
-                  <MenuItem fx:id="miDT" mnemonicParsing="false" text="Dark Theme" />
+                  <MenuItem fx:id="miLightTheme" mnemonicParsing="false" text="Light Theme" />
+                  <MenuItem fx:id="miDarkTheme" mnemonicParsing="false" text="Dark Theme" />
                   <Menu mnemonicParsing="false" text="Perso Theme">
                     <items>
-                      <MenuItem fx:id="miPT" mnemonicParsing="false" text="use" />
+                      <MenuItem fx:id="miPersoTheme" mnemonicParsing="false" text="use" />
                         <MenuItem mnemonicParsing="false" onAction="#openPersoThemeParameter">
                            <graphic>
                               <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
@@ -71,24 +60,6 @@
                </font>
             </MenuButton>
             <MenuButton fx:id="mbDatabase" mnemonicParsing="false" style="-fx-background-color: #cc0033;" text="🛠 Database" textFill="WHITE">
-               <items>
-                  <MenuItem fx:id="miLT1" mnemonicParsing="false" text="Light Theme" />
-                  <MenuItem fx:id="miDT1" mnemonicParsing="false" text="Dark Theme" />
-                  <Menu mnemonicParsing="false" text="Perso Theme">
-                     <items>
-                        <MenuItem fx:id="miPT1" mnemonicParsing="false" text="use" />
-                        <MenuItem mnemonicParsing="false" onAction="#openPersoThemeParameter">
-                           <graphic>
-                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../img/parametre.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </MenuItem>
-                     </items>
-                  </Menu>
-               </items>
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>

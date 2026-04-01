@@ -1,6 +1,7 @@
 package com.dbeditor.controller.parameter;
 
 import com.dbeditor.MainApp;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.util.DbManager;
 
 import javafx.event.ActionEvent;
@@ -20,12 +21,12 @@ public class MysqlController {
 
     @FXML
     void initialize() {
-        this.tfHost.setText(D_M.getMysqlDb().getDbHost());
-        this.tfUser.setText(D_M.getMysqlDb().getDbUser());
-        this.tfPassword.setText(D_M.getMysqlDb().getDbPassword());
-        this.tfPort.setText(D_M.getMysqlDb().getDbPort());
+        this.tfHost.setText(D_M.getSqlDb(DbType.MySql).dbHost);
+        this.tfUser.setText(D_M.getSqlDb(DbType.MySql).dbUser);
+        this.tfPassword.setText(D_M.getSqlDb(DbType.MySql).dbPassword);
+        this.tfPort.setText(D_M.getSqlDb(DbType.MySql).dbPort);
 
-        for(String name :  D_M.getMysqlDbTables()) {
+        for(String name :  D_M.getSqlTypeDatabases(DbType.MySql)) {
             this.createBddUtil(name);
         }
     }
@@ -43,11 +44,11 @@ public class MysqlController {
         tf.textProperty().addListener((observable, oldValue, newValue) -> {
             // supprime l'ancien nom s'il existe
             if (!oldValue.isEmpty()) {
-                D_M.getMysqlDbTables().remove(oldValue);
+                D_M.getSqlTypeDatabases(DbType.MySql).remove(oldValue);
             }
             // ajoute le nouveau si ce n'est pas vide
-            if (!newValue.isEmpty() && !D_M.getMysqlDbTables().contains(newValue)) {
-                D_M.getMysqlDbTables().add(newValue);
+            if (!newValue.isEmpty() && !D_M.getSqlTypeDatabases(DbType.MySql).contains(newValue)) {
+                D_M.getSqlTypeDatabases(DbType.MySql).add(newValue);
             }
         });
 
@@ -61,7 +62,7 @@ public class MysqlController {
             vboxBdd.getChildren().remove(hbox);
             String n = tf.getText();
             if (!n.isEmpty()) {
-                D_M.getMysqlDbTables().remove(n);
+                D_M.getSqlTypeDatabases(DbType.MySql).remove(n);
             }
         });
 

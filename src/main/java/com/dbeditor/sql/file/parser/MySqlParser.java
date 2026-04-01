@@ -8,6 +8,8 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.type.SqlType;
+import com.dbeditor.sql.DbType;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -17,7 +19,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
 
-public class MySqlParser implements SqlParser {
+public class MySqlParser extends SqlParser {
     
     @Override
     public DatabaseSchema loadFromFile(String filePath) {
@@ -36,7 +38,7 @@ public class MySqlParser implements SqlParser {
                 // ---- Handle USE db; manually ----
                 if (trimmed.toUpperCase().startsWith("USE ")) {
                     String dbName = trimmed.substring(4).trim();
-                    schema.setName(dbName);
+                    schema.name = dbName;
                     continue;
                 }
 
@@ -75,9 +77,10 @@ public class MySqlParser implements SqlParser {
         /* ---- Columns ---- */
         if (createTable.getColumnDefinitions() != null) {
             for (ColumnDefinition col : createTable.getColumnDefinitions()) {
+                String type = col.getColDataType().getDataType();
                 Column column = new Column(
                     col.getColumnName(),
-                    col.getColDataType().getDataType()
+                    SqlType.get(type, DbType.MySql)
                 );
 
                 // si la colonne n'a pas de specs
@@ -87,21 +90,21 @@ public class MySqlParser implements SqlParser {
                 }
 
                 if(col.getColumnSpecs().contains("PRIMARY") && col.getColumnSpecs().contains("KEY")) {
-                    column.setPrimaryKey(true);
-                    column.setUnique(true);
-                    column.setNotNull(true);
+                    column.isPrimaryKey = true;
+                    column.isUnique = true;
+                    column.isNotNull = true;
                 }
 
                 if(col.getColumnSpecs().contains("AUTO_INCREMENT")) {
-                    column.setAutoIncrementing(true);
+                    column.isAutoIncrementing = true;
                 }
 
                 if(col.getColumnSpecs().contains("NOT") && col.getColumnSpecs().contains("NULL")) {
-                    column.setNotNull(true);
+                    column.isNotNull = true;
                 }
 
                 if(col.getColumnSpecs().contains("UNIQUE")) {
-                    column.setUnique(true);
+                    column.isUnique = true;
                 }
 
                 // if(col.getColumnSpecs().contains("DEFAULT")) {
@@ -128,7 +131,7 @@ public class MySqlParser implements SqlParser {
                     String refColumn = fk.getReferencedColumnNames().get(0);
 
                     if(fkName == null || fkName.isEmpty()) {
-                        fkName = "fk_" + table.getName().toLowerCase() + "_" + refTable.toLowerCase();
+                        fkName = "fk_" + table.name.toLowerCase() + "_" + refTable.toLowerCase();
                     }
 
                     table.addForeignKey(

@@ -15,6 +15,9 @@ public class DatabaseSchema {
         this.tables = new HashMap<>();
     }
 
+    public void addTable(Table table) {
+        this.tables.put(table.name, table);
+    }
     public List<Table> getTables() {
         return new ArrayList<>(this.tables.values());
     }
