@@ -20,7 +20,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 public class DfController extends TextView {
-    private final static DbManager D_M = DbManager.getInstance();
 
     @Override
     public ViewType getViewType() {
@@ -63,7 +62,7 @@ public class DfController extends TextView {
 
     @Override
     public void open(DatabaseSchema dbS) throws IOException {
-        List<Table> tablesSorted = D_M.sortTables(dbS.getTables());
+        List<Table> tablesSorted = DbManager.sortTables(dbS.getTables());
 
 
         this.doTextNormal(tablesSorted);

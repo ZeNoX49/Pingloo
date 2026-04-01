@@ -12,8 +12,7 @@ import com.dbeditor.sql.DbType;
 import com.dbeditor.util.DbManager;
 
 public class MySqlExporter extends SqlExporter {
-    DbManager D_M = DbManager.getInstance();
-    
+        
     @Override
     public void exportToSQL(DatabaseSchema schema, String filepath) throws IOException {
         try (FileWriter writer = new FileWriter(filepath)) {
@@ -29,7 +28,7 @@ public class MySqlExporter extends SqlExporter {
         sql.append("CREATE DATABASE %s;\n".formatted(schema.name)); 
         sql.append("USE %s;\n\n".formatted(schema.name));
 
-        List<Table> orderedTables = D_M.sortTables(schema.getTables());
+        List<Table> orderedTables = DbManager.sortTables(schema.getTables());
         for (Table table : orderedTables) {
             sql.append("CREATE TABLE %s (\n".formatted(table.name));
             

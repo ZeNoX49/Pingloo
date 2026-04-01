@@ -12,10 +12,10 @@ import com.dbeditor.model.Table;
 import com.dbeditor.sql.DbType;
 import com.dbeditor.sql.db.MySqlDb;
 import com.dbeditor.sql.db.SqlDb;
-import com.dbeditor.sql.file.exporter.MySqlExporter;
 import com.dbeditor.sql.file.exporter.MsSqlExporter;
-import com.dbeditor.sql.file.exporter.PostgreSqlExporter;
+import com.dbeditor.sql.file.exporter.MySqlExporter;
 import com.dbeditor.sql.file.exporter.OracleExporter;
+import com.dbeditor.sql.file.exporter.PostgreSqlExporter;
 import com.dbeditor.sql.file.exporter.SqlExporter;
 import com.dbeditor.sql.file.parser.MsSqlParser;
 import com.dbeditor.sql.file.parser.MySqlParser;
@@ -42,7 +42,6 @@ public class DbManager {
 
     private DbManager() {
         this.sqlDb = new HashMap<>();
-        this.sqlTypeDatabases = new HashMap<>();
 
         this.sqlParser = new HashMap<>();
         this.sqlParser.put(DbType.MsSql, new MySqlParser());
@@ -55,6 +54,11 @@ public class DbManager {
         this.sqlExporter.put(DbType.MsSql, new MsSqlExporter());
         this.sqlExporter.put(DbType.PostgreSql, new PostgreSqlExporter());
         this.sqlExporter.put(DbType.Oracle, new OracleExporter());
+
+        this.sqlTypeDatabases = new HashMap<>();
+        for(DbType type : DbType.values()) {
+            this.sqlTypeDatabases.put(type, new ArrayList<>());
+        }
     }
 
     public void setMysqlDbData(Map<String, Object> data) {
@@ -85,7 +89,7 @@ public class DbManager {
      * @param tables
      * @return
      */
-    public List<Table> sortTables(Collection<Table> tables) {
+    public static List<Table> sortTables(Collection<Table> tables) {
         List<Table> res = new ArrayList<>();
         List<Table> toAdd = new ArrayList<>(tables);
 

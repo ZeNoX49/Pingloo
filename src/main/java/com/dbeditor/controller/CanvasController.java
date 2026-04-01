@@ -204,18 +204,21 @@ public class CanvasController implements Visual {
      * @param type
      */
     private void createMenuItemOpenDb(DbType type) {
-        this.createMenuItemParameterDb(this.mSaveDb);
+        Menu menu = new Menu(type.toString());
+        this.mOpenDb.getItems().add(menu);
 
-        for(String dbName : D_M.getSqlTypeDatabases(DbType.MySql)) {
+        this.createMenuItemParameterDb(menu);
+
+        for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
             mi.setOnAction(e -> {
                 try {
-                    this.open(D_M.getSqlDb(DbType.MySql).loadDb(dbName));
+                    this.open(D_M.getSqlDb(type).loadDb(dbName));
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
             });
-            this.mSaveDb.getItems().add(mi);
+            menu.getItems().add(mi);
         }
     }
 
@@ -235,7 +238,7 @@ public class CanvasController implements Visual {
 
             F_M.exportSQL(fileChooser, MainApp.schema, D_M.getSqlExporter(type));
         });
-        this.mOpenFile.getItems().add(mi);
+        this.mSaveFile.getItems().add(mi);
     }
 
     /**
@@ -243,9 +246,12 @@ public class CanvasController implements Visual {
      * @param type
      */
     private void createMenuItemSaveDb(DbType type) {
-        this.createMenuItemParameterDb(this.mSaveDb);
+        Menu menu = new Menu(type.toString());
+        this.mSaveDb.getItems().add(menu);
 
-        for(String dbName : D_M.getSqlTypeDatabases(DbType.MySql)) {
+        this.createMenuItemParameterDb(menu);
+
+        for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
             mi.setOnAction(e -> {
                 try {
@@ -254,7 +260,7 @@ public class CanvasController implements Visual {
                     ioe.printStackTrace();
                 }
             });
-            this.mSaveDb.getItems().add(mi);
+            menu.getItems().add(mi);
         }
     }
 
