@@ -20,7 +20,7 @@ public class LassoSelector {
     private final Pane viewportPane;   // reçoit les events (scene coords)
     private final Group content;   // parent local pour le rectangle
     private final SelectionModel<TableController> selectionModel;
-    private final Rectangle rect;
+    public final Rectangle rect;
     private final Map<String, TableController> tableNodes;
 
     private Point2D startLocal;
@@ -123,6 +123,4 @@ public class LassoSelector {
         this.rect.setVisible(false);
         this.dragging = false;
     }
-
-    public Rectangle getRect() { return this.rect; }
 }

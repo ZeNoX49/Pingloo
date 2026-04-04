@@ -3,7 +3,7 @@ package com.dbeditor.controller.view.dialogs;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
-import com.dbeditor.model.type.SqlType;
+import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
@@ -262,14 +262,14 @@ public class TableEditorDialog extends EditorDialog {
         }
 
         // Créer la table résultat
-        resultTable = new Table(name);
+        this.resultTable = new Table(name);
         for (ColumnRow row : columnData) {
-            Column col = new Column(row.getName(), SqlType.get(row.getType(), DbType.MySql));
+            Column col = new Column(row.getName(), __SqlType.get(row.getType(), DbType.MySql));
             col.isPrimaryKey = row.isPrimaryKey();
             col.isNotNull = row.isNotNull();
             col.isUnique = row.isUnique();
             col.isAutoIncrementing = row.isAutoIncrement();
-            resultTable.addColumn(col);
+            this.resultTable.addColumn(col);
         }
 
         return true;

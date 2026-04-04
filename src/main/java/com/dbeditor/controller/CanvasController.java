@@ -43,10 +43,9 @@ public class CanvasController implements Visual {
     private static final FileManager F_M = FileManager.getInstance();
 
     @FXML private ToolBar toolBar;
-    @FXML private Menu mOpenFile, mOpenDb; // TODO
-    @FXML private Menu mSaveFile, mSaveDb; // TODO
-    @FXML private MenuButton mbDatabase; // TODO
-    // @FXML private Button btnRedo, btnUndo;
+    @FXML private Menu mOpenFile, mOpenDb;
+    @FXML private Menu mSaveFile, mSaveDb;
+    @FXML private MenuButton mbDatabase;
     @FXML private TextField tfDbName;
     @FXML private Region spacer1, spacer2;
     @FXML private MenuItem miLightTheme, miDarkTheme, miPersoTheme;
@@ -255,7 +254,12 @@ public class CanvasController implements Visual {
             MenuItem mi = new MenuItem(dbName);
             mi.setOnAction(e -> {
                 try {
-                    D_M.getSqlDb(type).executeSqlScript(D_M.getSqlExporter(type).createSql(MainApp.schema));
+                    boolean good = D_M.getSqlDb(type).executeSqlScript(D_M.getSqlExporter(type).createSql(MainApp.schema));
+                    if(good) {
+                        CanvasController.showWarningAlert("Maj effectué", "La mise à jour de la bdd a été effectué");
+                    } else {
+                        CanvasController.showWarningAlert("Erreur", "Une erreur est survenu lors de la mise à jour de la bdd");
+                    }
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
@@ -271,6 +275,7 @@ public class CanvasController implements Visual {
     private void createMenuItemDatabse(DbType type) {
         MenuItem mi = new MenuItem(type.toString());
         mi.setOnAction(e -> {
+            MainApp.schema.type = type;
             for(ViewController v : this.views) {
                 v.updateType(type);
             }
@@ -284,27 +289,26 @@ public class CanvasController implements Visual {
     private void createMenuItemParameterDb(Menu menu) {
         menu.getItems().clear();
 
-        MenuItem mip = new MenuItem();
         ImageView img = new ImageView(new Image(MainApp.class.getResource("/img/parametre.png").toString(), 15, 15, true, true));
-        mip.setGraphic(img);
+        MenuItem mip = new MenuItem("", img);
 
         mip.setOnAction(e -> {
             try {
-                FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/parameter/mysql.fxml"));
+                FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/parameter/dbParam.fxml"));
                 Scene scene = new Scene(loader.load());
                 
                 Stage modalStage = new Stage();
-                modalStage.setTitle("MYSQL - paramètre");
+                modalStage.setTitle("db paramètre");
                 modalStage.initModality(Modality.APPLICATION_MODAL);
                 modalStage.initStyle(StageStyle.UTILITY);
                 modalStage.setResizable(false);
 
-                modalStage.setOnCloseRequest(ev -> { this.createMenuItemParameterDb(menu); });
+                modalStage.setOnCloseRequest(ev -> this.createMenuItemParameterDb(menu));
 
                 modalStage.setScene(scene);
                 modalStage.showAndWait();
             } catch (IOException ioe) {
-                System.err.println("Erreur de chargement de la scène : mysql.fxml");
+                System.err.println("Erreur de chargement de la scène : dbParam.fxml");
                 ioe.printStackTrace();
             }
         });

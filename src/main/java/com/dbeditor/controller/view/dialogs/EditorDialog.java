@@ -8,4 +8,5 @@ public abstract class EditorDialog implements Visual {
     public void updateStyle() {
         // TODO
     }
+    
 }

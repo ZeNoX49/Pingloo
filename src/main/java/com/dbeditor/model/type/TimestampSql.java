@@ -2,7 +2,7 @@ package com.dbeditor.model.type;
 
 import com.dbeditor.sql.DbType;
 
-public class TimestampSql extends SqlType {
+public class TimestampSql extends __SqlType {
 
     @Override
     public boolean isConform(String data) {
@@ -13,12 +13,12 @@ public class TimestampSql extends SqlType {
     @Override
     public String getRepr(DbType dbType) {
         // TODO
-        switch (dbType) {
-            case MySql : return "TIMESTAMP";
-            case MsSql : return "";
-            case PostgreSql : return "";
-            case Oracle : return "";        
-            default: return null;
-        }
+        return switch (dbType) {
+            case MySql -> "TIMESTAMP";
+            case MsSql -> "";
+            case PostgreSql -> "";
+            case Oracle -> "";
+            default -> null;
+        };
     }
 }

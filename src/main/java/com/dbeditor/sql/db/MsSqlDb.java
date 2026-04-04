@@ -24,7 +24,7 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
-import com.dbeditor.model.type.SqlType;
+import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.sql.DbType;
 
 public class MsSqlDb extends SqlDb {
@@ -152,7 +152,7 @@ public class MsSqlDb extends SqlDb {
                     fullType += "(" + columnSize + ")";
                 }
 
-                Column column = new Column(colName, SqlType.get(fullType, DbType.MsSql));
+                Column column = new Column(colName, __SqlType.get(fullType, DbType.MsSql));
                 if ("NO".equalsIgnoreCase(isNullable)) {
                     column.isNotNull = true;
                 }

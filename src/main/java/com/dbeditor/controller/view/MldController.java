@@ -34,7 +34,7 @@ public class MldController extends ModelView {
         if (schema == null) return;
 
         // supprime tous les nodes sauf selectionRect
-        super.getGroup().getChildren().removeIf(node -> node != super.getLasso().getRect());
+        super.getGroup().getChildren().removeIf(node -> node != super.getLasso().rect);
 
         super.getTableNodes().clear();
         super.getConnectionLines().clear();
@@ -43,7 +43,7 @@ public class MldController extends ModelView {
         this.drawConnections();
 
         if (super.getLasso() != null) {
-            super.getLasso().getRect().toFront();
+            super.getLasso().rect.toFront();
         }
     }
 
@@ -74,7 +74,7 @@ public class MldController extends ModelView {
 
         // s'assure que le rectangle de séléction est devant
         if (super.getLasso() != null) {
-            super.getLasso().getRect().toFront();
+            super.getLasso().rect.toFront();
         }
     }
 

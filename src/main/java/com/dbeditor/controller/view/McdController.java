@@ -87,7 +87,7 @@ public class McdController extends ModelView {
         this.conceptualSchema = new ConceptualSchema(dbS);
 
         // supprime tous les nodes sauf selectionRect
-        super.getGroup().getChildren().removeIf(node -> node != super.getLasso().getRect());
+        super.getGroup().getChildren().removeIf(node -> node != super.getLasso().rect);
 
         // vider les structures
         super.getTableNodes().clear();
@@ -98,7 +98,7 @@ public class McdController extends ModelView {
         this.drawLinks();
 
         if (super.getLasso() != null) {
-            super.getLasso().getRect().toFront();
+            super.getLasso().rect.toFront();
         }
 
         super.updateStyle();
@@ -120,7 +120,7 @@ public class McdController extends ModelView {
 
         // s'assure que le rectangle de séléction est devant
         if (super.getLasso() != null) {
-            super.getLasso().getRect().toFront();
+            super.getLasso().rect.toFront();
         }
     }
 
@@ -353,7 +353,7 @@ public class McdController extends ModelView {
             this.drawLink(this.getTableNodes().get(p.getKey()), assoCon, p.getValue());
         }
 
-        super.getLasso().getRect().toFront();
+        super.getLasso().rect.toFront();
     }
 
     // TODO
@@ -382,7 +382,7 @@ public class McdController extends ModelView {
     //     this.conceptualSchema.updateAssociation(oldName, newName, newParticipants);
 
     //     try { this.drawAssociations(); } catch (IOException e) { e.printStackTrace(); }
-    //     if (super.getLasso() != null) super.getLasso().getRect().toFront();
+    //     if (super.getLasso() != null) super.getLasso().rect.toFront();
     // }
 
     /**

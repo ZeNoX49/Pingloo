@@ -96,7 +96,4 @@ public class ZoomPanHandler {
         this.viewportPane.setCursor(Cursor.DEFAULT);
         e.consume();
     }
-
-    // public double getZoomLevel() { return this.zoomLevel; }
-    // public Scale getScale() { return this.scale; }
 }

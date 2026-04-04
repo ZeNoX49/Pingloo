@@ -2,7 +2,7 @@ package com.dbeditor.model.type;
 
 import com.dbeditor.sql.DbType;
 
-public class TimeSql extends SqlType {
+public class TimeSql extends __SqlType {
 
     @Override
     public boolean isConform(String data) {

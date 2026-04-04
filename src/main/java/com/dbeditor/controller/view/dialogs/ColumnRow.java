@@ -1,3 +1,4 @@
+
 package com.dbeditor.controller.view.dialogs;
 
 import javafx.beans.property.SimpleBooleanProperty;
@@ -25,25 +26,25 @@ public class ColumnRow {
 
     public String getName() { return name.get(); }
     public void setName(String value) { name.set(value); }
-    public SimpleStringProperty nameProperty() { return name; }
+    public SimpleStringProperty nameProperty() { return this.name; }
 
     public String getType() { return type.get(); }
     public void setType(String value) { type.set(value); }
-    public SimpleStringProperty typeProperty() { return type; }
+    public SimpleStringProperty typeProperty() { return this.type; }
 
     public boolean isPrimaryKey() { return primaryKey.get(); }
     public void setPrimaryKey(boolean value) { primaryKey.set(value); }
-    public SimpleBooleanProperty primaryKeyProperty() { return primaryKey; }
+    public SimpleBooleanProperty primaryKeyProperty() { return this.primaryKey; }
 
     public boolean isNotNull() { return notNull.get(); }
     public void setNotNull(boolean value) { notNull.set(value); }
-    public SimpleBooleanProperty notNullProperty() { return notNull; }
+    public SimpleBooleanProperty notNullProperty() { return this.notNull; }
 
     public boolean isUnique() { return unique.get(); }
     public void setUnique(boolean value) { unique.set(value); }
-    public SimpleBooleanProperty uniqueProperty() { return unique; }
+    public SimpleBooleanProperty uniqueProperty() { return this.unique; }
 
     public boolean isAutoIncrement() { return autoIncrement.get(); }
     public void setAutoIncrement(boolean value) { autoIncrement.set(value); }
-    public SimpleBooleanProperty autoIncrementProperty() { return autoIncrement; }
+    public SimpleBooleanProperty autoIncrementProperty() { return this.autoIncrement; }
 }

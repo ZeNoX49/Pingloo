@@ -24,7 +24,7 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
-import com.dbeditor.model.type.SqlType;
+import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.sql.DbType;
 
 public class MySqlDb extends SqlDb {
@@ -154,7 +154,7 @@ public class MySqlDb extends SqlDb {
                     fullType += "(" + columnSize + ")";
                 }
 
-                Column column = new Column(colName, SqlType.get(fullType, DbType.MySql));
+                Column column = new Column(colName, __SqlType.get(fullType, DbType.MySql));
                 if ("NO".equalsIgnoreCase(isNullable)) {
                     column.isNotNull = true;
                 }

@@ -2,7 +2,7 @@ package com.dbeditor.model.type;
 
 import com.dbeditor.sql.DbType;
 
-public class DecimalSql extends SqlType {
+public class DecimalSql extends __SqlType implements _TwoModifier {
 
     private int before;
     private int after;
@@ -18,6 +18,13 @@ public class DecimalSql extends SqlType {
     }
 
     @Override
+    public void updateData(int data1, int data2) {
+        if (data1 <= 0 || data2 <= 0) return;
+        this.before = data1;
+        this.after = data2;
+    }
+
+    @Override
     public boolean isConform(String data) {
         // TODO
         return false;
@@ -26,12 +33,12 @@ public class DecimalSql extends SqlType {
     @Override
     public String getRepr(DbType dbType) {
         // TODO
-        switch (dbType) {
-            case MySql : return "DECIMAL(%d, %d)".formatted(this.before, this.after);
-            case MsSql : return "";
-            case PostgreSql : return "";
-            case Oracle : return "";        
-            default: return null;
-        }
+        return switch (dbType) {
+            case MySql -> "DECIMAL(%d, %d)".formatted(this.before, this.after);
+            case MsSql -> "";
+            case PostgreSql -> "";
+            case Oracle -> "";
+            default -> null;
+        };
     }
 }

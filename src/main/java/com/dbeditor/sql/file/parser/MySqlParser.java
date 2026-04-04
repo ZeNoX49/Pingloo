@@ -8,7 +8,7 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
-import com.dbeditor.model.type.SqlType;
+import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.sql.DbType;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -80,7 +80,7 @@ public class MySqlParser extends SqlParser {
                 String type = col.getColDataType().getDataType();
                 Column column = new Column(
                     col.getColumnName(),
-                    SqlType.get(type, DbType.MySql)
+                    __SqlType.get(type, DbType.MySql)
                 );
 
                 // si la colonne n'a pas de specs

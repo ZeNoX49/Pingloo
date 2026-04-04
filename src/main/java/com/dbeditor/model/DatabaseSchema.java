@@ -5,13 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dbeditor.sql.DbType;
+
 public class DatabaseSchema {
     public String name;
+    public DbType type;
     public final Map<String, Table> tables;
     
     public DatabaseSchema(String name) {
         this.name = name;
         if(name == null || name.isBlank()) this.name = "db";
+        this.type = DbType.MySql;
         this.tables = new HashMap<>();
     }
 

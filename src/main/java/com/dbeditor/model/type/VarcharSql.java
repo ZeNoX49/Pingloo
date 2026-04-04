@@ -2,7 +2,7 @@ package com.dbeditor.model.type;
 
 import com.dbeditor.sql.DbType;
 
-public class VarcharSql extends SqlType {
+public class VarcharSql extends __SqlType implements _OneModifier {
 
     private int size;
 
@@ -15,6 +15,12 @@ public class VarcharSql extends SqlType {
     }
 
     @Override
+    public void updateData(int data) {
+        if (data <= 0) return;
+        this.size = data;
+    }
+
+    @Override
     public boolean isConform(String data) {
         // TODO
         return false;
@@ -23,12 +29,12 @@ public class VarcharSql extends SqlType {
     @Override
     public String getRepr(DbType dbType) {
         // TODO
-        switch (dbType) {
-            case MySql : return "VARCHAR(%d)".formatted(this.size);
-            case MsSql : return "";
-            case PostgreSql : return "";
-            case Oracle : return "";        
-            default: return null;
-        }
+        return switch (dbType) {
+            case MySql -> "VARCHAR(%d)".formatted(this.size);
+            case MsSql -> "";
+            case PostgreSql -> "";
+            case Oracle -> "";
+            default -> null;
+        };
     }
 }

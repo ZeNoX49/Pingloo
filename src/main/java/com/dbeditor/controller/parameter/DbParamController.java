@@ -13,7 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class MysqlController {
+public class DbParamController {
     DbManager D_M = DbManager.getInstance();
 
     @FXML private TextField tfHost, tfPassword, tfPort, tfUser;

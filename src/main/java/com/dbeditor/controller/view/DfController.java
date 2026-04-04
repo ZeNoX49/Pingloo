@@ -26,7 +26,6 @@ public class DfController extends TextView {
         return ViewType.DF;
     }
 
-
     private StackPane stackPane;
     private SplitPane splitPane;
     private StackPane tvStackPane;

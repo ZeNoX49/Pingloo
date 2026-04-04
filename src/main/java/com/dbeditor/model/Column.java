@@ -1,16 +1,16 @@
 package com.dbeditor.model;
 
-import com.dbeditor.model.type.SqlType;
+import com.dbeditor.model.type.__SqlType;
 
 public class Column {
     public String name;
-    public SqlType type;
+    public __SqlType type;
     public boolean isPrimaryKey;
     public boolean isNotNull;
     public boolean isUnique;
     public boolean isAutoIncrementing;
     
-    public Column(String name, SqlType type) {
+    public Column(String name, __SqlType type) {
         this.name = name;
         this.type = type;
     }

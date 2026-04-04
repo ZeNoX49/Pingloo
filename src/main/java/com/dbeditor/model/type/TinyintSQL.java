@@ -2,7 +2,7 @@ package com.dbeditor.model.type;
 
 import com.dbeditor.sql.DbType;
 
-public class TinyintSQL extends SqlType {
+public class TinyintSQL extends __SqlType {
 
     @Override
     public boolean isConform(String data) {
@@ -13,12 +13,12 @@ public class TinyintSQL extends SqlType {
     @Override
     public String getRepr(DbType dbType) {
         // TODO
-        switch (dbType) {
-            case MySql : return "TINYINT";
-            case MsSql : return "";
-            case PostgreSql : return "";
-            case Oracle : return "";        
-            default: return null;
-        }
+        return switch (dbType) {
+            case MySql -> "TINYINT";
+            case MsSql -> "";
+            case PostgreSql -> "";
+            case Oracle -> "";
+            default -> null;
+        };
     }
 }

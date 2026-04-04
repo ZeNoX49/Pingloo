@@ -2,7 +2,7 @@ package com.dbeditor.model.type;
 
 import com.dbeditor.sql.DbType;
 
-public class TextSql extends SqlType {
+public class TextSql extends __SqlType {
 
     @Override
     public boolean isConform(String data) {
@@ -13,12 +13,12 @@ public class TextSql extends SqlType {
     @Override
     public String getRepr(DbType dbType) {
         // TODO
-        switch (dbType) {
-            case MySql : return "TEXT";
-            case MsSql : return "";
-            case PostgreSql : return "";
-            case Oracle : return "";        
-            default: return null;
-        }
+        return switch (dbType) {
+            case MySql -> "TEXT";
+            case MsSql -> "";
+            case PostgreSql -> "";
+            case Oracle -> "";
+            default -> null;
+        };
     }
 }
