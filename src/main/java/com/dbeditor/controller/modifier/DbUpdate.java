@@ -2,7 +2,6 @@ package com.dbeditor.controller.modifier;
 
 import java.io.IOException;
 
-import com.dbeditor.controller.view.View;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.DbType;
 

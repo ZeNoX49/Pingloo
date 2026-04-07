@@ -32,7 +32,7 @@ public class ConceptualSchema {
             if(this.isAssociativeTable(table)) {
                 assoToCreate.add(table);
             } else {
-                new Entity(table);
+                this.entities.put(table.name, new Entity(table));
             }
         }
 
@@ -77,7 +77,9 @@ public class ConceptualSchema {
                     // ordre : premier = référençant (entity), second = référencé (target)
                     linkedEntitiesCard.add(new Pair<>(entity, referencingCard));
                     linkedEntitiesCard.add(new Pair<>(target, targetCard));
-                    new Association(linkedEntitiesCard, null);
+
+                    Association association = new Association(linkedEntitiesCard, null);
+                    this.associations.put(association.referencedTable.name, association);
                 }
             }
         }
@@ -124,7 +126,7 @@ public class ConceptualSchema {
             }
             linkedEntitiesCard.add(new Pair<>(target, cardForEntity));
         }
-        new Association(linkedEntitiesCard, table);
+        this.associations.put(table.name, new Association(linkedEntitiesCard, table));
     }
 
     /**
@@ -132,7 +134,7 @@ public class ConceptualSchema {
      * l'ajoute aussi dans le schema de MainApp
      */
     public void addEntity(Table table) {
-        new Entity(table);
+        this.entities.put(table.name, new Entity(table));
         MainApp.schema.tables.get(table.name);
     }
 
@@ -151,25 +153,24 @@ public class ConceptualSchema {
         associations.entrySet().removeIf(entry -> entry.getValue().linkedEntities.containsKey(e));
     }
 
-    // TODO
-    // /**
-    //  * Met à jour le nom d'une entité (et met à jour les associations).
-    //  */
-    // public void renameEntity(String oldName, Table updatedTable) {
-    //     Entity old = entities.remove(oldName);
-    //     if (old == null) return;
+    /**
+     * Met à jour le nom d'une entité (et met à jour les associations).
+     */
+    public void renameEntity(String oldName, Table updatedTable) {
+        Entity old = entities.remove(oldName);
+        if (old == null) return;
 
-    //     Entity updated = new Entity(updatedTable);
-    //     entities.put(updatedTable.getName(), updated);
+        Entity updated = new Entity(updatedTable);
+        entities.put(updatedTable.name, updated);
 
-    //     // mettre à jour les associations qui référencent l'ancienne entité
-    //     for (Association assoc : associations.values()) {
-    //         CardinalityValue card = assoc.linkedEntities.remove(old);
-    //         if (card != null) {
-    //             assoc.linkedEntities.put(updated, card);
-    //         }
-    //     }
-    // }
+        // mettre à jour les associations qui référencent l'ancienne entité
+        for (Association assoc : associations.values()) {
+            CardinalityValue card = assoc.linkedEntities.remove(old);
+            if (card != null) {
+                assoc.linkedEntities.put(updated, card);
+            }
+        }
+    }
 
     /**
      * Ajoute une association entre des entités
@@ -182,7 +183,8 @@ public class ConceptualSchema {
             en.add(new Pair<>(this.entities.get(p.getKey()), p.getValue()));
         }
 
-        new Association(en, table);
+        this.associations.put(table.name, new Association(en, table));
+
         return table;
     }
 
@@ -241,7 +243,7 @@ public class ConceptualSchema {
             }
 
             links.put(
-                assoc.name,
+                assoc.referencedTable.name,
                 tablesCard
             );
         }
@@ -265,39 +267,27 @@ public class ConceptualSchema {
     private final class Entity {
         public final Table table;
 
-        /**
-         * s'auto ajoute dans la map
-         */
         public Entity(Table table) {
             this.table = table;
-            entities.put(table.name, this);
         }
     }
 
     private final class Association {
-        public String name;
         public final Map<Entity, CardinalityValue> linkedEntities = new HashMap<>();
         public final Table referencedTable;
 
-        /**
-         * s'auto ajoute dans la map
-         */
         public Association(List<Pair<Entity, CardinalityValue>> entitiesCard, Table rfTable) {
             if(rfTable != null) {
                 this.referencedTable = rfTable;
-                this.name = rfTable.name;
             } else {
                 String nom = "";
                 for(Pair<Entity, CardinalityValue> p : entitiesCard) { nom += p.getKey().table.name + "_"; }
                 this.referencedTable = new Table(nom);
-                this.name = nom;
             }
 
             for(Pair<Entity, CardinalityValue> p : entitiesCard) {
                 this.linkedEntities.put(p.getKey(), p.getValue());
             }
-            
-            associations.put(this.name, this);
         }
     }
 }

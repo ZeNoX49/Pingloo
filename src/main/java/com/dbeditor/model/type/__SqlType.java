@@ -34,7 +34,7 @@ public abstract class __SqlType {
         return null;
     }
 
-    private static String clean(String data) {
+    protected static String clean(String data) {
         data = data.trim().replace(" ", "");
         data = data.split("\\(")[0];
         return data;

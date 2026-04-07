@@ -10,8 +10,8 @@ import javafx.scene.layout.StackPane;
 public abstract class TextView extends View {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
-    private StackPane spPane;
-    private TextArea textArea;
+    protected StackPane spPane;
+    protected TextArea textArea;
 
     @Override
     public void initialization(ToolBar toolbar) {
@@ -34,5 +34,5 @@ public abstract class TextView extends View {
         return this.spPane;
     }
 
-    public TextArea getTextArea() { return this.textArea; }
+    protected TextArea getTextArea() { return this.textArea; }
 }

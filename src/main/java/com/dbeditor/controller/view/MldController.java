@@ -7,7 +7,7 @@ import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.view.dialogs.TableEditorDialog;
+import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
@@ -34,16 +34,16 @@ public class MldController extends ModelView {
         if (schema == null) return;
 
         // supprime tous les nodes sauf selectionRect
-        super.getGroup().getChildren().removeIf(node -> node != super.getLasso().rect);
+        super.group.getChildren().removeIf(node -> node != super.lasso.rect);
 
-        super.getTableNodes().clear();
-        super.getConnectionLines().clear();
+        super.tableNodes.clear();
+        super.connectionLines.clear();
 
         this.createTableNodes(schema);
         this.drawConnections();
 
-        if (super.getLasso() != null) {
-            super.getLasso().rect.toFront();
+        if (super.lasso != null) {
+            super.lasso.rect.toFront();
         }
     }
 
@@ -73,8 +73,8 @@ public class MldController extends ModelView {
         }
 
         // s'assure que le rectangle de séléction est devant
-        if (super.getLasso() != null) {
-            super.getLasso().rect.toFront();
+        if (super.lasso != null) {
+            super.lasso.rect.toFront();
         }
     }
 
@@ -91,7 +91,7 @@ public class MldController extends ModelView {
         TableController tcController = loader.getController();
         tcController.createTableNode(table, TableType.Table);
 
-        super.getTableNodes().put(tcController.getTable().name, tcController);
+        super.tableNodes.put(tcController.getTable().name, tcController);
 
         // gérer la sélection d'un table lorsqu'elle est cliquée
         tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
@@ -108,13 +108,13 @@ public class MldController extends ModelView {
         });
 
         // attache le node pour le multidrag
-        super.getMultiDrag().attach(tcController);
+        super.multiDrag.attach(tcController);
 
         // position initiale
         tcPane.setLayoutX(x);
         tcPane.setLayoutY(y);
 
-        super.getGroup().getChildren().add(tcPane);
+        super.group.getChildren().add(tcPane);
     }
 
     /**
@@ -122,13 +122,13 @@ public class MldController extends ModelView {
      */
     private void drawConnections() {
         // Supprimer les anciennes lignes
-        super.getConnectionLines().forEach(pair -> super.getGroup().getChildren().remove(pair.getKey()));
-        super.getConnectionLines().clear();
+        super.connectionLines.forEach(pair -> super.group.getChildren().remove(pair.getKey()));
+        super.connectionLines.clear();
 
-        for (TableController fromNode : super.getTableNodes().values()) {
+        for (TableController fromNode : super.tableNodes.values()) {
             Table fromTable = fromNode.getTable();
             for (ForeignKey fk : fromTable.getForeignKeys()) {
-                TableController toNode = super.getTableNodes().get(fk.referencedTable);
+                TableController toNode = super.tableNodes.get(fk.referencedTable);
                 if (toNode != null) {
                     this.drawConnection(fromNode, toNode);
                 }
@@ -155,8 +155,8 @@ public class MldController extends ModelView {
         line.getStrokeDashArray().addAll(5.0, 5.0);
 
         // ajoute la ligne derrière le node
-        super.getGroup().getChildren().add(0, line);
-        super.getConnectionLines().add(new Pair<>(line, null));
+        super.group.getChildren().add(0, line);
+        super.connectionLines.add(new Pair<>(line, null));
         
         // bind la ligne aux tables
         line.startXProperty().bind(from.getRoot().layoutXProperty().add(from.getRoot().widthProperty().divide(2)));
@@ -177,7 +177,7 @@ public class MldController extends ModelView {
         String oldName = oldTable.name;
 
         // Ouvrir le dialogue avec les données existantes
-        TableEditorDialog dialog = new TableEditorDialog(oldTable);
+        EntityEditorDialog dialog = new EntityEditorDialog(oldTable);
         dialog.showAndWait();
 
         if (dialog.isConfirmed()) {

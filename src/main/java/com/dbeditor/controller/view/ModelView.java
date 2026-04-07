@@ -25,18 +25,18 @@ public abstract class ModelView extends View {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     // Nodes visuels
-    private final Map<String, TableController> tableNodes = new HashMap<>();
-    private final List<Pair<Line, Label>> connectionLines = new ArrayList<>();
+    protected final Map<String, TableController> tableNodes = new HashMap<>();
+    protected final List<Pair<Line, Label>> connectionLines = new ArrayList<>();
 
     // Helpers
-    private ZoomPanHandler zoomPan;
-    private SelectionModel<TableController> selectionModel;
-    private LassoSelector lasso;
-    private MultiDragManager multiDrag;
+    protected ZoomPanHandler zoomPan;
+    protected SelectionModel<TableController> selectionModel;
+    protected LassoSelector lasso;
+    protected MultiDragManager multiDrag;
 
-    private Label zlLabel;
-    private Pane pane;
-    private Group group;
+    protected Label zlLabel;
+    protected Pane pane;
+    protected Group group;
 
     @Override
     public void initialization(ToolBar toolbar) {
@@ -92,7 +92,7 @@ public abstract class ModelView extends View {
     /**
      * Gère la sélection d'une entité
      */
-    public void handleSelection(TableController table, MouseEvent e) {
+    protected void handleSelection(TableController table, MouseEvent e) {
         if (e.isControlDown()) {
             this.selectionModel.toggle(table);
             return;
@@ -108,19 +108,8 @@ public abstract class ModelView extends View {
         this.selectionModel.select(table);
     }
 
-    /* ========================= Utilitaire  ========================= */
     @Override
     public Pane getRoot() {
         return this.pane;
     }
-
-    public Map<String, TableController> getTableNodes() { return this.tableNodes; }
-    public List<Pair<Line, Label>> getConnectionLines() { return this.connectionLines; }
-    public ZoomPanHandler getZoomPan() { return this.zoomPan; }
-    public SelectionModel<TableController> getSelectionModel() { return this.selectionModel; }
-    public LassoSelector getLasso() { return this.lasso; }
-    public MultiDragManager getMultiDrag() { return this.multiDrag; }
-    public Label getZlLabel() { return this.zlLabel; }
-    public Pane getPane() { return this.pane; }
-    public Group getGroup() { return this.group; }
 }

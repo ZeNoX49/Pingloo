@@ -1,7 +1,9 @@
 package com.dbeditor.controller.view.dialogs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.model.Table;
@@ -9,15 +11,19 @@ import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -25,259 +31,282 @@ import javafx.stage.StageStyle;
 import javafx.util.Pair;
 
 /**
- * Dialogue pour créer ou modifier une association MCD
- * TODO: a refaire (c'est pas moi qui ait fait ca)
+ * Dialogue pour créer ou modifier une association
  */
 public class AssociationEditorDialog extends EditorDialog {
     private static final ThemeManager T_M = ThemeManager.getInstance();
     
-    private Stage stage;
+    private static final int MIN_ENTITIES = 2;   // Nombre minimum d'entités participantes
+    private static final int MAX_ENTITIES = 4;   // Nombre maximum d'entités participantes
+
+    private List<Table> availableEntities;
+    private List<EntityParticipationRow> participations;
+    
     private TextField tfAssociationName;
     private VBox entitiesBox;
-    private List<EntityParticipationRow> participations;
-    private List<Table> availableEntities;
-    private Table resultAssociation;
-    private boolean confirmed = false;
+    private TableView<DialogColumnRow> tableAttributes;
+    private ObservableList<DialogColumnRow> attributeData;
 
     /**
      * Ligne représentant la participation d'une entité dans l'association
      */
     private static class EntityParticipationRow {
-        ComboBox<Table> entityCombo;
-        ComboBox<String> cardinalityCombo;
-        HBox container;
+        private final ComboBox<String> entityCombo;
+        private final ComboBox<String> cardinalityCombo;
+        final HBox container;
+        private Map<String, Table> tables;
         
         public EntityParticipationRow(List<Table> entities) {
-            container = new HBox(10);
-            container.setAlignment(Pos.CENTER_LEFT);
+            this.tables = new HashMap<>();
+
+            this.container = new HBox(12);
+            this.container.setAlignment(Pos.CENTER_LEFT);
             
             Label lblEntity = new Label("Entité:");
-            lblEntity.setPrefWidth(60);
+            lblEntity.setPrefWidth(55);
             
-            entityCombo = new ComboBox<>(FXCollections.observableArrayList(entities));
-            entityCombo.setPrefWidth(150);
+            this.entityCombo = new ComboBox<>();
+            for(Table t : entities) {
+                this.entityCombo.getItems().add(t.name);
+                tables.put(t.name, t);
+            }
+            this.entityCombo.setPromptText("Sélectionner…");
+            this.entityCombo.setPrefWidth(160);
             
             Label lblCard = new Label("Cardinalité:");
             lblCard.setPrefWidth(80);
             
-            cardinalityCombo = new ComboBox<>(FXCollections.observableArrayList(
+            this.cardinalityCombo = new ComboBox<>(FXCollections.observableArrayList(
                 CardinalityValue._01_.toString(),
                 CardinalityValue._11_.toString(),
                 CardinalityValue._0N_.toString(),
                 CardinalityValue._1N_.toString()
             ));
-            cardinalityCombo.setPrefWidth(80);
-            cardinalityCombo.setValue(CardinalityValue._0N_.toString()); // Par défaut
+            this.cardinalityCombo.setValue(CardinalityValue._0N_.toString());
+            this.cardinalityCombo.setPrefWidth(90);
             
-            container.getChildren().addAll(lblEntity, entityCombo, lblCard, cardinalityCombo);
+            container.getChildren().addAll(lblEntity, this.entityCombo, lblCard, this.cardinalityCombo);
         }
         
         public Table getEntity() {
-            return entityCombo.getValue();
+            return this.tables.get(this.entityCombo.getValue());
         }
         
         public CardinalityValue getCardinality() {
-            return CardinalityValue.getCardinalityValue(cardinalityCombo.getValue());
+            return CardinalityValue.getCardinalityValue(this.cardinalityCombo.getValue());
         }
-        
-        public HBox getContainer() {
-            return container;
+
+        void setEntity(Table t) {
+            this.entityCombo.setValue(t.name);
+        }
+
+        void setCardinality(CardinalityValue cv) {
+            this.cardinalityCombo.setValue(cv.toString());
         }
     }
 
     /**
-     * Constructeur
-     * @param availableEntities liste des entités disponibles pour l'association
-     */
-    public AssociationEditorDialog(List<Table> availableEntities) {
-        this(availableEntities, null);
-    }
-
-    /**
-     * Constructeur pour modifier une association existante
+     * Constructeur pour créer ou modifier une association existante
      * @param availableEntities liste des entités disponibles
-     * @param association l'association à modifier (null pour créer une nouvelle)
+     * @param association l'association à modifier (null pour en créer une nouvelle)
      */
-    public AssociationEditorDialog(List<Table> availableEntities, Table association) {
+    public AssociationEditorDialog(List<Table> availableEntities, Pair<String, List<Pair<Table, CardinalityValue>>> association) {
         this.availableEntities = new ArrayList<>(availableEntities);
         this.participations = new ArrayList<>();
-        
-        initUI(association);
+        this.attributeData = FXCollections.observableArrayList();
+        this.initUI(association);
     }
 
     /**
      * Initialise l'interface utilisateur
      */
-    private void initUI(Table association) {
-        stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.initStyle(StageStyle.UTILITY);
-        stage.setTitle(association == null ? "Créer une association" : "Modifier l'association");
-        stage.setResizable(true);
-        stage.setWidth(600);
-        stage.setHeight(500);
+    private void initUI(Pair<String, List<Pair<Table, CardinalityValue>>> association) {
+        super.stage = new Stage();
+        super.stage.initModality(Modality.APPLICATION_MODAL);
+        super.stage.initStyle(StageStyle.UTILITY);
+        super.stage.setTitle(association == null ? "Créer une association" : "Modifier l'association");
+        super.stage.setResizable(true);
+        super.stage.setMinWidth(620);
+        super.stage.setMinHeight(560);
+        super.stage.setWidth(700);
+        super.stage.setHeight(680);
 
         VBox root = new VBox(15);
         root.setPadding(new Insets(20));
-        root.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
 
-        // En-tête avec info
-        Label infoLabel = new Label("💡 Association = lien entre entités avec un verbe à l'infinitif et des cardinalités.");
-        infoLabel.setStyle(
-            "-fx-text-fill: " + T_M.getTheme().getSecondaryTextColor() + "; " +
-            "-fx-font-size: 11px; " +
-            "-fx-padding: 5; " +
-            "-fx-background-color: " + T_M.getTheme().getCardColor() + "; " +
-            "-fx-background-radius: 4;"
-        );
-        infoLabel.setWrapText(true);
+        // --- Nom ---
+        Label lblName = new Label("Nom de l'association (verbe à l'infinitif)");
 
-        // Section nom de l'association
-        Label lblAssociationName = new Label("Nom de l'association (verbe):");
-        lblAssociationName.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + "; -fx-font-size: 14;");
-        
-        tfAssociationName = new TextField(association != null ? association.name : "");
-        tfAssociationName.setPromptText("Ex: posseder, commander, appartenir");
-        tfAssociationName.setStyle(
-            "-fx-background-color: " + T_M.getTheme().getCardColor() + "; " +
-            "-fx-text-fill: " + T_M.getTheme().getTextColor() + "; " +
-            "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; " +
-            "-fx-border-radius: 4; -fx-background-radius: 4;"
-        );
+        this.tfAssociationName = new TextField(association != null ? association.getKey() : "");
+        this.tfAssociationName.setPromptText("ex : posséder, commander, appartenir…");
+        this.tfAssociationName.setMaxWidth(350);
 
-        // Section participations des entités
-        Label lblEntities = new Label("Entités participantes:");
-        lblEntities.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + "; -fx-font-size: 14;");
-        
-        entitiesBox = new VBox(10);
-        entitiesBox.setStyle(
-            "-fx-background-color: " + T_M.getTheme().getCardColor() + "; " +
-            "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; " +
-            "-fx-padding: 10; " +
-            "-fx-border-radius: 4; -fx-background-radius: 4;"
-        );
+        // --- Entités participantes ---
+        Label lblEntities = new Label("Entités participantes  (" + MIN_ENTITIES + " – " + MAX_ENTITIES + ")");
 
-        // Si on modifie une association, charger les participations
+        this.entitiesBox = new VBox(8);
+
         if (association != null) {
-            // TODO: corriger ceci
-            CanvasController.showWarningAlert("Erreur", "Pas compatible avec la version actuelle");
-            // for (Table entity : association.getParticipations().keySet()) {
-            //     EntityParticipationRow row = new EntityParticipationRow(availableEntities);
-            //     row.entityCombo.setValue(entity);
-            //     row.cardinalityCombo.setValue(association.getCardinality(entity).toString());
-            //     participations.add(row);
-            //     entitiesBox.getChildren().add(row.getContainer());
-            // }
+            // Chargement des participations existantes
+            CanvasController.showWarningAlert("Attention", "La modification d'une association existante est partiellement prise en charge.");
+            for (Pair<Table, CardinalityValue> p : association.getValue()) {
+                EntityParticipationRow row = new EntityParticipationRow(this.availableEntities);
+                row.setEntity(p.getKey());
+                row.setCardinality(p.getValue());
+                this.participations.add(row);
+                this.entitiesBox.getChildren().add(row.container);
+            }
         } else {
-            // Par défaut : 2 entités pour une association binaire
-            addEntityParticipation();
-            addEntityParticipation();
+            // Par défaut : association binaire
+            this.addEntityParticipation();
+            this.addEntityParticipation();
         }
 
-        // Boutons pour gérer les participations
-        HBox entityActions = new HBox(10);
-        entityActions.setAlignment(Pos.CENTER_LEFT);
-        
-        Button btnAddEntity = new Button("Ajouter entité");
-        styleButton(btnAddEntity, T_M.getTheme().getHeaderColor());
-        btnAddEntity.setOnAction(e -> addEntityParticipation());
-        
-        Button btnRemoveEntity = new Button("Retirer dernière entité");
-        styleButton(btnRemoveEntity, "#c44545");
-        btnRemoveEntity.setOnAction(e -> removeLastEntityParticipation());
-        
-        entityActions.getChildren().addAll(btnAddEntity, btnRemoveEntity);
+        HBox entityActions = this.buildEntityActionsBar();
 
-        // Boutons de validation
+        // --- Attributs de l'association ---
+        Label lblAttributes = new Label("Attributs de l'association  (optionnel)");
+
+        this.tableAttributes = new TableView<>();
+        this.tableAttributes.setItems(this.attributeData);
+        super.setupTableColumns(this.tableAttributes);
+        this.tableAttributes.setPrefHeight(180);
+        VBox.setVgrow(this.tableAttributes, Priority.ALWAYS);
+
+        HBox attributeActions = this.buildAttributeActionsBar();
+
+        // --- Footer ---
+        HBox footer = this.buildFooter();
+
+        root.getChildren().addAll(
+            lblName, this.tfAssociationName,
+            new Separator(),
+            lblEntities, this.entitiesBox, entityActions,
+            new Separator(),
+            lblAttributes, this.tableAttributes, attributeActions,
+            new Separator(),
+            footer
+        );
+
+        super.stage.setScene(new Scene(root));
+    }
+
+    private HBox buildEntityActionsBar() {
+        HBox bar = new HBox(8);
+        bar.setAlignment(Pos.CENTER_LEFT);
+
+        Button btnAdd = new Button("＋ Ajouter entité");
+        btnAdd.setOnAction(e -> this.addEntityParticipation());
+
+        Button btnRemove = new Button("－ Retirer dernière");
+        btnRemove.setOnAction(e -> this.removeLastEntityParticipation());
+
+        bar.getChildren().addAll(btnAdd, btnRemove);
+        return bar;
+    }
+
+    private HBox buildAttributeActionsBar() {
+        HBox bar = new HBox(8);
+        bar.setAlignment(Pos.CENTER_LEFT);
+
+        Button btnAdd = new Button("＋ Ajouter attribut");
+        btnAdd.setOnAction(e -> this.addAttribute());
+
+        Button btnRemove = new Button("－ Supprimer");
+        btnRemove.setOnAction(e -> this.removeSelectedAttribute());
+
+        bar.getChildren().addAll(btnAdd, btnRemove);
+        return bar;
+    }
+
+    private HBox buildFooter() {
         HBox footer = new HBox(10);
         footer.setAlignment(Pos.CENTER_RIGHT);
-        
+        footer.setPadding(new Insets(4, 0, 0, 0));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         Button btnCancel = new Button("Annuler");
-        styleButton(btnCancel, "#666666");
         btnCancel.setOnAction(e -> {
-            confirmed = false;
-            stage.close();
+            super.confirmed = false;
+            super.stage.close();
         });
-        
+
         Button btnConfirm = new Button("Confirmer");
-        styleButton(btnConfirm, "#4a9eff");
+        btnConfirm.setDefaultButton(true);
         btnConfirm.setOnAction(e -> {
             if (validateAndSave()) {
-                confirmed = true;
-                stage.close();
+                super.confirmed = true;
+                super.stage.close();
             }
         });
-        
-        footer.getChildren().addAll(btnCancel, btnConfirm);
 
-        VBox.setVgrow(entitiesBox, Priority.ALWAYS);
-        root.getChildren().addAll(infoLabel, lblAssociationName, tfAssociationName, 
-                                  lblEntities, entitiesBox, entityActions, footer);
-
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
+        footer.getChildren().addAll(spacer, btnCancel, btnConfirm);
+        return footer;
     }
 
     /**
      * Ajoute une participation d'entité
      */
     private void addEntityParticipation() {
-        if (participations.size() >= 4) {
-            CanvasController.showWarningAlert("Limite atteinte", "Maximum 4 entités pour une association.");
+        if (this.participations.size() >= MAX_ENTITIES) {
+            CanvasController.showWarningAlert("Limite atteinte", "Maximum " + MAX_ENTITIES + " entités pour une association.");
             return;
         }
         
-        EntityParticipationRow row = new EntityParticipationRow(availableEntities);
-        participations.add(row);
-        entitiesBox.getChildren().add(row.getContainer());
+        EntityParticipationRow row = new EntityParticipationRow(this.availableEntities);
+        this.participations.add(row);
+        this.entitiesBox.getChildren().add(row.container);
     }
 
     /**
      * Retire la dernière participation
      */
     private void removeLastEntityParticipation() {
-        if (participations.size() <= 2) {
-            CanvasController.showWarningAlert("Erreur", "Une association doit avoir au minimum 2 entités.");
+        if (this.participations.size() <= MIN_ENTITIES) {
+            CanvasController.showWarningAlert("Erreur", "Une association doit avoir au minimum " + MIN_ENTITIES + " entités.");
             return;
         }
         
         EntityParticipationRow last = participations.remove(participations.size() - 1);
-        entitiesBox.getChildren().remove(last.getContainer());
+        this.entitiesBox.getChildren().remove(last.container);
     }
 
-    /**
-     * Style un bouton
-     */
-    private void styleButton(Button btn, String bgColor) {
-        btn.setStyle(
-            "-fx-background-color: " + bgColor + "; " +
-            "-fx-text-fill: white; " +
-            "-fx-padding: 8 15; " +
-            "-fx-background-radius: 4; " +
-            "-fx-cursor: hand;"
-        );
-        btn.setOnMouseEntered(e -> btn.setOpacity(0.8));
-        btn.setOnMouseExited(e -> btn.setOpacity(1.0));
+    private void addAttribute() {
+        this.attributeData.add(new DialogColumnRow("attribut", "VARCHAR(255)", false, false, false, false));
+        int lastIndex = this.attributeData.size() - 1;
+        this.tableAttributes.getSelectionModel().select(lastIndex);
+        this.tableAttributes.scrollTo(lastIndex);
+    }
+
+    private void removeSelectedAttribute() {
+        DialogColumnRow selected = this.tableAttributes.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            CanvasController.showWarningAlert("Aucune sélection", "Sélectionnez un attribut à supprimer.");
+            return;
+        }
+        this.attributeData.remove(selected);
     }
 
     /**
      * Valide et sauvegarde les données
      */
     private boolean validateAndSave() {
-        String name = tfAssociationName.getText().trim();
+        String name = this.tfAssociationName.getText().trim();
         
         if (name.isEmpty()) {
             CanvasController.showWarningAlert("Erreur", "Le nom de l'association ne peut pas être vide.");
             return false;
         }
         
-        if (participations.size() < 2) {
-            CanvasController.showWarningAlert("Erreur", "Une association doit relier au moins 2 entités.");
+        if (this.participations.size() < MIN_ENTITIES) {
+            CanvasController.showWarningAlert("Erreur", "Une association doit relier au moins " + MIN_ENTITIES + " entités.");
             return false;
         }
 
         // Vérifier que toutes les entités sont sélectionnées
-        for (EntityParticipationRow row : participations) {
+        for (EntityParticipationRow row : this.participations) {
             if (row.getEntity() == null) {
                 CanvasController.showWarningAlert("Erreur", "Veuillez sélectionner une entité pour chaque participation.");
                 return false;
@@ -285,47 +314,54 @@ public class AssociationEditorDialog extends EditorDialog {
         }
 
         // Vérifier qu'il n'y a pas de doublon (sauf pour association réflexive)
-        if (participations.size() > 2) {
+        if (this.participations.size() > MIN_ENTITIES) {
             List<Table> selectedEntities = new ArrayList<>();
-            for (EntityParticipationRow row : participations) {
+            for (EntityParticipationRow row : this.participations) {
                 if (selectedEntities.contains(row.getEntity())) {
-                    CanvasController.showWarningAlert("Erreur", "Une même entité ne peut pas apparaître plusieurs fois " +
-                                       "(sauf pour les associations binaires réflexives).");
+                    CanvasController.showWarningAlert("Erreur", "Une même entité ne peut pas apparaître plusieurs fois (sauf pour les associations binaires réflexives).");
                     return false;
                 }
                 selectedEntities.add(row.getEntity());
             }
         }
 
-        // Créer l'association résultat
-        resultAssociation = new Table(name);
-        // TODO: corriger ceci
-        // for (EntityParticipationRow row : participations) {
-        //     resultAssociation.addParticipation(row.getEntity(), row.getCardinality());
-        // }
+        // Vérifier que les noms d'attributs ne sont pas vides
+        for (DialogColumnRow row : this.attributeData) {
+            if (row.getName().isBlank()) {
+                CanvasController.showWarningAlert("Attribut invalide", "Tous les attributs doivent avoir un nom.");
+                return false;
+            }
+        }
 
         return true;
     }
 
     /**
-     * Affiche le dialogue et attend la fermeture
-     */
-    public void showAndWait() {
-        stage.showAndWait();
-    }
-
-    /**
-     * Retourne true si l'utilisateur a confirmé
-     */
-    public boolean isConfirmed() {
-        return confirmed;
-    }
-
-    /**
-     * Retourne l'association créée/modifiée
+     * Retourne les données saisies sous la forme d'une paire :
+     * <ul>
+     *   <li><b>key</b> : nom de l'association</li>
+     *   <li><b>value</b> : liste des participations (nom de l'entité, cardinalité)</li>
+     * </ul>
+     *
+     * <p>Les attributs sont disponibles via {@link #getResultAttributes()}.</p>
+     *
+     * @return la paire résultat, ou une paire vide si le dialogue n'a pas été confirmé
      */
     public Pair<String, List<Pair<String, CardinalityValue>>> getResultAssociation() {
-        // TODO
-        return new Pair<String, List<Pair<String, CardinalityValue>>>("", List.of());
+        if (!super.confirmed) return new Pair<>("", List.of());
+
+        String name = this.tfAssociationName.getText().trim();
+        List<Pair<String, CardinalityValue>> parts = new ArrayList<>();
+        for (EntityParticipationRow row : this.participations) {
+            parts.add(new Pair<>(row.getEntity().name, row.getCardinality()));
+        }
+        return new Pair<>(name, parts);
+    }
+
+    /**
+     * @return la liste des attributs définis pour l'association
+     */
+    public List<DialogColumnRow> getResultAttributes() {
+        return new ArrayList<>(this.attributeData);
     }
 }

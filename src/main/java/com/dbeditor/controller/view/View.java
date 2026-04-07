@@ -25,7 +25,7 @@ public abstract class View implements Visual, DbUpdate {
      */
     public abstract Pane getRoot();
 
-    public Button createButton(String text) {
+    protected Button createButton(String text) {
         Button button = new Button(text);
         return button;
     }

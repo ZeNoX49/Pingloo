@@ -84,7 +84,6 @@ public class TableController implements Visual {
             this.grid.add(colName, 0, i);
             GridPane.setMargin(colName, new Insets(1, 1, 1, 3));
             
-            System.out.println(col.type.toString() + " -> " + col.type.getRepr(DbType.MySql));
             Label colType = new Label(col.type.getRepr(DbType.MySql));
             if(col.isPrimaryKey || col.isNotNull) {
                 colType.setFont(Font.font("System", FontWeight.BOLD, 11));
