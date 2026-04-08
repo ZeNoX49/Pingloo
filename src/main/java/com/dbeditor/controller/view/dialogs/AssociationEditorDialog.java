@@ -8,7 +8,6 @@ import java.util.Map;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.model.Table;
 import com.dbeditor.model.mcd.CardinalityValue;
-import com.dbeditor.util.ThemeManager;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,18 +33,18 @@ import javafx.util.Pair;
  * Dialogue pour créer ou modifier une association
  */
 public class AssociationEditorDialog extends EditorDialog {
-    private static final ThemeManager T_M = ThemeManager.getInstance();
+    // private static final ThemeManager T_M = ThemeManager.getInstance();
     
     private static final int MIN_ENTITIES = 2;   // Nombre minimum d'entités participantes
     private static final int MAX_ENTITIES = 4;   // Nombre maximum d'entités participantes
 
-    private List<Table> availableEntities;
-    private List<EntityParticipationRow> participations;
+    private final List<Table> availableEntities;
+    private final List<EntityParticipationRow> participations;
     
     private TextField tfAssociationName;
     private VBox entitiesBox;
-    private TableView<DialogColumnRow> tableAttributes;
-    private ObservableList<DialogColumnRow> attributeData;
+    private final TableView<DialogColumnRow> tableAttributes;
+    private final ObservableList<DialogColumnRow> attributeData;
 
     /**
      * Ligne représentant la participation d'une entité dans l'association
@@ -54,7 +53,7 @@ public class AssociationEditorDialog extends EditorDialog {
         private final ComboBox<String> entityCombo;
         private final ComboBox<String> cardinalityCombo;
         final HBox container;
-        private Map<String, Table> tables;
+        private final Map<String, Table> tables;
         
         public EntityParticipationRow(List<Table> entities) {
             this.tables = new HashMap<>();
@@ -113,6 +112,7 @@ public class AssociationEditorDialog extends EditorDialog {
     public AssociationEditorDialog(List<Table> availableEntities, Pair<String, List<Pair<Table, CardinalityValue>>> association) {
         this.availableEntities = new ArrayList<>(availableEntities);
         this.participations = new ArrayList<>();
+        this.tableAttributes = new TableView<>();
         this.attributeData = FXCollections.observableArrayList();
         this.initUI(association);
     }
@@ -165,9 +165,8 @@ public class AssociationEditorDialog extends EditorDialog {
         HBox entityActions = this.buildEntityActionsBar();
 
         // --- Attributs de l'association ---
-        Label lblAttributes = new Label("Attributs de l'association  (optionnel)");
+        Label lblAttributes = new Label("Attributs de l'association (optionnel)");
 
-        this.tableAttributes = new TableView<>();
         this.tableAttributes.setItems(this.attributeData);
         super.setupTableColumns(this.tableAttributes);
         this.tableAttributes.setPrefHeight(180);

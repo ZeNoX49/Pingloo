@@ -7,7 +7,6 @@ import com.dbeditor.model.Table;
 import com.dbeditor.model.type.IntSql;
 import com.dbeditor.model.type.VarcharSql;
 import com.dbeditor.model.type.__SqlType;
-import com.dbeditor.util.ThemeManager;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,17 +30,18 @@ import javafx.stage.StageStyle;
  * Dialogue pour créer ou modifier une entité
  */
 public class EntityEditorDialog extends EditorDialog {
-    private static final ThemeManager T_M = ThemeManager.getInstance();
+    // private static final ThemeManager T_M = ThemeManager.getInstance();
     
     private TextField tfTableName;
-    private TableView<DialogColumnRow> tableColumns;
-    private ObservableList<DialogColumnRow> columnData;
-    private Table resultTable;
+    private final TableView<DialogColumnRow> tableColumns;
+    private final ObservableList<DialogColumnRow> columnData;
+    private final Table resultTable;
 
     /**
      * Constructeur pour créer une nouvelle table
      */
     public EntityEditorDialog() {
+        this.tableColumns = new TableView<>();
         this.columnData = FXCollections.observableArrayList();
         this.resultTable = new Table("a renommer");
 
@@ -56,6 +56,7 @@ public class EntityEditorDialog extends EditorDialog {
      * @param table la table à modifier, null pour créer une nouvelle
      */
     public EntityEditorDialog(Table table) {
+        this.tableColumns = new TableView<>();
         this.columnData = FXCollections.observableArrayList();
 
         // pas fameux mais fais l'affaire
@@ -103,7 +104,6 @@ public class EntityEditorDialog extends EditorDialog {
         // TableView pour les colonnes
         Label lblColumns = new Label("Colonnes");
         
-        this.tableColumns = new TableView<>();
         this.tableColumns.setItems(this.columnData);
         super.setupTableColumns(this.tableColumns);
         VBox.setVgrow(this.tableColumns, Priority.ALWAYS);

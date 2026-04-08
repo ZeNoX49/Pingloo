@@ -1,7 +1,6 @@
 package com.dbeditor.controller.view;
 
 import com.dbeditor.controller.view.dialogs.DialogColumnRow;
-import com.dbeditor.util.ThemeManager;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
@@ -10,7 +9,7 @@ import javafx.scene.layout.Pane;
 
 // TODO
 public abstract class GridView extends View {
-    private static final ThemeManager T_M = ThemeManager.getInstance();
+    // private static final ThemeManager T_M = ThemeManager.getInstance();
 
     protected TableView<DialogColumnRow> tableColumns;
     protected ObservableList<DialogColumnRow> columnData;

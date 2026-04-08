@@ -27,7 +27,7 @@ public class ThemeManager {
     /* ================================================== */
 
     private int id;
-    private Map<Integer, Theme> themes;
+    private final Map<Integer, Theme> themes;
     private Theme theme = new DarkTheme();
 
     public Theme getTheme() {

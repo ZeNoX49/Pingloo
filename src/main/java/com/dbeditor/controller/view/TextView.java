@@ -1,14 +1,12 @@
 package com.dbeditor.controller.view;
 
-import com.dbeditor.util.ThemeManager;
-
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 public abstract class TextView extends View {
-    private static final ThemeManager T_M = ThemeManager.getInstance();
+    // private static final ThemeManager T_M = ThemeManager.getInstance();
 
     protected StackPane spPane;
     protected TextArea textArea;
