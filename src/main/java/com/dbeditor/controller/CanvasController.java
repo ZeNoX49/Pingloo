@@ -59,6 +59,7 @@ public class CanvasController implements Visual {
         this.views = new ArrayList<>();
 
         for(DbType type : DbType.values()) {
+            if(type.equals(DbType.Oracle)) continue;
             this.createMenuItemOpenFile(type);
             this.createMenuItemOpenDb(type);
             this.createMenuItemSaveFile(type);

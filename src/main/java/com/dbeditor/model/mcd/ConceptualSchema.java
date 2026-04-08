@@ -129,39 +129,32 @@ public class ConceptualSchema {
         this.associations.put(table.name, new Association(linkedEntitiesCard, table));
     }
 
-    /**
-     * Permet d'ajouter une entité,
-     * l'ajoute aussi dans le schema de MainApp
-     */
-    public void addEntity(Table table) {
-        this.entities.put(table.name, new Entity(table));
-        MainApp.schema.tables.get(table.name);
-    }
-
     public boolean nameExists(String name) {
         return this.entities.containsKey(name) || this.associations.containsKey(name);
     }
 
     /**
-     * Supprime une entité et toutes les associations qui la relient.
+     * Permet d'ajouter une entité.
+     * L'ajoute aussi dans le schema de MainApp
      */
-    public void removeEntity(String name) {
-        Entity e = entities.remove(name);
-        if (e == null) return;
-
-        // supprimer les associations qui contiennent cette entité
-        associations.entrySet().removeIf(entry -> entry.getValue().linkedEntities.containsKey(e));
+    public void addEntity(Table table) {
+        this.entities.put(table.name, new Entity(table));
+        MainApp.schema.addTable(table);
     }
 
     /**
-     * Met à jour le nom d'une entité (et met à jour les associations).
+     * Met à jour une entité et toutes les associations associés.
+     * Le fait aussi dans le schema de MainApp
      */
-    public void renameEntity(String oldName, Table updatedTable) {
+    public void updateEntity(String oldName, Table updatedTable) {
         Entity old = entities.remove(oldName);
         if (old == null) return;
 
         Entity updated = new Entity(updatedTable);
         entities.put(updatedTable.name, updated);
+
+        MainApp.schema.tables.remove(oldName);
+        MainApp.schema.addTable(updatedTable);
 
         // mettre à jour les associations qui référencent l'ancienne entité
         for (Association assoc : associations.values()) {
@@ -173,7 +166,22 @@ public class ConceptualSchema {
     }
 
     /**
+     * Supprime une entité et toutes les associations associés.
+     * La supprime aussi dans le schema de MainApp
+     */
+    public void removeEntity(String name) {
+        Entity e = entities.remove(name);
+        if (e == null) return;
+
+        MainApp.schema.tables.remove(name);
+
+        // supprimer les associations qui contiennent cette entité
+        associations.entrySet().removeIf(entry -> entry.getValue().linkedEntities.containsKey(e));
+    }
+
+    /**
      * Ajoute une association entre des entités
+     * @return table utilisée pour l'affichage
      */
     public Table addAssociation(String name, List<Pair<String, CardinalityValue>> links) {
         Table table = new Table(name);
@@ -185,15 +193,9 @@ public class ConceptualSchema {
 
         this.associations.put(table.name, new Association(en, table));
 
-        return table;
-    }
+        // TODO: modification de MainApp.schema
 
-    /**
-     * Supprime une association par son nom.
-     */
-    public void removeAssociation(String name) {
-        // au cas où elle est supprimé lors de la suppression d'une table 
-        if(this.nameExists(name)) associations.remove(name);
+        return table;
     }
 
     // TODO
@@ -206,7 +208,18 @@ public class ConceptualSchema {
     //     if (old == null) return;
     //     Association updated = new Association(newName, participants, old.referencedTable);
     //     associations.put(newName, updated);
+    //
+    //     // TODO: modification de MainApp.schema
     // }
+
+    /**
+     * Supprime une association par son nom.
+     */
+    public void removeAssociation(String name) {
+        // au cas où elle est supprimé lors de la suppression d'une table 
+        if(this.nameExists(name)) associations.remove(name);
+         // TODO: modification de MainApp.schema
+    }
     
     /**
      * Retourne toutes les tables associés aux entités

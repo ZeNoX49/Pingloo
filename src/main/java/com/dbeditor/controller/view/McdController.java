@@ -314,7 +314,7 @@ public class McdController extends ModelView {
         }
 
         // Mettre à jour dans le ConceptualSchema (gère aussi les associations)
-        this.conceptualSchema.renameEntity(oldName, modifiedTable);
+        this.conceptualSchema.updateEntity(oldName, modifiedTable);
 
         // Mettre à jour dans le DatabaseSchema global
         MainApp.schema.tables.remove(oldName);

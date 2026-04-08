@@ -27,7 +27,7 @@ public class MultiDragManager {
     public void attach(TableController tc) {
         // on suppose TableController expose setOnDrag / setOnDragEnd / setOnSelect grâce à SelectionModel
         tc.setOnDrag((t, e) -> this.handleDrag(t, e));
-        tc.setOnDragEnd((t, e) -> this.handleDragEnd(t, e));
+        tc.setOnDragEnd((t, e) -> this.handleDragEnd(e));
     }
 
     private void handleDrag(TableController tc, MouseEvent e) {
@@ -62,7 +62,7 @@ public class MultiDragManager {
         e.consume();
     }
 
-    private void handleDragEnd(TableController tc, MouseEvent e) {
+    private void handleDragEnd(MouseEvent e) {
         this.dragStartPositions.clear();
         this.dragStartMouse = null;
         e.consume();
