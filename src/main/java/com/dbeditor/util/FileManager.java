@@ -2,6 +2,8 @@ package com.dbeditor.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.file.exporter.MySqlExporter;
@@ -26,6 +28,8 @@ public class FileManager {
 
     /* ================================================== */
 
+    private static final Logger LOGGER = Logger.getLogger(FileManager.class.getName());
+
     private Stage stage;
     private File lastUsedDirectory;
  
@@ -41,12 +45,12 @@ public class FileManager {
             if (schema != null && !schema.getTables().isEmpty()) {
                 return schema;
             } else {
-                System.err.println("Erreur lors du chargement de la base de données");
+                LOGGER.log(Level.SEVERE, "Erreur lors du chargement de la base de données");
                 return null;
             }
         }
 
-        System.err.println("Le dossier n'existe pas ????");
+        LOGGER.log(Level.SEVERE, "Le dossier n'existe pas ????");
         return null;
     }
     

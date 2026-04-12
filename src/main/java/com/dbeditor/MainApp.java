@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.util.FileManager;
@@ -16,6 +18,8 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
+	private static final Logger LOGGER = Logger.getLogger(MainApp.class.getName());
+	
     public static DatabaseSchema schema;
 
     @Override
@@ -39,8 +43,7 @@ public class MainApp extends Application {
 
 			stage.setOnCloseRequest(e -> J_M.save());
 	    } catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("Erreur de chargement de la scène : /fxml/canvas.fxml");
+			LOGGER.log(Level.SEVERE, "Erreur de chargement de la scène : /fxml/canvas.fxml", e);
 	    }
 	} public static void main(String[] args) {
 		deleteUselessLog();

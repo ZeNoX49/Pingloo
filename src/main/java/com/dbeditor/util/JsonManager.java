@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dbeditor.sql.DbType;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,9 +29,11 @@ public class JsonManager {
 
     /* ================================================== */
 
-    private DbManager D_M = DbManager.getInstance();
-    private ThemeManager T_M = ThemeManager.getInstance();
-    private FileManager F_M = FileManager.getInstance();
+    private static final Logger LOGGER = Logger.getLogger(JsonManager.class.getName());
+
+    private static final DbManager D_M = DbManager.getInstance();
+    private static final ThemeManager T_M = ThemeManager.getInstance();
+    private static final FileManager F_M = FileManager.getInstance();
 
     private final static Path PATH_TO_FILE_USER_DATA = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "userPreferences.json");
 
@@ -109,8 +113,7 @@ public class JsonManager {
             mapper.writeValue(PATH_TO_FILE_USER_DATA.toFile(), root);
             System.out.println("Sauvegarde JSON réussie vers " + PATH_TO_FILE_USER_DATA);
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'écriture du fichier JSON : " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'écriture du fichier JSON", e);
         }
     }
 
@@ -151,8 +154,7 @@ public class JsonManager {
             mapper.writeValue(PATH_TO_FILE_USER_DATA.toFile(), root);
             System.out.println("Sauvegarde JSON réussie vers " + PATH_TO_FILE_USER_DATA);
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'écriture du fichier JSON : " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'écriture du fichier JSON", e);
         }
     }
     

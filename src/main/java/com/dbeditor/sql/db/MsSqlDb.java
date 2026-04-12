@@ -44,22 +44,20 @@ public class MsSqlDb extends SqlDb {
      * URL JDBC MSSQL : jdbc:sqlserver://host:port;databaseName=DB;...
      */
     public void connect(String dbName) {
-        if (isConnected()) {
+        if (this.isConnected()) {
             LOGGER.info("Déjà connecté.");
             return;
         }
 
         // Paramètres recommandés : encrypt et trustServerCertificate selon ton infra
-        String url = String.format(
-            "jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=false;trustServerCertificate=true",
-            this.dbHost, this.dbPort, dbName);
+        String url = "jdbc:sqlserver://"+this.dbHost+":"+this.dbPort+";databaseName="+dbName;
 
         try {
             // Driver Microsoft JDBC pour SQL Server
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             this.connection = DriverManager.getConnection(url, this.dbUser, this.dbPassword);
             this.connection.setAutoCommit(true);
-            LOGGER.info("Connexion MSSQL établie vers " + url);
+            LOGGER.info(() -> "Connexion MSSQL établie vers " + url);
         } catch (ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Driver JDBC MSSQL introuvable. Ajoute le driver 'mssql-jdbc' au classpath.", e);
         } catch (SQLException e) {
@@ -91,13 +89,13 @@ public class MsSqlDb extends SqlDb {
 
     @Override
     public DatabaseSchema loadDb(String dbName) {
-        connect(dbName);
-        if (!isConnected()) {
-            LOGGER.severe("Impossible de charger la BD : pas de connexion.");
-            return new DatabaseSchema(dbName);
-        }
-
+        this.connect(dbName);
         DatabaseSchema schema = new DatabaseSchema(dbName);
+
+        if (!this.isConnected()) {
+            LOGGER.severe("Impossible de charger la BD : pas de connexion.");
+            return schema;
+        }
 
         try {
             DatabaseMetaData meta = this.connection.getMetaData();
@@ -222,14 +220,7 @@ public class MsSqlDb extends SqlDb {
         return rows;
     }
 
-    /**
-     * Exécute un script SQL en découpant correctement les statements.
-     * Supporte : 
-     *  - point-virgule ';' comme séparateur classique,
-     *  - la directive 'GO' (ligne seule) très utilisée par SQL Server.
-     *
-     * Retourne true si tout s'est bien passé.
-     */
+    @Override
     public boolean executeSqlScript(String sqlScript) {
         if (!isConnected()) {
             LOGGER.warning("executeSqlScript: pas de connexion active.");

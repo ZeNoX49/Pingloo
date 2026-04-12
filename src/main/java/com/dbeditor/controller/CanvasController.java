@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.modifier.Visual;
@@ -38,6 +40,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class CanvasController implements Visual {
+    private static final Logger LOGGER = Logger.getLogger(CanvasController.class.getName());
+
     private static final DbManager D_M = DbManager.getInstance();
     private static final ThemeManager T_M = ThemeManager.getInstance();
     private static final FileManager F_M = FileManager.getInstance();
@@ -156,8 +160,7 @@ public class CanvasController implements Visual {
 	        modalStage.setScene(scene);
 			modalStage.showAndWait();
 	    } catch (IOException e) {
-	        System.err.println("Erreur de chargement de la scène : theme.fxml");
-	        e.printStackTrace();
+	        LOGGER.log(Level.SEVERE, "Erreur de chargement de la scène : theme.fxml", e);
 	    }
     }
 
@@ -193,7 +196,7 @@ public class CanvasController implements Visual {
             try {
                 this.open(F_M.openDatabase(fileChooser, D_M.getSqlParser(type)));
             } catch (IOException ex) {
-                ex.printStackTrace();
+                LOGGER.log(Level.SEVERE, "", ex);
             }
         });
         this.mOpenFile.getItems().add(mi);
@@ -215,7 +218,7 @@ public class CanvasController implements Visual {
                 try {
                     this.open(D_M.getSqlDb(type).loadDb(dbName));
                 } catch (IOException ioe) {
-                    ioe.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "", e);
                 }
             });
             menu.getItems().add(mi);
@@ -262,7 +265,7 @@ public class CanvasController implements Visual {
                         CanvasController.showWarningAlert("Erreur", "Une erreur est survenu lors de la mise à jour de la bdd");
                     }
                 } catch (IOException ioe) {
-                    ioe.printStackTrace();
+                    LOGGER.log(Level.SEVERE, "", e);
                 }
             });
             menu.getItems().add(mi);
@@ -309,8 +312,7 @@ public class CanvasController implements Visual {
                 modalStage.setScene(scene);
                 modalStage.showAndWait();
             } catch (IOException ioe) {
-                System.err.println("Erreur de chargement de la scène : dbParam.fxml");
-                ioe.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Erreur de chargement de la scène : dbParam.fxml", ioe);
             }
         });
         menu.getItems().add(mip);

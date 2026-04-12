@@ -2,6 +2,8 @@ package com.dbeditor.controller;
 
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.modifier.DbUpdate;
@@ -25,6 +27,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 
 public class ViewController implements Visual, DbUpdate {
+    private static final Logger LOGGER = Logger.getLogger(ViewController.class.getName());
+
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private BorderPane root;
@@ -123,7 +127,7 @@ public class ViewController implements Visual, DbUpdate {
             try {
                 this.createView(ViewType.toEnum(newValue));
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "", e);
             }
         });
     }
@@ -149,7 +153,7 @@ public class ViewController implements Visual, DbUpdate {
             try {
                 newController.open(MainApp.schema);
             } catch (IOException ex) {
-                ex.printStackTrace();
+                LOGGER.log(Level.SEVERE, "", ex);
             }
 
             // this.setupSplit();
@@ -253,7 +257,7 @@ public class ViewController implements Visual, DbUpdate {
     //         if (this.parent != null) this.parent.getChildren().add(newPane);
 
     //     } catch (IOException ioe) {
-    //         ioe.printStackTrace();
+    //         LOGGER.log(Level.SEVERE, "", ioe);
     //     }
     // }
 

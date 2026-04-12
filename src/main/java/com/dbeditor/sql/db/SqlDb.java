@@ -16,7 +16,9 @@ public abstract class SqlDb {
     public abstract DatabaseSchema loadDb(String dbName);
     
     /**
-     * 
+     * Exécute un script SQL.
+     * Retourne true si tout s'est bien passé.
+     * @param sqlScript tout le script sql a éxécuté
      */
     public abstract boolean executeSqlScript(String sqlScript);
 }

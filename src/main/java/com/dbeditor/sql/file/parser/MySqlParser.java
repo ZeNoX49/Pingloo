@@ -3,6 +3,8 @@ package com.dbeditor.sql.file.parser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
@@ -20,6 +22,7 @@ import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
 
 public class MySqlParser extends SqlParser {
+    private static final Logger LOGGER = Logger.getLogger(SqlParser.class.getName());
     
     @Override
     public DatabaseSchema loadFromFile(String filePath) {
@@ -60,7 +63,7 @@ public class MySqlParser extends SqlParser {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "", e);
             return null;
         }
 

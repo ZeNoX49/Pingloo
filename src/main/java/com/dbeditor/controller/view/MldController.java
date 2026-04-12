@@ -201,7 +201,7 @@ public class MldController extends ModelView {
             //     // this.open(schema);
 
             // } catch (IOException e) {
-            //     e.printStackTrace();
+            //     LOGGER.log(Level.SEVERE, "", e);
             //     CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
             // }
         }

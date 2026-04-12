@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
@@ -34,6 +36,8 @@ import javafx.scene.shape.Line;
 import javafx.util.Pair;
 
 public class McdController extends ModelView {
+    private static final Logger LOGGER = Logger.getLogger(McdController.class.getName());
+
     private static final ThemeManager T_M = ThemeManager.getInstance();
     
     @Override
@@ -43,7 +47,6 @@ public class McdController extends ModelView {
 
     private Button btnEntity, btnAssociation;
 
-    // Modèle de données MCD
     private ConceptualSchema conceptualSchema;
     
     @Override
@@ -63,7 +66,7 @@ public class McdController extends ModelView {
                         try {
                             this.deleteSelected();
                         } catch (IOException ioe) {
-                            ioe.printStackTrace();
+                            LOGGER.log(Level.SEVERE, "", ioe);
                         }
                     }
                 });
@@ -73,10 +76,10 @@ public class McdController extends ModelView {
 
         // basic button handlers (could be expanded)
         this.btnEntity.setOnAction(e -> {
-            try { addEntity(); } catch (IOException ex) { ex.printStackTrace(); }
+            try { addEntity(); } catch (IOException ex) { LOGGER.log(Level.SEVERE, "", ex); }
         });
         this.btnAssociation.setOnAction(e -> {
-            try { addAssociation(); } catch (IOException ex) { ex.printStackTrace(); }
+            try { addAssociation(); } catch (IOException ex) { LOGGER.log(Level.SEVERE, "", ex); }
         });
     }
 
@@ -86,6 +89,10 @@ public class McdController extends ModelView {
 
         this.conceptualSchema = new ConceptualSchema(dbS);
 
+        this.rebuildView();
+    }
+
+    private void rebuildView() throws IOException {
         // supprime tous les nodes sauf selectionRect
         super.group.getChildren().removeIf(node -> node != super.lasso.rect);
 
@@ -97,9 +104,7 @@ public class McdController extends ModelView {
         this.createTableNodes();
         this.drawLinks();
 
-        if (super.lasso != null) {
-            super.lasso.rect.toFront();
-        }
+        super.lasso.rect.toFront();
 
         super.updateStyle();
     }
@@ -116,11 +121,6 @@ public class McdController extends ModelView {
         // TODO: script de rangement automatique
         for (Table table : this.conceptualSchema.getTables()) {
             this.createTableNode(table, TableType.Entite);
-        }
-
-        // s'assure que le rectangle de séléction est devant
-        if (super.lasso != null) {
-            super.lasso.rect.toFront();
         }
     }
 
@@ -320,9 +320,7 @@ public class McdController extends ModelView {
         MainApp.schema.tables.remove(oldName);
         MainApp.schema.addTable(modifiedTable);
 
-        // TODO: juste reload la TableController
-        // try { this.rebuildView(); } catch (IOException e) { e.printStackTrace(); }
-        try { this.open(MainApp.schema); } catch (IOException e) { e.printStackTrace(); }
+        try { this.rebuildView(); } catch (IOException e) { LOGGER.log(Level.SEVERE, "", e); }
     }
 
     /**
@@ -388,7 +386,7 @@ public class McdController extends ModelView {
 
         // this.conceptualSchema.updateAssociation(oldName, newName, newParticipants);
 
-        // try { this.drawAssociations(); } catch (IOException e) { e.printStackTrace(); }
+        // try { this.drawAssociations(); } catch (IOException e) { LOGGER.log(Level.SEVERE, "", e); }
         // if (super.lasso != null) super.lasso.rect.toFront();
     }
 
