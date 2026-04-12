@@ -46,48 +46,44 @@ public class ConceptualSchema {
             for(ForeignKey fk : entity.table.getForeignKeys()) {
                 // si != null alors lien entre table hors association
                 Entity target = entities.get(fk.referencedTable);
-                if(target != null) {
-                    // colonne FK dans la table référençante (entity)
-                    Column referencingCol = entity.table.columns.get(fk.columnName);
-                    if(referencingCol == null) continue;
+                if(target == null) continue;
 
-                    // Déterminer la cardinalité côté référençant (entity)
-                    // chaque ligne référençante pointe vers une et une seule entité référence -> max = 1
-                    // min = 1 si NOT NULL sinon 0
-                    CardinalityValue referencingCard = referencingCol.isNotNull ? CardinalityValue._11_ : CardinalityValue._01_;
+                // colonne FK dans la table référençante (entity)
+                Column referencingCol = entity.table.columns.get(fk.columnName);
+                if(referencingCol == null) continue;
 
-                    // Déterminer la cardinalité côté référencé (target)
-                    // par défaut B peut être référencé par plusieurs A -> 0..N
-                    // si la colonne FK dans A est unique (détectée ici si elle est PK), alors max = 1
-                    CardinalityValue targetCard;
-                    if (referencingCol.isPrimaryKey) {
-                        // FK est PK => relation 1-1 ou 0-1 selon nullabilité de la FK (dans A)
-                        targetCard = referencingCol.isNotNull ? CardinalityValue._11_ : CardinalityValue._01_;
-                    } else {
-                        Column fkColumn = entity.table.columns.get(fk.columnName);
-                        if (fkColumn.isNotNull) {
-                            targetCard = CardinalityValue._1N_;
-                        } else {
-                            // FK non-unique => côté référencé = 0..N (par défaut pas d'obligation)
-                            targetCard = CardinalityValue._0N_;
-                        }
-                    }
+                // Déterminer la cardinalité côté référençant (entity)
+                // chaque ligne référençante pointe vers une et une seule entité référence -> max = 1
+                // min = 1 si NOT NULL sinon 0
+                CardinalityValue referencingCard = referencingCol.isNotNull ? CardinalityValue._11_ : CardinalityValue._01_;
 
-                    List<Pair<Entity, CardinalityValue>> linkedEntitiesCard = new ArrayList<>();
-                    // ordre : premier = référençant (entity), second = référencé (target)
-                    linkedEntitiesCard.add(new Pair<>(entity, referencingCard));
-                    linkedEntitiesCard.add(new Pair<>(target, targetCard));
-
-                    Association association = new Association(linkedEntitiesCard, null);
-                    this.associations.put(association.referencedTable.name, association);
+                // Déterminer la cardinalité côté référencé (target)
+                // par défaut B peut être référencé par plusieurs A -> 0..N
+                // si la colonne FK dans A est unique (détectée ici si elle est PK), alors max = 1
+                CardinalityValue targetCard;
+                if (referencingCol.isPrimaryKey) {
+                    // FK est PK => relation 1-1 ou 0-1 selon nullabilité de la FK (dans A)
+                    targetCard = referencingCol.isNotNull ? CardinalityValue._11_ : CardinalityValue._01_;
+                } else {
+                    Column fkColumn = entity.table.columns.get(fk.columnName);
+                    // FK non-unique => côté référencé = 0..N (par défaut pas d'obligation)
+                    targetCard = fkColumn.isNotNull ? CardinalityValue._1N_ : CardinalityValue._0N_;
                 }
+
+                List<Pair<Entity, CardinalityValue>> linkedEntitiesCard = new ArrayList<>();
+                // ordre : premier = référençant (entity), second = référencé (target)
+                linkedEntitiesCard.add(new Pair<>(entity, referencingCard));
+                linkedEntitiesCard.add(new Pair<>(target, targetCard));
+
+                Association association = new Association(linkedEntitiesCard, null);
+                this.associations.put(association.referencedTable.name, association);
             }
         }
     }
 
     /**
      * Vérifie si la table est un association
-     * telle que -> (pk == fk) >= 2
+     * telle que -> (pk === fk) >= 2
      */
     private boolean isAssociativeTable(Table table) {
         List<Column> tablePkList = new ArrayList<>();
@@ -224,24 +220,20 @@ public class ConceptualSchema {
     /**
      * Retourne toutes les tables associés aux entités
      */
-    public List<Table> getTables() {
+    public List<Table> getEntitiesTables() {
         List<Table> tables = new ArrayList<>();
         for(Entity e : this.entities.values()) {
             tables.add(e.table);
-        }
-        return tables;
+        } return tables;
     }
 
     /**
      * Retourne la table associé au nom de l'entité,
      * null si elle n'existe pas
      */
-    public Table getTable(String name) {
-        for(Entity e : this.entities.values()) {
-            if(e.table.name.equals(name)) {
-                return e.table;
-            }
-        } return null;
+    public Table getEntityTable(String name) {
+        Entity e = this.entities.get(name);
+        return e == null ? null : e.table;
     }
 
     /**
@@ -268,11 +260,8 @@ public class ConceptualSchema {
      * null si elle n'existe pas
      */
     public Table getAssociationTable(String name) {
-        for(Association a : associations.values()) {
-            if(a.referencedTable.name.equals(name)) {
-                return a.referencedTable;
-            }
-        } return null;
+        Association a = this.associations.get(name);
+        return a == null ? null : a.referencedTable;
     }
 
     /* =========================================================================================== */

@@ -119,7 +119,7 @@ public class McdController extends ModelView {
      */
     private void createTableNodes() throws IOException {
         // TODO: script de rangement automatique
-        for (Table table : this.conceptualSchema.getTables()) {
+        for (Table table : this.conceptualSchema.getEntitiesTables()) {
             this.createTableNode(table, TableType.Entite);
         }
     }
@@ -308,7 +308,7 @@ public class McdController extends ModelView {
         Table modifiedTable = dialog.getResultTable();
         String newName = modifiedTable.name;
 
-        if (!oldName.equals(newName) && this.conceptualSchema.getTable(newName) != null) {
+        if (!oldName.equals(newName) && this.conceptualSchema.getEntityTable(newName) != null) {
             CanvasController.showWarningAlert("Erreur", "Une entité nommée « " + newName + " » existe déjà.");
             return;
         }
@@ -327,7 +327,7 @@ public class McdController extends ModelView {
      * Ajoute une nouvelle association.
      */
     public void addAssociation() throws IOException {
-        List<Table> entities = this.conceptualSchema.getTables();
+        List<Table> entities = this.conceptualSchema.getEntitiesTables();
         if (entities.size() < 1) {
             CanvasController.showWarningAlert("Erreur", "Il faut au moins 1 entité pour créer une association.");
             return;
@@ -360,7 +360,7 @@ public class McdController extends ModelView {
      * Édite une association existante (double-clic sur son node).
      */
     private void editAssociation(TableController assocTc) {
-        List<Table> entities = this.conceptualSchema.getTables();
+        List<Table> entities = this.conceptualSchema.getEntitiesTables();
         Table oldTable = assocTc.getTable();
         String oldName = oldTable.name;
 
@@ -406,7 +406,7 @@ public class McdController extends ModelView {
         for (TableController tc : selected) {
             String name = tc.getTable().name;
 
-            if (this.conceptualSchema.getTable(name) != null) {
+            if (this.conceptualSchema.getEntityTable(name) != null) {
                 // Entité : supprimer du MCD et du schema global
                 this.conceptualSchema.removeEntity(name);
                 MainApp.schema.tables.remove(name);

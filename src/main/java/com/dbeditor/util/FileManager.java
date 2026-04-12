@@ -40,7 +40,6 @@ public class FileManager {
         if (fileDir != null) {
             this.lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
             
-            parser = new MySqlParser();
             DatabaseSchema schema = parser.loadFromFile(fileDir.getAbsolutePath());
             if (schema != null && !schema.getTables().isEmpty()) {
                 return schema;
@@ -58,7 +57,6 @@ public class FileManager {
         fileChooser.setInitialDirectory(this.lastUsedDirectory);
 
         File file = fileChooser.showSaveDialog(this.stage);
-        exporter = new MySqlExporter();
         if (file != null) {
             try {
                 exporter.exportToSQL(schema, file.getAbsolutePath());
