@@ -38,6 +38,6 @@ public final class Table {
     /* =================================================================== */
     // pour que les tables aient la même position sur un changement de vue //
     /* =================================================================== */
-    public float posX = 0;
-    public float posY = 0;
+    public double posX = 0;
+    public double posY = 0;
 }

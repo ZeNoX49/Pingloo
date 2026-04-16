@@ -2,16 +2,14 @@ package com.dbeditor.controller.modifier;
 
 import java.io.IOException;
 
-import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.DbType;
 
 public interface DbUpdate {
 
     /**
      * Permet de charger une bdd
-     * @param schema DatabaseSchema de la bdd
      */
-    public abstract void open(DatabaseSchema schema) throws IOException;
+    public abstract void open() throws IOException;
 
     /**
      * Permet de mettre a jour les textes lors d'un changement de type de bdd

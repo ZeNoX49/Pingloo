@@ -19,7 +19,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.util.Pair;
 
 public class MldController extends ModelView {
     private static final ThemeManager T_M = ThemeManager.getInstance();
@@ -30,16 +29,14 @@ public class MldController extends ModelView {
     }
 
     @Override
-    public void open(DatabaseSchema schema) throws IOException {
-        if (schema == null) return;
-
+    public void open() {
         // supprime tous les nodes sauf selectionRect
         super.group.getChildren().removeIf(node -> node != super.lasso.rect);
 
         super.tableNodes.clear();
         super.connectionLines.clear();
 
-        this.createTableNodes(schema);
+        this.createTableNodes();
         this.drawConnections();
 
         if (super.lasso != null) {
@@ -54,13 +51,12 @@ public class MldController extends ModelView {
 
     /**
      * Permet de créer le visuel des tables à partir d'un DatabaseSchema
-     * @param schema
      */
-    private void createTableNodes(DatabaseSchema schema) throws IOException {
+    private void createTableNodes() {
         int col = 0, row = 0;
-        int cols = (int) Math.ceil(Math.sqrt(schema.getTables().size()));
+        int cols = (int) Math.ceil(Math.sqrt(MainApp.schema.getTables().size()));
 
-        for (Table table : schema.getTables()) {
+        for (Table table : MainApp.schema.getTables()) {
             double x = col * 250 + 50;
             double y = row * 200 + 50;
             this.createTableNode(table, x, y);
@@ -85,11 +81,17 @@ public class MldController extends ModelView {
      * @param y position Y
      * @return le contrôleur de la table créée
      */
-    private void createTableNode(Table table, double x, double y) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
-        AnchorPane tcPane = loader.load();
-        TableController tcController = loader.getController();
-        tcController.createTableNode(table, TableType.Table);
+    private void createTableNode(Table table, double x, double y) {
+        AnchorPane tcPane;
+        TableController tcController;
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
+            tcPane = loader.load();
+            tcController = loader.getController();
+        } catch (IOException e) { throw new Error("Une erreur est survenue lors de la création du visuel"); }
+
+        tcController.createTableController(table, TableType.Table);
 
         super.tableNodes.put(tcController.getTable().name, tcController);
 
@@ -122,7 +124,7 @@ public class MldController extends ModelView {
      */
     private void drawConnections() {
         // Supprimer les anciennes lignes
-        super.connectionLines.forEach(pair -> super.group.getChildren().remove(pair.getKey()));
+        super.connectionLines.forEach(connection -> super.group.getChildren().remove(connection.line));
         super.connectionLines.clear();
 
         for (TableController fromNode : super.tableNodes.values()) {
@@ -156,7 +158,7 @@ public class MldController extends ModelView {
 
         // ajoute la ligne derrière le node
         super.group.getChildren().add(0, line);
-        super.connectionLines.add(new Pair<>(line, null));
+        super.connectionLines.add(new Connection(from.getTable().name, to.getTable().name, line, null));
         
         // bind la ligne aux tables
         line.startXProperty().bind(from.getRoot().layoutXProperty().add(from.getRoot().widthProperty().divide(2)));

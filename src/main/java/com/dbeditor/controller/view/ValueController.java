@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.Table;
 import com.dbeditor.sql.DbType;
 
@@ -41,7 +40,7 @@ public class ValueController extends GridView {
     }
 
     @Override
-    public void open(DatabaseSchema dbS) throws IOException {
+    public void open() throws IOException {
         // TODO
     }
 

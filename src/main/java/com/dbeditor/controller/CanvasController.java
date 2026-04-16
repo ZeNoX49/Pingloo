@@ -175,7 +175,7 @@ public class CanvasController implements Visual {
             this.tfDbName.setText(schema.name);
 
             for(ViewController v : this.views) {
-                v.open(schema);
+                v.open();
             }
         }
     }

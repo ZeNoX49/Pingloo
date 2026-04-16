@@ -153,7 +153,7 @@ public class ConceptualSchema {
         MainApp.schema.addTable(updatedTable);
 
         // mettre à jour les associations qui référencent l'ancienne entité
-        for (Association assoc : associations.values()) {
+        for (Association assoc : this.associations.values()) {
             CardinalityValue card = assoc.linkedEntities.remove(old);
             if (card != null) {
                 assoc.linkedEntities.put(updated, card);
@@ -172,7 +172,7 @@ public class ConceptualSchema {
         MainApp.schema.tables.remove(name);
 
         // supprimer les associations qui contiennent cette entité
-        associations.entrySet().removeIf(entry -> entry.getValue().linkedEntities.containsKey(e));
+        this.associations.entrySet().removeIf(entry -> entry.getValue().linkedEntities.containsKey(e));
     }
 
     /**
@@ -214,7 +214,17 @@ public class ConceptualSchema {
     public void removeAssociation(String name) {
         // au cas où elle est supprimé lors de la suppression d'une table 
         if(this.nameExists(name)) associations.remove(name);
-         // TODO: modification de MainApp.schema
+
+        // TODO: (modification de MainApp.schema) a verif
+        if(!MainApp.schema.tables.containsKey(name)) return;
+        MainApp.schema.tables.remove(name);
+        for(Table t : MainApp.schema.tables.values()) {
+            for(ForeignKey fk : t.getForeignKeys()) {
+                if(!fk.referencedTable.equals(name)) {
+                    t.foreignKeys.remove(fk.columnName);
+                }
+            }
+        }
     }
     
     /**
@@ -237,6 +247,15 @@ public class ConceptualSchema {
     }
 
     /**
+     * Retourne la table associé au nom de l'entité,
+     * null si elle n'existe pas
+     */
+    public Table getAssociationTable(String name) {
+        Association a = this.associations.get(name);
+        return a == null ? null : a.referencedTable;
+    }
+    
+    /**
      * retourne le nécessaire pour tracé les liens entre les entités et les associations + les cardinalités
      */
     public Map<String, List<Pair<Table, CardinalityValue>>> getLinks() {
@@ -253,15 +272,6 @@ public class ConceptualSchema {
             );
         }
         return links;
-    }
-
-    /**
-     * Retourne la table associé au nom de l'entité,
-     * null si elle n'existe pas
-     */
-    public Table getAssociationTable(String name) {
-        Association a = this.associations.get(name);
-        return a == null ? null : a.referencedTable;
     }
 
     /* =========================================================================================== */

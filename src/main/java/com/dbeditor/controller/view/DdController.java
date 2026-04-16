@@ -3,7 +3,6 @@ package com.dbeditor.controller.view;
 import java.io.IOException;
 
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.DbType;
 
 import javafx.scene.control.ToolBar;
@@ -33,7 +32,7 @@ public class DdController extends GridView {
     }
 
     @Override
-    public void open(DatabaseSchema dbS) throws IOException {
+    public void open() throws IOException {
         // TODO
     }
 

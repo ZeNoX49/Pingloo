@@ -2,14 +2,12 @@ package com.dbeditor.controller;
 
 import java.io.IOException;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.dbeditor.MainApp;
 import com.dbeditor.controller.modifier.DbUpdate;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.controller.view.View;
-import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
@@ -75,7 +73,7 @@ public class ViewController implements Visual, DbUpdate {
         this.viewPane = newPane;   // TODO: a verif
 
         // initialiser la nouvelle vue
-        this.view.open(MainApp.schema);
+        this.view.open();
 
         this.setupCombobox();
         // this.setupSplit();
@@ -95,8 +93,8 @@ public class ViewController implements Visual, DbUpdate {
     }
 
     @Override
-    public void open(DatabaseSchema schema) throws IOException {
-        this.view.open(schema);
+    public void open() throws IOException {
+        this.view.open();
     }
 
     @Override
@@ -151,7 +149,7 @@ public class ViewController implements Visual, DbUpdate {
             this.viewPane = newPane;
 
             try {
-                newController.open(MainApp.schema);
+                newController.open();
             } catch (IOException ex) {
                 LOGGER.log(Level.SEVERE, "", ex);
             }

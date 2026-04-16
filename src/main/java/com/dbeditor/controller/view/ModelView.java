@@ -19,14 +19,39 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Pair;
 
 public abstract class ModelView extends View {
+
+    protected class Connection {
+        public final String firstTable;
+        public final String secondTable;
+        public final Line line;
+        public final Label label;
+
+        /**
+         * pour le MCD : entité, association, ...
+         */
+        public Connection(String firstTable, String secondTable, Line line, Label label) {
+            this.firstTable = firstTable;
+            this.secondTable = secondTable;
+            this.line = line;
+            this.label = label;
+        }
+
+        public boolean involves(String tableName) {
+            return this.firstTable.equals(tableName) || this.secondTable.equals(tableName);
+        }
+
+        public void removeFrom(Group group) {
+            group.getChildren().removeAll(this.line, this.label);
+        }
+    }
+
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     // Nodes visuels
     protected final Map<String, TableController> tableNodes = new HashMap<>();
-    protected final List<Pair<Line, Label>> connectionLines = new ArrayList<>();
+    protected final List<Connection> connectionLines = new ArrayList<>();
 
     // Helpers
     protected ZoomPanHandler zoomPan;
@@ -35,7 +60,7 @@ public abstract class ModelView extends View {
     protected MultiDragManager multiDrag;
 
     protected Label zlLabel;
-    protected Pane pane;
+    private Pane pane;
     protected Group group;
 
     @Override
@@ -80,8 +105,9 @@ public abstract class ModelView extends View {
             tc.updateStyle();
         }
 
-        for(Pair<Line, Label> p : this.connectionLines) {
-            p.getValue().setStyle(
+        for(Connection c : this.connectionLines) {
+            if(c.label == null) continue;
+            c.label.setStyle(
                 "-fx-background-color: " + T_M.getTheme().getBackgroundColor() + "; " + 
                 "-fx-text-fill: " + T_M.getTheme().getTextColor() + ";" +
                 "-fx-font-size: 15;"

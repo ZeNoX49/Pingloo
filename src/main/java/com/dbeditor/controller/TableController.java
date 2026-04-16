@@ -25,7 +25,7 @@ import javafx.scene.text.FontWeight;
 
 public class TableController implements Visual {
     public enum TableType {
-        Table, Entite, Association;
+        Table, Entity, Association;
     }
 
     private static final ThemeManager T_M = ThemeManager.getInstance();
@@ -48,7 +48,7 @@ public class TableController implements Visual {
      * Permet de mettre en place le visuel de la table.<br>
      * Met aussi en en place l'ui et le drag
      */
-    public void createTableNode(Table table, TableType type) {
+    public void createTableController(Table table, TableType type) {
         this.table = table;
         this.type = type;
         this.createUI();
@@ -202,6 +202,7 @@ public class TableController implements Visual {
         this.onDragEnd = onDragEnd;
     }
     
-    public Table getTable() { return table; }
+    public Table getTable() { return this.table; }
     public AnchorPane getRoot() { return this.pane; }
+    public TableType getType() { return this.type; }
 }

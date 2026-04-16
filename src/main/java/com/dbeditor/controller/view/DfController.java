@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.Column;
-import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.sql.DbType;
@@ -60,8 +60,8 @@ public class DfController extends TextView {
     }
 
     @Override
-    public void open(DatabaseSchema dbS) throws IOException {
-        List<Table> tablesSorted = DbManager.sortTables(dbS.getTables());
+    public void open() throws IOException {
+        List<Table> tablesSorted = DbManager.sortTables(MainApp.schema.getTables());
 
 
         this.doTextNormal(tablesSorted);

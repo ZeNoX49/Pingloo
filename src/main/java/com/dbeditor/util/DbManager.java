@@ -44,13 +44,13 @@ public class DbManager {
         this.sqlDb = new HashMap<>();
 
         this.sqlParser = new HashMap<>();
-        this.sqlParser.put(DbType.MsSql, new MySqlParser());
+        this.sqlParser.put(DbType.MySql, new MySqlParser());
         this.sqlParser.put(DbType.MsSql, new MsSqlParser());
         this.sqlParser.put(DbType.PostgreSql, new PostgreSqlParser());
         this.sqlParser.put(DbType.Oracle, new OracleParser());
 
         this.sqlExporter = new HashMap<>();
-        this.sqlExporter.put(DbType.MsSql, new MySqlExporter());
+        this.sqlExporter.put(DbType.MySql, new MySqlExporter());
         this.sqlExporter.put(DbType.MsSql, new MsSqlExporter());
         this.sqlExporter.put(DbType.PostgreSql, new PostgreSqlExporter());
         this.sqlExporter.put(DbType.Oracle, new OracleExporter());
