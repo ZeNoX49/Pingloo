@@ -20,28 +20,28 @@ public enum ViewType {
     }
 
     public static ViewType toEnum(String value) {
-        switch (value) {
-            case "MCD" : return MCD;
-            case "MLD" : return MLD;
-            case "DF" : return DF;
-            case "DD" : return DD;
-            case "SDF" : return SDF;
-            case "Value" : return VALUE;
-            case "SQL" : return SQL;
-            default: return null;
-        }
+        return switch (value) {
+            case "MCD" -> MCD;
+            case "MLD" -> MLD;
+            case "DF" -> DF;
+            case "DD" -> DD;
+            case "SDF" -> SDF;
+            case "Value" -> VALUE;
+            case "SQL" -> SQL;
+            default -> null;
+        };
     }
 
     public View getController() {
-        switch (this) {
-            case MCD : return new McdController();
-            case MLD : return new MldController();
-            case DF : return new DfController();
-            case DD : return new DdController();
-            case SDF : return new SdfController();
-            case VALUE : return new ValueController();
-            case SQL : return new SqlController();
-            default: return null;
-        }
+        return switch (this) {
+            case MCD -> new McdController();
+            case MLD -> new MldController();
+            case DF -> new DfController();
+            case DD -> new DdController();
+            case SDF -> new SdfController();
+            case VALUE -> new ValueController();
+            case SQL -> new SqlController();
+            default -> null;
+        };
     }
 }

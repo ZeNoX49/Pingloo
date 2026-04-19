@@ -1,7 +1,5 @@
 package com.dbeditor.controller.modifier;
 
-import com.dbeditor.sql.DbType;
-
 public interface Visual {
 
     /**

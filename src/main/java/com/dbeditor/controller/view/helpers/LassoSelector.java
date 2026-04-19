@@ -2,7 +2,7 @@ package com.dbeditor.controller.view.helpers;
 
 import java.util.Map;
 
-import com.dbeditor.controller.TableController;
+import com.dbeditor.controller.modifier.Drag;
 
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -14,23 +14,23 @@ import javafx.scene.shape.Rectangle;
 
 /**
  * Lasso rectangulaire : attache des handlers sur le 'viewportPane' et ajoute une Rectangle dans 'content'.
- * tableNodes : la liste des TableController à tester.
+ * nodes : la liste des Node à tester.
  */
 public class LassoSelector {
     private final Pane viewportPane;   // reçoit les events (scene coords)
     private final Group content;   // parent local pour le rectangle
-    private final SelectionModel<TableController> selectionModel;
+    private final SelectionModel selectionModel;
     public final Rectangle rect;
-    private final Map<String, TableController> tableNodes;
+    private final Map<String, Drag> nodes;
 
     private Point2D startLocal;
     private boolean dragging = false;
 
-    public LassoSelector(Pane viewportPane, Group content, Map<String, TableController> tableNodes, SelectionModel<TableController> selectionModel) {
+    public LassoSelector(Pane viewportPane, Group content, Map<String, Drag> nodes, SelectionModel selectionModel) {
         this.viewportPane = viewportPane;
         this.content = content;
         this.selectionModel = selectionModel;
-        this.tableNodes = tableNodes;
+        this.nodes = nodes;
 
         // le lasso
         this.rect = new Rectangle();
@@ -103,7 +103,7 @@ public class LassoSelector {
         // sélectionner les tables qui intersectent
         Bounds rectBounds = this.rect.getBoundsInParent();
         this.selectionModel.clear();
-        for (TableController tc : this.tableNodes.values()) {
+        for (Drag tc : this.nodes.values()) {
             if (tc.getRoot().getBoundsInParent().intersects(rectBounds)) {
                 this.selectionModel.select(tc);
             }

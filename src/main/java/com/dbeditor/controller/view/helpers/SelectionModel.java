@@ -5,46 +5,48 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import com.dbeditor.controller.modifier.Drag;
+
 /**
  * Modèle simple de sélection
  */
-public class SelectionModel<T> {
-    private final List<T> selected = new ArrayList<>();
-    // callback pour appliquer visuellement la sélection : (table, selected?)
-    private final BiConsumer<T, Boolean> visualizer;
+public class SelectionModel {
+    private final List<Drag> selected = new ArrayList<>();
+    // callback pour appliquer visuellement la sélection : (Node, selected?)
+    private final BiConsumer<Drag, Boolean> visualizer;
 
-    public SelectionModel(BiConsumer<T, Boolean> visualizer) {
+    public SelectionModel(BiConsumer<Drag, Boolean> visualizer) {
         this.visualizer = visualizer;
     }
 
     /**
-     * Sélectionne la value si elle n'est pas déja sélectionné
+     * Sélectionne le node si il n'est pas déja sélectionné
      */
-    public void select(T value) {
-        if (!this.selected.contains(value)) {
-            this.selected.add(value);
-            this.visualizer.accept(value, true);
+    public void select(Drag node) {
+        if (!this.selected.contains(node)) {
+            this.selected.add(node);
+            this.visualizer.accept(node, true);
         }
     }
 
     /**
-     * Désélectionne la value si elle est déja sélectionné
+     * Désélectionne le node si il est déja sélectionné
      */
-    public void deselect(T value) {
-        if (this.selected.remove(value)) {
-            this.visualizer.accept(value, false);
+    public void deselect(Drag node) {
+        if (this.selected.remove(node)) {
+            this.visualizer.accept(node, false);
         }
     }
 
     /**
-     * Si la value est sélectionnée, la désélectionne<br>
-     * Sinon la sélectionne
+     * Si le node est sélectionnée, le désélectionne<br>
+     * Sinon le sélectionne
      */
-    public void toggle(T value) {
-        if (this.selected.contains(value)) {
-            this.deselect(value);
+    public void toggle(Drag node) {
+        if (this.selected.contains(node)) {
+            this.deselect(node);
         } else {
-            this.select(value);
+            this.select(node);
         }
     }
 
@@ -52,33 +54,33 @@ public class SelectionModel<T> {
      * Déselectionne toutes les value
      */
     public void clear() {
-        for (T table : new ArrayList<>(this.selected)) {
-            this.deselect(table);
+        for (Drag node : new ArrayList<>(this.selected)) {
+            this.deselect(node);
         }
     }
 
     /**
-     * Retourne toutes les value sélectionnées
+     * Retourne tout les node sélectionnées
      * @return
      */
-    public List<T> getSelected() {
+    public List<Drag> getSelected() {
         return List.copyOf(this.selected);
     }
 
     /**
-     * Sélectionne une liste de values
+     * Sélectionne une liste de nodes
      */
-    public void selectAll(Collection<T> values) {
-        for (T value : values) {
-            this.select(value);
+    public void selectAll(Collection<Drag> nodes) {
+        for (Drag node : nodes) {
+            this.select(node);
         }
     }
 
     /**
-     * Vérifie si la value est déja sélectionné
+     * Vérifie si le node est déja sélectionné
      * @return bool
      */
-    public boolean contains(T value) {
-        return this.selected.contains(value);
+    public boolean contains(Drag node) {
+        return this.selected.contains(node);
     }
 }

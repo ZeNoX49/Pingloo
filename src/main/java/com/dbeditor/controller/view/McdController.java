@@ -6,13 +6,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
+import com.dbeditor.controller.modifier.Drag;
 import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
 import com.dbeditor.controller.view.dialogs.DialogColumnRow;
 import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
@@ -23,7 +23,6 @@ import com.dbeditor.model.mcd.ConceptualSchema;
 import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.util.ThemeManager;
 
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -37,8 +36,6 @@ import javafx.scene.shape.Line;
 import javafx.util.Pair;
 
 public class McdController extends ModelView {
-    private static final Logger LOGGER = Logger.getLogger(McdController.class.getName());
-
     private static final ThemeManager T_M = ThemeManager.getInstance();
     
     @Override
@@ -68,9 +65,12 @@ public class McdController extends ModelView {
                     }
 
                     else if (e.getCode() == KeyCode.D && e.isControlDown()) {
-                        List<TableController> selectedTables = this.selectionModel.getSelected();
+                        List<Drag> selectedTables = this.selectionModel.getSelected();
 
-                        for(TableController tc : selectedTables) {
+                        for(Drag d : selectedTables) {
+                            TableController tc = super.getTableController(d);
+                            if(tc == null) continue;
+
                             Table dupli = new Table(tc.getTable());
                             if(dupli.isPositionned()) {
                                 dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
@@ -118,7 +118,7 @@ public class McdController extends ModelView {
 
         // créer les nodes à partir du MCD
         this.createTableNodes();
-        this.drawLinks();
+        this.drawConnections();
 
         super.lasso.rect.toFront();
 
@@ -129,14 +129,13 @@ public class McdController extends ModelView {
      * Crée les nodes visuels pour les entités
      */
     private void createTableNodes() {
-        // TODO: script de rangement automatique
         for (Table table : this.conceptualSchema.getEntitiesTables()) {
             this.createTableNode(table, TableType.Entity);
         }
     }
 
     /**
-     * Crée un node d'entité à une position donnée
+     * Crée un node d'entité/association
      */
     private void createTableNode(Table table, TableType tabletype) {
         AnchorPane tcPane;
@@ -169,11 +168,8 @@ public class McdController extends ModelView {
         });
 
         // mettre a jour la position lors d'un déplacement
-        ChangeListener<Number> posListener = (obs, oldVal, newVal) -> {
-            table.setPosition(tcPane.getLayoutX(), tcPane.getLayoutY());
-        };
-        tcPane.layoutXProperty().addListener(posListener);
-        tcPane.layoutYProperty().addListener(posListener);
+        tcPane.layoutXProperty().addListener((a, b, c) -> table.setPosition(tcPane.getLayoutX(), table.getPosY()));
+        tcPane.layoutYProperty().addListener((a, b, c) -> table.setPosition(table.getPosX(), tcPane.getLayoutY()));
 
         // attache le node pour le multidrag
         super.multiDrag.attach(tcController);
@@ -184,7 +180,7 @@ public class McdController extends ModelView {
     /**
      * Tracer tout les liens entre les tables
      */
-    private void drawLinks() {
+    private void drawConnections() {
         // Supprimer les anciennes lignes
         super.connectionLines.forEach(connection -> {
             super.group.getChildren().remove(connection.line);
@@ -214,10 +210,13 @@ public class McdController extends ModelView {
             }
 
             this.createTableNode(table, TableType.Association);
-            TableController ac = super.tableNodes.get(name);
+            TableController ac = super.getTableController(super.tableNodes.get(name));
+            if(ac == null) return;
 
             for(Pair<Table, CardinalityValue> p : links.get(name)) {
-                this.drawLink(super.tableNodes.get(p.getKey().name), ac, p.getValue());
+                TableController ec = super.getTableController(super.tableNodes.get(p.getKey().name));
+
+                this.drawConnection(ec, ac, p.getValue());
             }
         }
     }
@@ -225,7 +224,7 @@ public class McdController extends ModelView {
     /**
      * Permet de tracer un lien entre une entité et une association
      */
-    private void drawLink(TableController fromEntity, TableController toAsso, CardinalityValue cardinality) {
+    private void drawConnection(TableController fromEntity, TableController toAsso, CardinalityValue cardinality) {
         // permet de savoir quelle TableController récupérer lors d'une modif/suppression
         if (fromEntity == null || fromEntity.getType() != TableType.Entity) return;
         if (toAsso == null || toAsso.getType() != TableType.Association) return;
@@ -370,17 +369,18 @@ public class McdController extends ModelView {
         // Recrée le node avec le nouveau nom
         this.createTableNode(modifiedTable, TableType.Entity);
 
-        TableController newTc = super.tableNodes.get(newName);
+        TableController newTc = super.getTableController(super.tableNodes.get(newName));
+        if(newTc == null) return;
 
         // Redessine uniquement les liens de cette entité
         for (Entry<String, List<Pair<Table, CardinalityValue>>> entry : this.conceptualSchema.getLinks().entrySet()) {
             String assocName = entry.getKey();
-            TableController assocTc = super.tableNodes.get(assocName);
+            TableController assocTc = super.getTableController(super.tableNodes.get(assocName));
             if (assocTc == null) continue;
 
             for (Pair<Table, CardinalityValue> p : entry.getValue()) {
                 if (p.getKey().name.equals(newName)) {
-                    this.drawLink(newTc, assocTc, p.getValue());
+                    this.drawConnection(newTc, assocTc, p.getValue());
                     break;
                 }
             }
@@ -413,10 +413,10 @@ public class McdController extends ModelView {
         this.applyDialogAttributesToTable(asso, dialog.getResultAttributes());
 
         this.createTableNode(asso, TableType.Association);
-        TableController assoCon = this.tableNodes.get(asso.name);
+        TableController assoCon = super.getTableController(this.tableNodes.get(asso.name));
 
         for(Pair<String, CardinalityValue> p : result.getValue()) {
-            this.drawLink(this.tableNodes.get(p.getKey()), assoCon, p.getValue());
+            this.drawConnection(super.getTableController(this.tableNodes.get(p.getKey())), assoCon, p.getValue());
         }
 
         super.lasso.rect.toFront();
@@ -455,11 +455,11 @@ public class McdController extends ModelView {
         this.applyDialogAttributesToTable(newAsso, dialog.getResultAttributes());
 
         this.createTableNode(newAsso, TableType.Association);
-        TableController newAssoTc = super.tableNodes.get(newName);
+        TableController newAssoTc = super.getTableController(super.tableNodes.get(newName));
 
         for (Pair<String, CardinalityValue> p : result.getValue()) {
-            TableController entityTc = super.tableNodes.get(p.getKey());
-            this.drawLink(entityTc, newAssoTc, p.getValue());
+            TableController entityTc = super.getTableController(super.tableNodes.get(p.getKey()));
+            this.drawConnection(entityTc, newAssoTc, p.getValue());
         }
 
         super.lasso.rect.toFront();
@@ -469,8 +469,14 @@ public class McdController extends ModelView {
      * Supprime les entités et associations sélectionnées
      */
     public void deleteSelected() {
-        List<TableController> selected = new ArrayList<>(super.selectionModel.getSelected());
-        if (selected.isEmpty()) return;
+        List<Drag> selectedDrag = new ArrayList<>(super.selectionModel.getSelected());
+        if (selectedDrag.isEmpty()) return;
+
+        List<TableController> selected = new ArrayList<>();
+        for(Drag d : selectedDrag) {
+            TableController tc = super.getTableController(d);
+            if(d != null) selected.add(tc);
+        }
 
         String message = selected.size() == 1
             ? "Supprimer « " + selected.get(0).getTable().name + " » ?"

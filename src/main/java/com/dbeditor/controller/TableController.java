@@ -2,6 +2,7 @@ package com.dbeditor.controller;
 
 import java.util.function.BiConsumer;
 
+import com.dbeditor.controller.modifier.Drag;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
@@ -14,6 +15,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
+import static javafx.scene.input.MouseButton.PRIMARY;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -23,7 +25,7 @@ import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-public class TableController implements Visual {
+public class TableController implements Visual, Drag {
     public enum TableType {
         Table, Entity, Association;
     }
@@ -40,9 +42,9 @@ public class TableController implements Visual {
     private TableType type;
 
     // callbacks fournis par CanvasController
-    private BiConsumer<TableController, MouseEvent> onSelect;
-    private BiConsumer<TableController, MouseEvent> onDrag;
-    private BiConsumer<TableController, MouseEvent> onDragEnd;
+    private BiConsumer<Drag, MouseEvent> onSelect;
+    private BiConsumer<Drag, MouseEvent> onDrag;
+    private BiConsumer<Drag, MouseEvent> onDragEnd;
 
     /**
      * Permet de mettre en place le visuel de la table.<br>
@@ -138,13 +140,11 @@ public class TableController implements Visual {
     public void updateType() {
         // TODO
     }
-    
-    /**
-     * Met en place la logique de drag
-     */
-    private void setupDragHandlers() {
+
+    @Override
+    public void setupDragHandlers() {
         this.pane.setOnMousePressed(e -> {
-            if (e.getButton() == MouseButton.PRIMARY) {
+            if (e.getButton() == PRIMARY) {
                 // informer CanvasController de la sélection
                 if (this.onSelect != null) {
                     this.onSelect.accept(this, e);
@@ -175,10 +175,7 @@ public class TableController implements Visual {
         });
     }
 
-    /**
-     * Modifie le bord de la table en fonction de la sélection
-     * @param selected
-     */
+    @Override
     public void setSelected(boolean selected) {
         if (selected) {
             pane.setStyle(pane.getStyle() + "; -fx-border-color: " + T_M.getTheme().getSelectionBorderColor() + ";");
@@ -187,26 +184,21 @@ public class TableController implements Visual {
         }
     }
 
-    /**
-     * On regarde si l'élement est déja inclus
-     * @param pInParent
-     * @return
-     */
-    public boolean contains(Point2D pInParent) {
-        return this.pane.getBoundsInParent().contains(pInParent);
-    }
-
-    public void setOnSelect(BiConsumer<TableController, MouseEvent> onSelect) {
+    @Override
+    public void setOnSelect(BiConsumer<Drag, MouseEvent> onSelect) {
         this.onSelect = onSelect;
     }
-    public void setOnDrag(BiConsumer<TableController, MouseEvent> onDrag) {
+    @Override
+    public void setOnDrag(BiConsumer<Drag, MouseEvent> onDrag) {
         this.onDrag = onDrag;
     }
-    public void setOnDragEnd(BiConsumer<TableController, MouseEvent> onDragEnd) {
+    @Override
+    public void setOnDragEnd(BiConsumer<Drag, MouseEvent> onDragEnd) {
         this.onDragEnd = onDragEnd;
     }
     
     public Table getTable() { return this.table; }
+    @Override
     public AnchorPane getRoot() { return this.pane; }
     public TableType getType() { return this.type; }
 }

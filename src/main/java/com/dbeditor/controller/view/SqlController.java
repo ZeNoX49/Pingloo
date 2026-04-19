@@ -1,10 +1,6 @@
 package com.dbeditor.controller.view;
 
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.sql.DbType;
-
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ToolBar;
 
 
 public class SqlController extends TextView {
@@ -14,28 +10,18 @@ public class SqlController extends TextView {
         return ViewType.SQL;
     }
 
-    private ComboBox<String> combobox;
-
+    // @Override
+    // public void initialization(ToolBar toolbar) {
+    //     super.initialization(toolbar);
+    // }
+    
     @Override
-    public void initialization(ToolBar toolbar) {
-        this.combobox = new ComboBox<>();
-        this.combobox.getItems().setAll(
-            DbType.MySql.toString(),
-            DbType.MsSql.toString(),
-            DbType.PostgreSql.toString()
-        );
-        toolbar.getItems().add(this.combobox);
-
-        super.initialization(toolbar);
+    public void open() {
+        // TODO
     }
 
     @Override
     public void updateStyle() {
-        // TODO
-    }
-    
-    @Override
-    public void open() {
         // TODO
     }
 

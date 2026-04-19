@@ -21,14 +21,21 @@ public class ValueController extends GridView {
         this.combobox = new ComboBox<>();
 
         for(Table table : MainApp.schema.getTables()) {
-            this.combobox.getItems().add(
-                table.name
-            );
+            this.combobox.getItems().add(table.name);
         }
 
-        toolbar.getItems().add(this.combobox);
+        this.combobox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue.equals(oldValue)) return;
 
+            this.openTable(MainApp.schema.tables.get(newValue));
+        });
+
+        toolbar.getItems().add(this.combobox);
         super.initialization(toolbar);
+    }
+
+    private void openTable(Table table) {
+        // TODO
     }
 
     @Override

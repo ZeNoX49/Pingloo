@@ -7,8 +7,8 @@ import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
-import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.controller.modifier.Drag;
+import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.util.ThemeManager;
@@ -38,44 +38,25 @@ public class MldController extends ModelView {
         this.createTableNodes();
         this.drawConnections();
 
-        if (super.lasso != null) {
-            super.lasso.rect.toFront();
-        }
+        super.lasso.rect.toFront();
+
+        super.updateStyle();
     }
 
     /**
      * Permet de créer le visuel des tables à partir d'un DatabaseSchema
      */
     private void createTableNodes() {
-        int col = 0, row = 0;
-        int cols = (int) Math.ceil(Math.sqrt(MainApp.schema.getTables().size()));
-
         for (Table table : MainApp.schema.getTables()) {
-            double x = col * 250 + 50;
-            double y = row * 200 + 50;
-            this.createTableNode(table, x, y);
-
-            col++;
-            if (col >= cols) {
-                col = 0;
-                row++;
-            }
-        }
-
-        // s'assure que le rectangle de séléction est devant
-        if (super.lasso != null) {
-            super.lasso.rect.toFront();
+            this.createTableNode(table);
         }
     }
 
     /**
-     * Crée un node de table à une position donnée
+     * Crée un node de table
      * @param table la table à créer
-     * @param x position X
-     * @param y position Y
-     * @return le contrôleur de la table créée
      */
-    private void createTableNode(Table table, double x, double y) {
+    private void createTableNode(Table table) {
         AnchorPane tcPane;
         TableController tcController;
 
@@ -87,28 +68,26 @@ public class MldController extends ModelView {
 
         tcController.createTableController(table, TableType.Table);
 
-        super.tableNodes.put(tcController.getTable().name, tcController);
+        super.tableNodes.put(table.name, tcController);
 
         // gérer la sélection d'un table lorsqu'elle est cliquée
         tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
 
         // Ajouter le menu contextuel avec clic droit
         tcPane.setOnMouseClicked(e -> {
-            if (e.getButton() == MouseButton.PRIMARY) {
-                // si double clique gauche -> on modifie la table
-                if (e.getClickCount() == 2) {
-                    this.editTable(tcController);
-                    e.consume();
-                }
+            // si double clique gauche -> on modifie la table
+            if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
+                this.editTable(tcController);
+                e.consume();
             }
         });
 
+        // mettre a jour la position lors d'un déplacement
+        tcPane.layoutXProperty().addListener((a, b, c) -> table.setPosition(tcPane.getLayoutX(), table.getPosY()));
+        tcPane.layoutYProperty().addListener((a, b, c) -> table.setPosition(table.getPosX(), tcPane.getLayoutY()));
+
         // attache le node pour le multidrag
         super.multiDrag.attach(tcController);
-
-        // position initiale
-        tcPane.setLayoutX(x);
-        tcPane.setLayoutY(y);
 
         super.group.getChildren().add(tcPane);
     }
@@ -121,10 +100,13 @@ public class MldController extends ModelView {
         super.connectionLines.forEach(connection -> super.group.getChildren().remove(connection.line));
         super.connectionLines.clear();
 
-        for (TableController fromNode : super.tableNodes.values()) {
+        for (Drag d : super.tableNodes.values()) {
+            TableController fromNode = super.getTableController(d);
+            if (fromNode == null) continue;
+
             Table fromTable = fromNode.getTable();
             for (ForeignKey fk : fromTable.getForeignKeys()) {
-                TableController toNode = super.tableNodes.get(fk.referencedTable);
+                TableController toNode = super.getTableController(super.tableNodes.get(fk.referencedTable));
                 if (toNode != null) {
                     this.drawConnection(fromNode, toNode);
                 }
@@ -149,57 +131,78 @@ public class MldController extends ModelView {
         line.setStroke(Color.web(T_M.getTheme().getSecondaryTextColor()));
         line.setStrokeWidth(2);
         line.getStrokeDashArray().addAll(5.0, 5.0);
-
-        // ajoute la ligne derrière le node
-        super.group.getChildren().add(0, line);
-        super.connectionLines.add(new Connection(from.getTable().name, to.getTable().name, line, null));
         
         // bind la ligne aux tables
         line.startXProperty().bind(from.getRoot().layoutXProperty().add(from.getRoot().widthProperty().divide(2)));
         line.startYProperty().bind(from.getRoot().layoutYProperty().add(from.getRoot().heightProperty().divide(2)));
         line.endXProperty().bind(to.getRoot().layoutXProperty().add(to.getRoot().widthProperty().divide(2)));
         line.endYProperty().bind(to.getRoot().layoutYProperty().add(to.getRoot().heightProperty().divide(2)));
+    
+        // ajoute la ligne derrière le node
+        super.group.getChildren().add(0, line);
+        super.connectionLines.add(new Connection(from.getTable().name, to.getTable().name, line, null));
     }
 
     /**
      * Modifie une table existante
-     * @param tableController le contrôleur de la table à modifier
      */
-    private void editTable(TableController tableController) {
-        DatabaseSchema schema = MainApp.schema;
-        if (schema == null) return;
-
-        Table oldTable = tableController.getTable();
+    private void editTable(TableController tc) {
+        Table oldTable = tc.getTable();
         String oldName = oldTable.name;
 
-        // Ouvrir le dialogue avec les données existantes
-        EntityEditorDialog dialog = new EntityEditorDialog(oldTable);
+        TableEditorDialog dialog = new TableEditorDialog(oldTable);
         dialog.showAndWait();
+        if (!dialog.isConfirmed()) return;
 
-        if (dialog.isConfirmed()) {
-            Table modifiedTable = dialog.getResultTable();
-            String newName = modifiedTable.name;
-
-            // Si le nom a changé, vérifier qu'il n'existe pas déjà
-            if (!oldName.equals(newName) && schema.tables.get(newName) != null) {
-                CanvasController.showWarningAlert("Erreur", "Une table avec ce nom existe déjà.");
-                return;
-            }
-
-            // try {
-            //     // Supprimer l'ancienne table du schéma
-            //     schema.removeTable(oldName);
-                
-            //     // Ajouter la table modifiée
-            //     schema.addTable(modifiedTable);
-
-            //     // Recréer tout le visuel (pour simplifier)
-            //     // this.open(schema);
-
-            // } catch (IOException e) {
-            //     LOGGER.log(Level.SEVERE, "", e);
-            //     CanvasController.showWarningAlert("Erreur", "Impossible de mettre à jour la table.");
-            // }
+        Table modifiedTable = dialog.getResultTable();
+        String newName = modifiedTable.name;
+        
+        // Si le nom a changé, vérifier qu'il n'existe pas déjà
+        if (!oldName.equals(newName) && MainApp.schema.tables.get(newName) != null) {
+            CanvasController.showWarningAlert("Erreur", "Une table avec ce nom existe déjà.");
+            return;
         }
+
+        // TODO
+        // // Mettre à jour dans le ConceptualSchema
+        // this.conceptualSchema.updateEntity(oldName, modifiedTable);
+
+        // // Mise à jour du schema global
+        // MainApp.schema.tables.remove(oldName);
+        // MainApp.schema.addTable(modifiedTable);
+
+        // // Supprime l'ancien node visuel
+        // super.group.getChildren().remove(tc.getRoot());
+        // super.tableNodes.remove(oldName);
+
+        // // Supprime les anciens liens liés à cette entité
+        // Iterator<Connection> it = super.connectionLines.iterator();
+        // while (it.hasNext()) {
+        //     Connection connection = it.next();
+
+        //     if (connection.firstTable.equals(oldName)) {
+        //         super.group.getChildren().removeAll(connection.line, connection.label);
+        //         it.remove();
+        //     }
+        // }
+
+        // // Recrée le node avec le nouveau nom
+        // this.createTableNode(modifiedTable, TableType.Entity);
+
+        // TableController newTc = super.tableNodes.get(newName);
+
+        // // Redessine uniquement les liens de cette entité
+        // for (Entry<String, List<Pair<Table, CardinalityValue>>> entry : this.conceptualSchema.getLinks().entrySet()) {
+        //     String assocName = entry.getKey();
+        //     TableController assocTc = super.tableNodes.get(assocName);
+        //     if (assocTc == null) continue;
+
+        //     for (Pair<Table, CardinalityValue> p : entry.getValue()) {
+        //         if (p.getKey().name.equals(newName)) {
+        //             this.drawConnection(newTc, assocTc, p.getValue());
+        //             break;
+        //         }
+        //     }
+        // }
     }
 }

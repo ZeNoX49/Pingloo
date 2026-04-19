@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.dbeditor.controller.TableController;
+import com.dbeditor.controller.modifier.Drag;
 import com.dbeditor.controller.view.helpers.LassoSelector;
 import com.dbeditor.controller.view.helpers.MultiDragManager;
 import com.dbeditor.controller.view.helpers.SelectionModel;
 import com.dbeditor.controller.view.helpers.ZoomPanHandler;
-import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.scene.Group;
@@ -51,12 +51,12 @@ public abstract class ModelView extends View {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     // Nodes visuels
-    protected final Map<String, TableController> tableNodes = new HashMap<>();
+    protected final Map<String, Drag> tableNodes = new HashMap<>();
     protected final List<Connection> connectionLines = new ArrayList<>();
 
     // Helpers
     protected ZoomPanHandler zoomPan;
-    protected SelectionModel<TableController> selectionModel;
+    protected SelectionModel selectionModel;
     protected LassoSelector lasso;
     protected MultiDragManager multiDrag;
 
@@ -74,7 +74,7 @@ public abstract class ModelView extends View {
         this.pane.getChildren().add(this.group);
         
         // Initialiser le modèle de sélection -> visualizer appelle setSelected sur TableController
-        this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
+        this.selectionModel = new SelectionModel((tc, selected) -> tc.setSelected(selected));
         
         // Initialiser le zoom/pan
         this.zoomPan = new ZoomPanHandler(this.pane, this.group);
@@ -102,8 +102,8 @@ public abstract class ModelView extends View {
         
         this.zlLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
         
-        for (TableController tc : this.tableNodes.values()) {
-            tc.updateStyle();
+        for (Drag d : this.tableNodes.values()) {
+            if(d instanceof TableController tc) tc.updateStyle();
         }
 
         for(Connection c : this.connectionLines) {
@@ -118,22 +118,23 @@ public abstract class ModelView extends View {
 
     @Override
     public void updateType() {
-        for (TableController tc : this.tableNodes.values()) {
-            tc.updateType();
+        for (Drag d : this.tableNodes.values()) {
+            if(d instanceof TableController tc) tc.updateType();
         }
     }
 
     /**
      * Gère la sélection d'une entité
      */
-    protected void handleSelection(TableController table, MouseEvent e) {
+    protected void handleSelection(Drag table, MouseEvent e) {
         if (e.isControlDown()) {
             this.selectionModel.toggle(table);
+            e.consume();
             return;
         }
 
         if (this.selectionModel.contains(table)) {
-            // Enleve cette table du multi-drag
+            // on laisse faire le drag
             table.getRoot().toFront();
             return;
         }
@@ -145,5 +146,12 @@ public abstract class ModelView extends View {
     @Override
     public Pane getRoot() {
         return this.pane;
+    }
+
+    public TableController getTableController(Drag d) {
+        if(d != null && d instanceof TableController tc) {
+            return tc;
+        }
+        return null;
     }
 }
