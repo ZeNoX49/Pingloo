@@ -1,14 +1,11 @@
 package com.dbeditor.controller;
 
-import java.io.IOException;
 import java.util.function.Consumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.dbeditor.controller.modifier.DbUpdate;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.controller.view.View;
-import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.application.Platform;
@@ -54,7 +51,7 @@ public class ViewController implements Visual, DbUpdate {
      * @param vieviewTypew
      * @param registrar fonction fournie par CanvasController pour enregistrer la paire (controller, pane)
      */
-    public void setData(Pane parent, Pane viewPane, ViewType viewType, Consumer<ViewController> registrar) throws IOException {
+    public void setData(Pane parent, Pane viewPane, ViewType viewType, Consumer<ViewController> registrar) {
         this.parent = parent;
         this.viewPane = viewPane;
         this.view = viewType.getController();
@@ -93,14 +90,14 @@ public class ViewController implements Visual, DbUpdate {
     }
 
     @Override
-    public void open() throws IOException {
+    public void open() {
         this.view.open();
     }
 
     @Override
-    public void updateType(DbType type) {
+    public void updateType() {
         // TODO
-        this.view.updateType(type);
+        this.view.updateType();
     }
 
     // TODO: sync
@@ -122,15 +119,11 @@ public class ViewController implements Visual, DbUpdate {
         this.cb.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (newValue.equals(oldValue) || this.view == null) return;
 
-            try {
-                this.createView(ViewType.toEnum(newValue));
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "", e);
-            }
+            this.createView(ViewType.toEnum(newValue));
         });
     }
 
-    public void createView(ViewType viewType) throws IOException {
+    public void createView(ViewType viewType) {
         if (viewType == null) return;
         this.cb.setValue(viewType.toString());
 
@@ -148,11 +141,7 @@ public class ViewController implements Visual, DbUpdate {
             this.view = newController;
             this.viewPane = newPane;
 
-            try {
-                newController.open();
-            } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, "", ex);
-            }
+            newController.open();
 
             // this.setupSplit();
         });

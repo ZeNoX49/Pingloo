@@ -1,11 +1,8 @@
 package com.dbeditor.controller.view;
 
-import java.io.IOException;
-
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.Table;
-import com.dbeditor.sql.DbType;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
@@ -40,12 +37,12 @@ public class ValueController extends GridView {
     }
 
     @Override
-    public void open() throws IOException {
+    public void open() {
         // TODO
     }
 
     @Override
-    public void updateType(DbType type) {
+    public void updateType() {
         // TODO
     }
 }

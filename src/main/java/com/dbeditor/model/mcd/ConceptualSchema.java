@@ -3,8 +3,10 @@ package com.dbeditor.model.mcd;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.dbeditor.MainApp;
@@ -173,6 +175,11 @@ public class ConceptualSchema {
 
         // supprimer les associations qui contiennent cette entité
         this.associations.entrySet().removeIf(entry -> entry.getValue().linkedEntities.containsKey(e));
+        for(Entry<String, Association> entry : this.associations.entrySet()) {
+            if(entry.getValue().linkedEntities.keySet().contains(e)) {
+                this.removeAssociation(entry.getKey());
+            }
+        }
     }
 
     /**
@@ -190,6 +197,7 @@ public class ConceptualSchema {
         this.associations.put(table.name, new Association(en, table));
 
         // TODO: modification de MainApp.schema
+        MainApp.schema.addTable(table);
 
         return table;
     }
@@ -212,16 +220,17 @@ public class ConceptualSchema {
      * Supprime une association par son nom.
      */
     public void removeAssociation(String name) {
-        // au cas où elle est supprimé lors de la suppression d'une table 
-        if(this.nameExists(name)) associations.remove(name);
+        if (!this.nameExists(name)) return;
 
-        // TODO: (modification de MainApp.schema) a verif
-        if(!MainApp.schema.tables.containsKey(name)) return;
+        this.associations.remove(name);
         MainApp.schema.tables.remove(name);
-        for(Table t : MainApp.schema.tables.values()) {
-            for(ForeignKey fk : t.getForeignKeys()) {
-                if(!fk.referencedTable.equals(name)) {
-                    t.foreignKeys.remove(fk.columnName);
+
+        for (Table t : MainApp.schema.tables.values()) {
+            Iterator<Map.Entry<String, ForeignKey>> it = t.foreignKeys.entrySet().iterator();
+            while (it.hasNext()) {
+                ForeignKey fk = it.next().getValue();
+                if (name.equals(fk.referencedTable)) {
+                    it.remove();
                 }
             }
         }

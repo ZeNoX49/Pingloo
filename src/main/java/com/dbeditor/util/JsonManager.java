@@ -41,7 +41,7 @@ public class JsonManager {
      * Charge toutes les préférences de l'utilisateur au lancement de l'application.
      * Si le fichier n'existe il est créé
      */
-    public void load() throws IOException {
+    public void load() {
         File file = PATH_TO_FILE_USER_DATA.toFile();
 
         if (!file.exists()) {
@@ -52,7 +52,10 @@ public class JsonManager {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        Map<String, Object> root = mapper.readValue(file, Map.class);
+        Map<String, Object> root;
+        try {
+            root = mapper.readValue(file, Map.class);
+        } catch (IOException e) { throw new Error("Imposible de lire le JSON : " + e.getMessage()); }
 
         T_M.changeTheme((int) root.get("id_theme"));
         

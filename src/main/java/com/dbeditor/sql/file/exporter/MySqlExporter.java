@@ -14,14 +14,17 @@ import com.dbeditor.util.DbManager;
 public class MySqlExporter extends SqlExporter {
         
     @Override
-    public void exportToSQL(DatabaseSchema schema, String filepath) throws IOException {
+    public void exportToSQL(DatabaseSchema schema, String filepath) {
         try (FileWriter writer = new FileWriter(filepath)) {
             writer.write(this.createSql(schema));
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
     @Override
-    public String createSql(DatabaseSchema schema) throws IOException {
+    public String createSql(DatabaseSchema schema) {
         StringBuilder sql = new StringBuilder();
 
         sql.append("DROP DATABASE IF EXISTS %s;\n".formatted(schema.name)); 

@@ -19,6 +19,7 @@ public final class Table {
         this(other.name);
         for(Column col : other.columns.values()) this.addColumn(new Column(col));
         for(ForeignKey fk : other.foreignKeys.values()) this.addForeignKey(new ForeignKey(fk));
+        if(other.positionned) this.setPosition(other.posX, other.posY);
     }
 
     public void addColumn(Column col) {
@@ -38,6 +39,17 @@ public final class Table {
     /* =================================================================== */
     // pour que les tables aient la même position sur un changement de vue //
     /* =================================================================== */
-    public double posX = 0;
-    public double posY = 0;
+    private double posX = 0;
+    private double posY = 0;
+    private boolean positionned = false;
+
+    public void setPosition(double x, double y) {
+        this.posX = x;
+        this.posY = y;
+        this.positionned = true;
+    }
+
+    public double getPosX() { return this.posX; }
+    public double getPosY() { return this.posY; }
+    public boolean isPositionned() { return this.positionned; }
 }

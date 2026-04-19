@@ -59,10 +59,7 @@ public class EntityEditorDialog extends EditorDialog {
         this.tableColumns = new TableView<>();
         this.columnData = FXCollections.observableArrayList();
 
-        // pas fameux mais fais l'affaire
-        this.resultTable = new Table("a renommer");
-        this.resultTable.posX = table.posX;
-        this.resultTable.posY = table.posY;
+        this.resultTable = new Table(table);
 
         // charger les données de la table
         for (Column col : table.getColumns()) {
@@ -219,6 +216,7 @@ public class EntityEditorDialog extends EditorDialog {
 
         // Créer la table résultat
         this.resultTable.name = name;
+        this.resultTable.columns.clear();
         for (DialogColumnRow row : this.columnData) {
             Column col = new Column(row.getName(), __SqlType.get(row.getType(), MainApp.schema.type));
             col.isPrimaryKey = row.isPrimaryKey();

@@ -1,14 +1,11 @@
 package com.dbeditor.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.dbeditor.model.DatabaseSchema;
-import com.dbeditor.sql.file.exporter.MySqlExporter;
 import com.dbeditor.sql.file.exporter.SqlExporter;
-import com.dbeditor.sql.file.parser.MySqlParser;
 import com.dbeditor.sql.file.parser.SqlParser;
 
 import javafx.scene.control.Alert;
@@ -58,21 +55,13 @@ public class FileManager {
 
         File file = fileChooser.showSaveDialog(this.stage);
         if (file != null) {
-            try {
-                exporter.exportToSQL(schema, file.getAbsolutePath());
+            exporter.exportToSQL(schema, file.getAbsolutePath());
 
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Export réussi");
-                alert.setHeaderText(null);
-                alert.setContentText("La base de données a été exportée avec succès !");
-                alert.showAndWait();
-            } catch (IOException e) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Erreur");
-                alert.setHeaderText(null);
-                alert.setContentText("Erreur lors de l'export");
-                alert.showAndWait();
-            }
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Export réussi");
+            alert.setHeaderText(null);
+            alert.setContentText("La base de données a été exportée avec succès !");
+            alert.showAndWait();
         }
     }
 

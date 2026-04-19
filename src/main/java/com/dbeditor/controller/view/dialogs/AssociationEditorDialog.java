@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
+import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 import com.dbeditor.model.mcd.CardinalityValue;
 
@@ -110,10 +112,34 @@ public class AssociationEditorDialog extends EditorDialog {
      * @param association l'association à modifier (null pour en créer une nouvelle)
      */
     public AssociationEditorDialog(List<Table> availableEntities, Pair<String, List<Pair<Table, CardinalityValue>>> association) {
+        this(availableEntities, association, null);
+    }
+
+    /**
+     * Constructeur pour créer ou modifier une association existante
+     * @param availableEntities liste des entités disponibles
+     * @param association l'association à modifier (null pour en créer une nouvelle)
+     * @param existingTable
+     */
+    public AssociationEditorDialog(List<Table> availableEntities, Pair<String, List<Pair<Table, CardinalityValue>>> association, Table existingTable) {
         this.availableEntities = new ArrayList<>(availableEntities);
         this.participations = new ArrayList<>();
         this.tableAttributes = new TableView<>();
         this.attributeData = FXCollections.observableArrayList();
+
+        if (existingTable != null) {
+            for (Column col : existingTable.getColumns()) {
+                this.attributeData.add(new DialogColumnRow(
+                    col.name,
+                    col.type.getRepr(MainApp.schema.type),
+                    col.isPrimaryKey,
+                    col.isNotNull,
+                    col.isUnique,
+                    col.isAutoIncrementing
+                ));
+            }
+        }
+
         this.initUI(association);
     }
 
@@ -148,7 +174,6 @@ public class AssociationEditorDialog extends EditorDialog {
 
         if (association != null) {
             // Chargement des participations existantes
-            CanvasController.showWarningAlert("Attention", "La modification d'une association existante est partiellement prise en charge.");
             for (Pair<Table, CardinalityValue> p : association.getValue()) {
                 EntityParticipationRow row = new EntityParticipationRow(this.availableEntities);
                 row.setEntity(p.getKey());

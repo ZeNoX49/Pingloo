@@ -1,7 +1,5 @@
 package com.dbeditor.controller.view;
 
-import java.io.IOException;
-
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.sql.DbType;
 
@@ -37,12 +35,12 @@ public class SqlController extends TextView {
     }
     
     @Override
-    public void open() throws IOException {
+    public void open() {
         // TODO
     }
 
     @Override
-    public void updateType(DbType type) {
+    public void updateType() {
         // TODO
     }
     

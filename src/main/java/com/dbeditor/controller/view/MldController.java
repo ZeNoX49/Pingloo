@@ -11,7 +11,6 @@ import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
-import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.fxml.FXMLLoader;
@@ -42,11 +41,6 @@ public class MldController extends ModelView {
         if (super.lasso != null) {
             super.lasso.rect.toFront();
         }
-    }
-
-    @Override
-    public void updateType(DbType type) {
-        // TODO
     }
 
     /**

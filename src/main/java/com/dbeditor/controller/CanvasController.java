@@ -59,7 +59,7 @@ public class CanvasController implements Visual {
     private List<ViewController> views;
 
     @FXML
-    private void initialize() throws IOException {
+    private void initialize() {
         this.views = new ArrayList<>();
 
         for(DbType type : DbType.values()) {
@@ -92,12 +92,16 @@ public class CanvasController implements Visual {
     /**
      * Permettre de créer une vue de base<br>
      * dans ce cas le MCD
-     * @throws IOException
      */
-    private void createBaseView() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view.fxml"));
-        Pane mcdPane = loader.load();
-        ViewController mcdController = loader.getController();
+    private void createBaseView() {
+        Pane mcdPane;
+        ViewController mcdController;
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view.fxml"));
+            mcdPane = loader.load();
+            mcdController = loader.getController();
+        } catch (IOException e) { throw new Error("Une erreur est survenue lors de la création du visuel"); }
 
         // on fournit la fonction d'enregistrement au controller
         mcdController.setData(this.spPane, mcdPane, ViewType.MCD, (view) -> {
@@ -138,6 +142,13 @@ public class CanvasController implements Visual {
             v.updateStyle();
         }
     }
+    
+    @Override
+    public void updateType() {
+        for(ViewController v : this.views) {
+            v.updateType();
+        }
+    }
 
     /**
      * Ouvre la fenêtre de modification du thème perso
@@ -166,10 +177,8 @@ public class CanvasController implements Visual {
 
     /**
      * Permet de charger un DatabaseSchema dans toutes les vues
-     * @param dbS
-     * @throws IOException
      */
-    private void open(DatabaseSchema schema) throws IOException {
+    private void open(DatabaseSchema schema) {
         if(schema != null) {
             MainApp.schema = schema;
             this.tfDbName.setText(schema.name);
@@ -193,11 +202,7 @@ public class CanvasController implements Visual {
                 new FileChooser.ExtensionFilter("Fichiers " + type.toString(), "*.sql")
             );
 
-            try {
-                this.open(F_M.openDatabase(fileChooser, D_M.getSqlParser(type)));
-            } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, "", ex);
-            }
+            this.open(F_M.openDatabase(fileChooser, D_M.getSqlParser(type)));
         });
         this.mOpenFile.getItems().add(mi);
     }
@@ -215,11 +220,7 @@ public class CanvasController implements Visual {
         for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
             mi.setOnAction(e -> {
-                try {
-                    this.open(D_M.getSqlDb(type).loadDb(dbName));
-                } catch (IOException ioe) {
-                    LOGGER.log(Level.SEVERE, "", e);
-                }
+                this.open(D_M.getSqlDb(type).loadDb(dbName));
             });
             menu.getItems().add(mi);
         }
@@ -257,15 +258,11 @@ public class CanvasController implements Visual {
         for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
             mi.setOnAction(e -> {
-                try {
-                    boolean good = D_M.getSqlDb(type).executeSqlScript(D_M.getSqlExporter(type).createSql(MainApp.schema));
-                    if(good) {
-                        CanvasController.showWarningAlert("Maj effectué", "La mise à jour de la bdd a été effectué");
-                    } else {
-                        CanvasController.showWarningAlert("Erreur", "Une erreur est survenu lors de la mise à jour de la bdd");
-                    }
-                } catch (IOException ioe) {
-                    LOGGER.log(Level.SEVERE, "", e);
+                boolean good = D_M.getSqlDb(type).executeSqlScript(D_M.getSqlExporter(type).createSql(MainApp.schema));
+                if(good) {
+                    CanvasController.showWarningAlert("Maj effectué", "La mise à jour de la bdd a été effectué");
+                } else {
+                    CanvasController.showWarningAlert("Erreur", "Une erreur est survenu lors de la mise à jour de la bdd");
                 }
             });
             menu.getItems().add(mi);
@@ -280,9 +277,7 @@ public class CanvasController implements Visual {
         MenuItem mi = new MenuItem(type.toString());
         mi.setOnAction(e -> {
             MainApp.schema.type = type;
-            for(ViewController v : this.views) {
-                v.updateType(type);
-            }
+            this.updateType();
         });
         this.mbDatabase.getItems().add(mi);
     }

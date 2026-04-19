@@ -59,8 +59,8 @@ public class TableController implements Visual {
      * Permet de créer l'UI de la table
      */
     private void createUI() {
-        this.pane.setLayoutX(table.posX);
-        this.pane.setLayoutY(table.posY);
+        this.pane.setLayoutX(table.getPosX());
+        this.pane.setLayoutY(table.getPosY());
 
         this.hName.setPadding(new Insets(2));
 
@@ -133,6 +133,10 @@ public class TableController implements Visual {
                 }
             }
         }
+    }
+
+    public void updateType() {
+        // TODO
     }
     
     /**

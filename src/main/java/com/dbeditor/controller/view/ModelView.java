@@ -10,6 +10,7 @@ import com.dbeditor.controller.view.helpers.LassoSelector;
 import com.dbeditor.controller.view.helpers.MultiDragManager;
 import com.dbeditor.controller.view.helpers.SelectionModel;
 import com.dbeditor.controller.view.helpers.ZoomPanHandler;
+import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.scene.Group;
@@ -112,6 +113,13 @@ public abstract class ModelView extends View {
                 "-fx-text-fill: " + T_M.getTheme().getTextColor() + ";" +
                 "-fx-font-size: 15;"
             );
+        }
+    }
+
+    @Override
+    public void updateType() {
+        for (TableController tc : this.tableNodes.values()) {
+            tc.updateType();
         }
     }
 

@@ -17,6 +17,11 @@ public abstract class EditorDialog implements Visual {
     public void updateStyle() {
         // TODO
     }
+    
+    @Override
+    public void updateType() {
+        // TODO
+    }
 
      /**
      * Configure les colonnes de la TableView

@@ -1,7 +1,5 @@
 package com.dbeditor.controller.parameter;
 
-import java.io.IOException;
-
 import com.dbeditor.theme.PersoTheme;
 import com.dbeditor.util.ThemeManager;
 
@@ -28,7 +26,7 @@ public class ThemeController {
     private PersoTheme perso;
 
     @FXML
-    private void initialize() throws IOException {
+    private void initialize() {
         this.perso = T_M.getPersoTheme();
         
         this.createListener();

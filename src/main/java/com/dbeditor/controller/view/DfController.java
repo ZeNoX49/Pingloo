@@ -1,6 +1,5 @@
 package com.dbeditor.controller.view;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
-import com.dbeditor.sql.DbType;
 import com.dbeditor.util.DbManager;
 
 import javafx.geometry.Orientation;
@@ -60,7 +58,7 @@ public class DfController extends TextView {
     }
 
     @Override
-    public void open() throws IOException {
+    public void open() {
         List<Table> tablesSorted = DbManager.sortTables(MainApp.schema.getTables());
 
 
@@ -71,7 +69,7 @@ public class DfController extends TextView {
     }
 
     @Override
-    public void updateType(DbType type) {
+    public void updateType() {
         // TODO
     }
 
