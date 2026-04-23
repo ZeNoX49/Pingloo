@@ -15,6 +15,9 @@ import javafx.scene.transform.Scale;
  * content : Group (ou Node) qui est zoomé/translaté
  */
 public class ZoomPanHandler {
+    private final static double MIN_ZOOM = 0.1;
+    private final static double MAX_ZOOM = 2.5;
+
     private final Pane viewportPane;
     private final Group content;
     private final Scale scale = new Scale(1, 1, 0, 0);
@@ -52,7 +55,7 @@ public class ZoomPanHandler {
             Point2D mouseScene = new Point2D(e.getSceneX(), e.getSceneY());
             Point2D mouseLocal = content.sceneToLocal(mouseScene);
 
-            this.zoomLevel = Math.max(0.05, Math.min(this.zoomLevel * deltaFactor, 6.0));
+            this.zoomLevel = Math.max(MIN_ZOOM, Math.min(this.zoomLevel * deltaFactor, MAX_ZOOM));
             this.scale.setX(this.zoomLevel);
             this.scale.setY(this.zoomLevel);
 

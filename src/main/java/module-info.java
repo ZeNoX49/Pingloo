@@ -9,6 +9,7 @@ module com.dbeditor {
     requires java.sql;
 
     requires com.microsoft.sqlserver.jdbc;
+    requires javafx.base;
 
     opens com.dbeditor to javafx.fxml;
     opens com.dbeditor.controller to javafx.fxml;

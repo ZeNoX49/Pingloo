@@ -36,6 +36,11 @@
                   <Menu fx:id="mSaveDb" mnemonicParsing="false" text="BDD" />
                </items>
             </MenuButton>
+            <MenuButton fx:id="mbDatabase" mnemonicParsing="false" style="-fx-background-color: #cc0033;" text="🛠 Database" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </MenuButton>
             <MenuButton mnemonicParsing="false" style="-fx-background-color: #dd9e3f;" text="🎨 Theme" textFill="WHITE">
                <items>
                   <MenuItem fx:id="miLightTheme" mnemonicParsing="false" text="Light Theme" />
@@ -55,11 +60,6 @@
                     </items>
                   </Menu>
                </items>
-               <font>
-                  <Font name="System Bold" size="12.0" />
-               </font>
-            </MenuButton>
-            <MenuButton fx:id="mbDatabase" mnemonicParsing="false" style="-fx-background-color: #cc0033;" text="🛠 Database" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>

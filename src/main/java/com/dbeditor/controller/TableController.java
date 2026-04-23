@@ -11,11 +11,9 @@ import com.dbeditor.util.ThemeManager;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
-import static javafx.scene.input.MouseButton.PRIMARY;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
@@ -75,6 +73,8 @@ public class TableController implements Visual, Drag {
         for (int i = 0; i < this.table.getColumns().size(); i++) {
             Column col = this.table.getColumns().get(i);
 
+            if(this.type == TableType.Association && col.isPrimaryKey) continue;
+            
             Label colName = new Label(col.name);
             if(col.isPrimaryKey || col.isUnique) {
                 colName.setFont(Font.font("System", FontWeight.BOLD, 12));
@@ -137,6 +137,7 @@ public class TableController implements Visual, Drag {
         }
     }
 
+    @Override
     public void updateType() {
         // TODO
     }
@@ -144,7 +145,7 @@ public class TableController implements Visual, Drag {
     @Override
     public void setupDragHandlers() {
         this.pane.setOnMousePressed(e -> {
-            if (e.getButton() == PRIMARY) {
+            if (e.getButton() == MouseButton.PRIMARY) {
                 // informer CanvasController de la sélection
                 if (this.onSelect != null) {
                     this.onSelect.accept(this, e);

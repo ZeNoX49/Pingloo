@@ -16,6 +16,36 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+/**
+ * TODO : ajouté un type de "profil" de les types de bdd et pouvoir activer/désactiver les bdd chosis
+ * <br>
+ * "mysql" : [
+ *     {
+ *         "name" : "xampp",
+ *         "host" : "localhost",
+ *         "user" : "root",
+ *         "password" : "",
+ *         "port" : "3306",
+ *         "databases" : [
+ *             {
+ *                 "name" : "ecogestum",
+ *                 "enabled" : true
+ *             },
+ *             {
+ *                 "name" : "pokemontgcp",
+ *                 "enabled" : false
+ *             },
+ *             {
+ *                 "name" : "sae4",
+ *                 "enabled" : true
+ *             }
+ *         ]
+ *     },
+ *     {
+ *         ...
+ *     }
+ * ]
+*/
 public class JsonManager {
     private static JsonManager instance;
     public static JsonManager getInstance() {
@@ -68,7 +98,7 @@ public class JsonManager {
 
         T_M.getPersoTheme().loadColor((Map<String, String>) root.get("perso_theme"));
 
-        Map<String, Map<String, Object>> db = (Map<String, Map<String, Object>>) root.get("db");
+        Map<String, Map<String, Object>> db = (Map<String, Map<String, Object>>) root.get("db_type");
         Map<String, Object> mysql = db.get("mysql");
         D_M.setMysqlDbData(mysql);
     }
@@ -110,7 +140,7 @@ public class JsonManager {
         }
         mysql.put("databases", tables);
         db.put("mysql", mysql);
-        root.put("db", db);
+        root.put("db_type", db);
 
         try {
             mapper.writeValue(PATH_TO_FILE_USER_DATA.toFile(), root);
@@ -151,7 +181,7 @@ public class JsonManager {
         mysql.put("port", "3306");
         mysql.put("databases", new ArrayList<Map<String, String>>());
         db.put("mysql", mysql);
-        root.put("db", db);
+        root.put("db_type", db);
 
         try {
             mapper.writeValue(PATH_TO_FILE_USER_DATA.toFile(), root);

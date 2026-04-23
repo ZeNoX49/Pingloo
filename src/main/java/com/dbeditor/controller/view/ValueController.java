@@ -6,6 +6,7 @@ import com.dbeditor.model.Table;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Pane;
 
 public class ValueController extends GridView {
 
@@ -31,10 +32,15 @@ public class ValueController extends GridView {
         });
 
         toolbar.getItems().add(this.combobox);
-        super.initialization(toolbar);
+        // super.initialization(toolbar);
     }
 
     private void openTable(Table table) {
+        // TODO
+    }
+
+    // @Override
+    protected void setupTableColumns() {
         // TODO
     }
 
@@ -51,5 +57,11 @@ public class ValueController extends GridView {
     @Override
     public void updateType() {
         // TODO
+    }
+
+    @Override
+    public Pane getRoot() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getRoot'");
     }
 }

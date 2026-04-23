@@ -2,7 +2,9 @@ package com.dbeditor.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,10 +59,14 @@ public class CanvasController implements Visual {
     @FXML private StackPane spPane;
 
     private List<ViewController> views;
+    private Map<DbType, Menu> menuOpenDb;
+    private Map<DbType, Menu> menuSaveDb;
 
     @FXML
     private void initialize() {
         this.views = new ArrayList<>();
+        menuOpenDb = new HashMap<>();
+        menuSaveDb = new HashMap<>();
 
         for(DbType type : DbType.values()) {
             if(type.equals(DbType.MsSql) || type.equals(DbType.PostgreSql) || type.equals(DbType.Oracle)) continue;
@@ -104,9 +110,7 @@ public class CanvasController implements Visual {
         } catch (IOException e) { throw new Error("Une erreur est survenue lors de la création du visuel"); }
 
         // on fournit la fonction d'enregistrement au controller
-        mcdController.setData(this.spPane, mcdPane, ViewType.MCD, (view) -> {
-            this.views.add(view);
-        });
+        mcdController.setData(this.spPane, mcdPane, ViewType.MCD, (view) -> this.views.add(view), (vc) -> this.sync(vc));
         
         this.views.add(mcdController);
 
@@ -114,6 +118,12 @@ public class CanvasController implements Visual {
         mcdPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         this.spPane.getChildren().add(mcdPane);
+    }
+
+    private void sync(ViewController origin) {
+        for(ViewController vc : this.views) {
+            if(vc != origin) vc.open();
+        }
     }
 
     // utiliser lors des splits
@@ -207,15 +217,24 @@ public class CanvasController implements Visual {
         this.mOpenFile.getItems().add(mi);
     }
 
+    private Menu getMenuOpenDb(DbType type) {
+        Menu menu = this.menuOpenDb.get(type);
+        if(menu == null) {
+            menu = new Menu(type.toString());
+            this.mOpenDb.getItems().add(menu);
+            this.menuOpenDb.put(type, menu);
+        }
+        return menu;
+    }
+
     /**
      * Creér un Menu Item pour mOpenDb
      * @param type
      */
     private void createMenuItemOpenDb(DbType type) {
-        Menu menu = new Menu(type.toString());
-        this.mOpenDb.getItems().add(menu);
+        Menu menu = this.getMenuOpenDb(type);
 
-        this.createMenuItemParameterDb(menu);
+        this.createMenuItemParameterDb(menu, type);
 
         for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
@@ -234,7 +253,7 @@ public class CanvasController implements Visual {
         MenuItem mi = new MenuItem(type.toString());
         mi.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Ouvrir une base de données");
+            fileChooser.setTitle("Sauvegarder le fichier");
             fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Fichiers SQL", "*.sql")
             );
@@ -245,15 +264,24 @@ public class CanvasController implements Visual {
         this.mSaveFile.getItems().add(mi);
     }
 
+    private Menu getMenuSaveDb(DbType type) {
+        Menu menu = this.menuSaveDb.get(type);
+        if(menu == null) {
+            menu = new Menu(type.toString());
+            this.mSaveDb.getItems().add(menu);
+            this.menuSaveDb.put(type, menu);
+        }
+        return menu;
+    }
+
     /**
      * Creér un Menu Item pour mSaveDb
      * @param type
      */
     private void createMenuItemSaveDb(DbType type) {
-        Menu menu = new Menu(type.toString());
-        this.mSaveDb.getItems().add(menu);
+        Menu menu = this.getMenuSaveDb(type);
 
-        this.createMenuItemParameterDb(menu);
+        this.createMenuItemParameterDb(menu, type);
 
         for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
@@ -285,7 +313,7 @@ public class CanvasController implements Visual {
     /**
      * 
      */
-    private void createMenuItemParameterDb(Menu menu) {
+    private void createMenuItemParameterDb(Menu menu, DbType type) {
         menu.getItems().clear();
 
         ImageView img = new ImageView(new Image(MainApp.class.getResource("/img/parametre.png").toString(), 15, 15, true, true));
@@ -302,7 +330,10 @@ public class CanvasController implements Visual {
                 modalStage.initStyle(StageStyle.UTILITY);
                 modalStage.setResizable(false);
 
-                modalStage.setOnCloseRequest(ev -> this.createMenuItemParameterDb(menu));
+                modalStage.setOnCloseRequest(ev -> {
+                    this.createMenuItemOpenDb(type);
+                    this.createMenuItemSaveDb(type);
+                });
 
                 modalStage.setScene(scene);
                 modalStage.showAndWait();

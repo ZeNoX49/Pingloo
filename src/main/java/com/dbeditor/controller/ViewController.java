@@ -2,7 +2,6 @@ package com.dbeditor.controller;
 
 import java.io.IOException;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 import com.dbeditor.controller.modifier.DbUpdate;
 import com.dbeditor.controller.modifier.Visual;
@@ -31,8 +30,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 
 public class ViewController implements Visual, DbUpdate {
-    private static final Logger LOGGER = Logger.getLogger(ViewController.class.getName());
-
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     @FXML private BorderPane root;
@@ -45,6 +42,7 @@ public class ViewController implements Visual, DbUpdate {
     private View view;
     private Pane viewPane;
     private Consumer<ViewController> registrar; // callback pour enregistrer la vue dans CanvasController
+    private Consumer<ViewController> sync;
     private Popup popup;
     private ObservableList<Node> baseItemToolbar;
     
@@ -60,11 +58,12 @@ public class ViewController implements Visual, DbUpdate {
      * @param viewType
      * @param registrar fonction fournie par CanvasController pour enregistrer la paire (controller, pane)
      */
-    public void setData(Pane parent, Pane viewPane, ViewType viewType, Consumer<ViewController> registrar) {
+    public void setData(Pane parent, Pane viewPane, ViewType viewType, Consumer<ViewController> registrar, Consumer<ViewController> sync) {
         this.parent = parent;
         this.viewPane = viewPane;
         this.view = viewType.getController();
         this.registrar = registrar;
+        this.sync = sync;
 
         // vue de base
         this.cb.setValue(viewType.toString());
@@ -83,6 +82,10 @@ public class ViewController implements Visual, DbUpdate {
 
         this.setupCombobox();
         this.setupSplit();
+
+        this.btnSync.setOnMouseClicked((e) -> {
+            this.sync.accept(this);
+        });
     }
 
     public ToolBar getToolBar() { return this.toolbar; }
@@ -107,8 +110,6 @@ public class ViewController implements Visual, DbUpdate {
     public void updateType() {
         this.view.updateType();
     }
-
-    // TODO: sync
 
     /**
      * gère la logique de changement de vue
@@ -135,6 +136,11 @@ public class ViewController implements Visual, DbUpdate {
         this.cb.setValue(viewType.toString());
 
         this.toolbar.getItems().setAll(this.baseItemToolbar);
+
+        // TODO: voir si il faut enlver le btnSync autre part
+        if(viewType == ViewType.SDF) {
+            this.toolbar.getItems().remove(this.btnSync);
+        }
 
         View newController = viewType.getController();
         newController.initialization(this.toolbar);
@@ -220,7 +226,7 @@ public class ViewController implements Visual, DbUpdate {
         } catch (IOException e) { throw new Error("Une erreur est survenue lors de la création du visuel"); }
 
         View newView = this.view.getViewType().getController();
-        newController.setData((Pane) parentNode, newPane, newView.getViewType(), this.registrar);
+        newController.setData((Pane) parentNode, newPane, newView.getViewType(), this.registrar, this.sync);
         newController.updateStyle();
 
         newPane.setMinSize(0, 0);

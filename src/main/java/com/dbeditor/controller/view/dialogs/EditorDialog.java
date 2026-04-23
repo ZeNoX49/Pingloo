@@ -28,7 +28,7 @@ public abstract class EditorDialog implements Visual {
      */
     protected void setupTableColumns(TableView<DialogColumnRow> tableColumns) {
         tableColumns.setEditable(true);
-        tableColumns.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tableColumns.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         tableColumns.setPlaceholder(new javafx.scene.control.Label("Aucune colonne. Cliquez sur « Ajouter »."));
 
         // --- Nom ---
