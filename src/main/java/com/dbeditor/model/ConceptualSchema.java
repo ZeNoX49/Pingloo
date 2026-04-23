@@ -15,12 +15,7 @@ public class ConceptualSchema {
     private final Map<String, Association> associations;
     
     public ConceptualSchema(String name) {
-        if(name == null || name.isBlank()) {
-            this.name = "db";
-        } else {
-            this.name = name.strip();
-        }
-        
+        this.name = (name == null || name.isBlank()) ? "db" : name.strip();
         this.type = DbType.MySql;
         this.entities = new HashMap<>();
         this.associations = new HashMap<>();

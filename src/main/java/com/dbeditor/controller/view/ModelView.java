@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dbeditor.controller.TableController;
-import com.dbeditor.controller.modifier.Drag;
+import com.dbeditor.controller.node.NodeController;
 import com.dbeditor.controller.view.helpers.LassoSelector;
 import com.dbeditor.controller.view.helpers.MultiDragManager;
 import com.dbeditor.controller.view.helpers.SelectionModel;
@@ -51,14 +50,14 @@ public abstract class ModelView extends View {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     // Nodes visuels
-    protected final Map<String, Drag> tableNodes = new HashMap<>();
+    protected final Map<String, NodeController> tableNodes = new HashMap<>();
     protected final List<Connection> connectionLines = new ArrayList<>();
 
     // Helpers
     protected ZoomPanHandler zoomPan;
-    protected SelectionModel selectionModel;
-    protected LassoSelector lasso;
-    protected MultiDragManager multiDrag;
+    protected SelectionModel<NodeController> selectionModel;
+    protected LassoSelector<NodeController> lasso;
+    protected MultiDragManager<NodeController> multiDrag;
 
     protected Label zlLabel;
     private Pane pane;
@@ -74,14 +73,14 @@ public abstract class ModelView extends View {
         this.pane.getChildren().add(this.group);
         
         // Initialiser le modèle de sélection -> visualizer appelle setSelected sur TableController
-        this.selectionModel = new SelectionModel((tc, selected) -> tc.setSelected(selected));
+        this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
         
         // Initialiser le zoom/pan
         this.zoomPan = new ZoomPanHandler(this.pane, this.group);
         this.zoomPan.setupEvents(this.zlLabel);
 
         // Initialiser le multidrag
-        this.multiDrag = new MultiDragManager(this.selectionModel);
+        this.multiDrag = new MultiDragManager<>(this.selectionModel);
 
         // Permet au node de ne pas sortir du pane (pour ne pas les voir au dessus de la toolbar)
         Rectangle clip = new Rectangle();
@@ -90,7 +89,7 @@ public abstract class ModelView extends View {
         this.pane.setClip(clip);
 
         // Initialiser le lasso avec la liste partagée (vide pour l'instant)
-        this.lasso = new LassoSelector(this.pane, this.group, this.tableNodes, this.selectionModel);
+        this.lasso = new LassoSelector<>(this.pane, this.group, this.tableNodes, this.selectionModel);
         this.lasso.setupEvents();
 
         this.updateStyle();
@@ -102,8 +101,8 @@ public abstract class ModelView extends View {
         
         this.zlLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
         
-        for (Drag d : this.tableNodes.values()) {
-            if(d instanceof TableController tc) tc.updateStyle();
+        for (NodeController tc : this.tableNodes.values()) {
+            tc.updateStyle();
         }
 
         for(Connection c : this.connectionLines) {
@@ -118,15 +117,15 @@ public abstract class ModelView extends View {
 
     @Override
     public void updateType() {
-        for (Drag d : this.tableNodes.values()) {
-            if(d instanceof TableController tc) tc.updateType();
+        for (NodeController tc : this.tableNodes.values()) {
+            tc.updateType();
         }
     }
 
     /**
      * Gère la sélection d'une entité
      */
-    protected void handleSelection(Drag table, MouseEvent e) {
+    protected void handleSelection(NodeController table, MouseEvent e) {
         if (e.isControlDown()) {
             this.selectionModel.toggle(table);
             e.consume();
@@ -146,12 +145,5 @@ public abstract class ModelView extends View {
     @Override
     public Pane getRoot() {
         return this.pane;
-    }
-
-    public TableController getTableController(Drag d) {
-        if(d != null && d instanceof TableController tc) {
-            return tc;
-        }
-        return null;
     }
 }

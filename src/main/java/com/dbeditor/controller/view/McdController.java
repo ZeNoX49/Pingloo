@@ -1,27 +1,14 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.dbeditor.MainApp;
-import com.dbeditor.controller.CanvasController;
-import com.dbeditor.controller.TableController;
-import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.modifier.Drag;
-import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
-import com.dbeditor.controller.view.dialogs.DialogColumnRow;
-import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
+import com.dbeditor.controller.node.NodeController;
 import com.dbeditor.model.Association;
 import com.dbeditor.model.CardinalityValue;
-import com.dbeditor.model.Column;
 import com.dbeditor.model.Entity;
 import com.dbeditor.model.ForeignKey;
-import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.fxml.FXML;
@@ -34,7 +21,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.util.Pair;
 
 public class McdController extends ModelView {
     private static final ThemeManager T_M = ThemeManager.getInstance();
@@ -62,37 +48,23 @@ public class McdController extends ModelView {
                     }
 
                     else if (e.getCode() == KeyCode.D && e.isControlDown()) {
-                        List<Drag> selectedTables = this.selectionModel.getSelected();
-
-                        for(Drag d : selectedTables) {
-                            TableController tc = super.getTableController(d);
-                            if(tc == null) continue;
-
+                        for(NodeController tc : this.selectionModel.getSelected()) {
                             if(tc.getType() == TableType.Entity) {
                                 Entity dupli = new Entity(tc.getTable());
-
                                 dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
-
                                 while(super.tableNodes.get(dupli.name) != null) {
                                     dupli.name += " copy";
                                 }
-
                                 MainApp.schema.addEntity(dupli);
-
                                 this.createTableNode(dupli, TableType.Entity);
                             }
-                            
                             else if(tc.getType() == TableType.Association && tc.getTable() instanceof Association association) {
                                 Association dupli = new Association(association);
-
                                 dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
-
                                 while(super.tableNodes.get(dupli.name) != null) {
                                     dupli.name += " copy";
                                 }
-
                                 MainApp.schema.addAssociation(dupli);
-
                                 this.createTableNode(dupli, TableType.Association);
                             }
                         }
@@ -101,12 +73,8 @@ public class McdController extends ModelView {
             }
         });
 
-        this.btnEntity.setOnAction(e -> {
-            this.addEntity();
-        });
-        this.btnAssociation.setOnAction(e -> {
-            this.addAssociation();
-        });
+        this.btnEntity.setOnAction(e -> this.addEntity());
+        this.btnAssociation.setOnAction(e -> this.addAssociation());
     }
 
     @Override
@@ -141,7 +109,7 @@ public class McdController extends ModelView {
      */
     private void createTableNode(Entity table, TableType tabletype) {
         AnchorPane tcPane;
-        TableController tcController;
+        NodeController tcController;
         
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/table.fxml"));
@@ -154,7 +122,7 @@ public class McdController extends ModelView {
         super.tableNodes.put(table.name, tcController);
 
         // Gérer la sélection
-        tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
+        tcController.setOnSelect((tc, e) -> super.handleSelection((NodeController) tc, e));
 
         // Menu contextuel
         tcPane.setOnMouseClicked(e -> {
@@ -197,9 +165,7 @@ public class McdController extends ModelView {
                 double sumY = 0;
 
                 for(ForeignKey fk : asso.foreignKeys.values()) {
-                    TableController tc = this.getTableController(super.tableNodes.get(fk.referencedEntity));
-                    if(tc == null) continue;
-                    Entity e = tc.getTable();
+                    Entity e = super.tableNodes.get(fk.referencedEntity).getTable();
                     sumX += e.getPosX();
                     sumY += e.getPosY();
                 }
@@ -211,12 +177,11 @@ public class McdController extends ModelView {
             }
 
             this.createTableNode(asso, TableType.Association);
-            TableController ac = super.getTableController(super.tableNodes.get(asso.name));
+            NodeController ac = super.tableNodes.get(asso.name);
             if(ac == null) return;
 
             for(ForeignKey fk : asso.foreignKeys.values()) {
-                TableController ec = super.getTableController(super.tableNodes.get(p.getKey().name));
-                if(ec == null) continue;
+                NodeController ec = super.tableNodes.get(fk.referencedEntity);
 
                 this.drawConnection(ec, ac, fk.cardinalityValue);
             }
@@ -226,7 +191,7 @@ public class McdController extends ModelView {
     /**
      * Permet de tracer un lien entre une entité et une association
      */
-    private void drawConnection(TableController fromEntity, TableController toAsso, CardinalityValue cardinality) {
+    private void drawConnection(NodeController fromEntity, NodeController toAsso, CardinalityValue cardinality) {
         // permet de savoir quelle TableController récupérer lors d'une modif/suppression
         if (fromEntity == null || fromEntity.getType() != TableType.Entity) return;
         if (toAsso == null || toAsso.getType() != TableType.Association) return;
@@ -278,7 +243,7 @@ public class McdController extends ModelView {
      *   // Édition inline de la cardinalité (double-clic sur le label).
      *   // Change la cardinalité dans le ConceptualSchema et rafraîchit.
      */
-    private void editCardinality(Label cardLabel, TableController entityNode, TableController assocNode) {
+    private void editCardinality(Label cardLabel, NodeController entityNode, NodeController assocNode) {
         // CardinalityValue[] values = CardinalityValue.values();
         // String current = cardLabel.getText();
         // CardinalityValue currentCard = CardinalityValue.getCardinalityValue(current);
@@ -311,214 +276,214 @@ public class McdController extends ModelView {
      */
     @FXML
     public void addEntity() {
-        EntityEditorDialog dialog = new EntityEditorDialog();
-        dialog.showAndWait();
-        if (!dialog.isConfirmed()) return;
+        // EntityEditorDialog dialog = new EntityEditorDialog();
+        // dialog.showAndWait();
+        // if (!dialog.isConfirmed()) return;
         
-        Entity table = dialog.getResultTable();
+        // Entity table = dialog.getResultTable();
         
-        if (MainApp.schema.nameExists(table.name)) {
-            CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
-            return;
-        }
+        // if (MainApp.schema.nameExists(table.name)) {
+        //     CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
+        //     return;
+        // }
 
-        MainApp.schema.addEntity(table);
+        // MainApp.schema.addEntity(table);
         
-        this.createTableNode(table, TableType.Entity);
+        // this.createTableNode(table, TableType.Entity);
     }
 
     /**
      * Édite une entité existante.
      */
-    private void editEntity(TableController tc) {
-        Entity oldTable = tc.getTable();
-        String oldName = oldTable.name;
+    private void editEntity(NodeController tc) {
+        // Entity oldTable = tc.getTable();
+        // String oldName = oldTable.name;
     
-        EntityEditorDialog dialog = new EntityEditorDialog(oldTable);
-        dialog.showAndWait();
-        if (!dialog.isConfirmed()) return;
+        // EntityEditorDialog dialog = new EntityEditorDialog(oldTable);
+        // dialog.showAndWait();
+        // if (!dialog.isConfirmed()) return;
 
-        Entity modifiedTable = dialog.getResultTable();
-        String newName = modifiedTable.name;
+        // Entity modifiedTable = dialog.getResultTable();
+        // String newName = modifiedTable.name;
 
-        if (!oldName.equals(newName) && !MainApp.schema.nameExists(newName)) {
-            CanvasController.showWarningAlert("Erreur", "Une entité nommée « " + newName + " » existe déjà.");
-            return;
-        }
+        // if (!oldName.equals(newName) && !MainApp.schema.nameExists(newName)) {
+        //     CanvasController.showWarningAlert("Erreur", "Une entité nommée « " + newName + " » existe déjà.");
+        //     return;
+        // }
 
-        MainApp.schema.updateEntity(oldName, modifiedTable);
+        // MainApp.schema.updateEntity(oldName, modifiedTable);
 
-        // Supprime l'ancien node visuel
-        super.group.getChildren().remove(tc.getRoot());
-        super.tableNodes.remove(oldName);
+        // // Supprime l'ancien node visuel
+        // super.group.getChildren().remove(tc.getRoot());
+        // super.tableNodes.remove(oldName);
 
-        // Supprime les anciens liens liés à cette entité
-        Iterator<Connection> it = super.connectionLines.iterator();
-        while (it.hasNext()) {
-            Connection connection = it.next();
+        // // Supprime les anciens liens liés à cette entité
+        // Iterator<Connection> it = super.connectionLines.iterator();
+        // while (it.hasNext()) {
+        //     Connection connection = it.next();
 
-            if (connection.firstTable.equals(oldName)) {
-                super.group.getChildren().removeAll(connection.line, connection.label);
-                it.remove();
-            }
-        }
+        //     if (connection.firstTable.equals(oldName)) {
+        //         super.group.getChildren().removeAll(connection.line, connection.label);
+        //         it.remove();
+        //     }
+        // }
 
-        // Recrée le node avec le nouveau nom
-        this.createTableNode(modifiedTable, TableType.Entity);
+        // // Recrée le node avec le nouveau nom
+        // this.createTableNode(modifiedTable, TableType.Entity);
 
-        TableController newTc = super.getTableController(super.tableNodes.get(newName));
-        if(newTc == null) return;
+        // TableController newTc = super.tableNodes.get(newName);
+        // if(newTc == null) return;
 
-        // Redessine uniquement les liens de cette entité
-        for (Entry<String, List<Pair<Entity, CardinalityValue>>> entry : MainApp.schema.getLinks().entrySet()) {
-            String assocName = entry.getKey();
-            TableController assocTc = super.getTableController(super.tableNodes.get(assocName));
-            if (assocTc == null) continue;
+        // // Redessine uniquement les liens de cette entité
+        // for (Entry<String, List<Pair<Entity, CardinalityValue>>> entry : MainApp.schema.getLinks().entrySet()) {
+        //     String assocName = entry.getKey();
+        //     TableController assocTc = super.tableNodes.get(assocName));
+        //     if (assocTc == null) continue;
 
-            for (Pair<Entity, CardinalityValue> p : entry.getValue()) {
-                if (p.getKey().name.equals(newName)) {
-                    this.drawConnection(newTc, assocTc, p.getValue());
-                    break;
-                }
-            }
-        }
+        //     for (Pair<Entity, CardinalityValue> p : entry.getValue()) {
+        //         if (p.getKey().name.equals(newName)) {
+        //             this.drawConnection(newTc, assocTc, p.getValue());
+        //             break;
+        //         }
+        //     }
+        // }
     }
 
     /**
      * Ajoute une nouvelle association.
      */
     public void addAssociation() {
-        List<Entity> entities = MainApp.schema.getEntitiesTables();
-        if (entities.isEmpty()) {
-            CanvasController.showWarningAlert("Erreur", "Il faut au moins 1 entité pour créer une association.");
-            return;
-        }
+        // List<Entity> entities = MainApp.schema.getEntitiesTables();
+        // if (entities.isEmpty()) {
+        //     CanvasController.showWarningAlert("Erreur", "Il faut au moins 1 entité pour créer une association.");
+        //     return;
+        // }
 
-        AssociationEditorDialog dialog = new AssociationEditorDialog(entities, null);
-        dialog.showAndWait();
-        if (!dialog.isConfirmed()) return;
+        // AssociationEditorDialog dialog = new AssociationEditorDialog(entities, null);
+        // dialog.showAndWait();
+        // if (!dialog.isConfirmed()) return;
 
-        Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
-        String name = result.getKey();
+        // Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
+        // String name = result.getKey();
 
-        if (MainApp.schema.nameExists(name)) {
-            CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
-            return;
-        }
+        // if (MainApp.schema.nameExists(name)) {
+        //     CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
+        //     return;
+        // }
 
-        Entity asso = MainApp.schema.addAssociation(name, result.getValue());
-        this.applyDialogAttributesToTable(asso, dialog.getResultAttributes());
+        // Entity asso = MainApp.schema.addAssociation(name, result.getValue());
+        // this.applyDialogAttributesToTable(asso, dialog.getResultAttributes());
 
-        this.createTableNode(asso, TableType.Association);
-        TableController assoCon = super.getTableController(this.tableNodes.get(asso.name));
+        // this.createTableNode(asso, TableType.Association);
+        // TableController assoCon = this.tableNodes.get(asso.name));
 
-        for(Pair<String, CardinalityValue> p : result.getValue()) {
-            this.drawConnection(super.getTableController(this.tableNodes.get(p.getKey())), assoCon, p.getValue());
-        }
+        // for(Pair<String, CardinalityValue> p : result.getValue()) {
+        //     this.drawConnection(this.tableNodes.get(p.getKey())), assoCon, p.getValue());
+        // }
 
-        super.lasso.rect.toFront();
+        // super.lasso.rect.toFront();
     }
 
     /**
      * Édite une association existante (double-clic sur son node).
      */
-    private void editAssociation(TableController assocTc) {
-        List<Entity> entities = MainApp.schema.getEntitiesTables();
-        Entity oldTable = assocTc.getTable();
-        String oldName = oldTable.name;
+    private void editAssociation(NodeController assocTc) {
+        // List<Entity> entities = MainApp.schema.getEntitiesTables();
+        // Entity oldTable = assocTc.getTable();
+        // String oldName = oldTable.name;
 
-        // TODO: erreur ici
-        Pair<String, List<Pair<Entity, CardinalityValue>>> current = new Pair<>(oldName, MainApp.schema.getLinks().get(oldName));
-        AssociationEditorDialog dialog = new AssociationEditorDialog(entities, current);
-        dialog.showAndWait();
-        if (!dialog.isConfirmed()) return;
+        // // TODO: erreur ici
+        // Pair<String, List<Pair<Entity, CardinalityValue>>> current = new Pair<>(oldName, MainApp.schema.getLinks().get(oldName));
+        // AssociationEditorDialog dialog = new AssociationEditorDialog(entities, current);
+        // dialog.showAndWait();
+        // if (!dialog.isConfirmed()) return;
 
-        Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
-        String newName = result.getKey();
+        // Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
+        // String newName = result.getKey();
 
-        if (!oldName.equals(newName) && MainApp.schema.nameExists(newName)) {
-            CanvasController.showWarningAlert("Erreur", "Une association nommée « " + newName + " » existe déjà.");
-            return;
-        }
+        // if (!oldName.equals(newName) && MainApp.schema.nameExists(newName)) {
+        //     CanvasController.showWarningAlert("Erreur", "Une association nommée « " + newName + " » existe déjà.");
+        //     return;
+        // }
 
-        // Supprime l'ancienne association
-        MainApp.schema.removeAssociation(oldName);
-        super.group.getChildren().remove(assocTc.getRoot());
-        super.tableNodes.remove(oldName);
-        this.removeConnectionsInvolving(oldName);
+        // // Supprime l'ancienne association
+        // MainApp.schema.removeAssociation(oldName);
+        // super.group.getChildren().remove(assocTc.getRoot());
+        // super.tableNodes.remove(oldName);
+        // this.removeConnectionsInvolving(oldName);
 
-        // Recrée la nouvelle association
-        Entity newAsso = MainApp.schema.addAssociation(newName, result.getValue());
-        this.applyDialogAttributesToTable(newAsso, dialog.getResultAttributes());
+        // // Recrée la nouvelle association
+        // Entity newAsso = MainApp.schema.addAssociation(newName, result.getValue());
+        // this.applyDialogAttributesToTable(newAsso, dialog.getResultAttributes());
 
-        this.createTableNode(newAsso, TableType.Association);
-        TableController newAssoTc = super.getTableController(super.tableNodes.get(newName));
+        // this.createTableNode(newAsso, TableType.Association);
+        // TableController newAssoTc = super.tableNodes.get(newName));
 
-        for (Pair<String, CardinalityValue> p : result.getValue()) {
-            TableController entityTc = super.getTableController(super.tableNodes.get(p.getKey()));
-            this.drawConnection(entityTc, newAssoTc, p.getValue());
-        }
+        // for (Pair<String, CardinalityValue> p : result.getValue()) {
+        //     TableController entityTc = super.tableNodes.get(p.getKey()));
+        //     this.drawConnection(entityTc, newAssoTc, p.getValue());
+        // }
 
-        super.lasso.rect.toFront();
+        // super.lasso.rect.toFront();
     }
 
     /**
      * Supprime les entités et associations sélectionnées
      */
     public void deleteSelected() {
-        List<Drag> selectedDrag = new ArrayList<>(super.selectionModel.getSelected());
-        if (selectedDrag.isEmpty()) return;
+        // List<TableController> selectedDrag = new ArrayList<>(super.selectionModel.getSelected());
+        // if (selectedDrag.isEmpty()) return;
 
-        List<TableController> selected = new ArrayList<>();
-        for(Drag d : selectedDrag) {
-            TableController tc = super.getTableController(d);
-            if(d != null) selected.add(tc);
-        }
+        // List<TableController> selected = new ArrayList<>();
+        // for(TableController d : selectedDrag) {
+        //     TableController tc = d);
+        //     if(d != null) selected.add(tc);
+        // }
 
-        String message = selected.size() == 1
-            ? "Supprimer « " + selected.get(0).getTable().name + " » ?"
-            : "Supprimer " + selected.size() + " éléments ?";
+        // String message = selected.size() == 1
+        //     ? "Supprimer « " + selected.get(0).getTable().name + " » ?"
+        //     : "Supprimer " + selected.size() + " éléments ?";
 
-        if (!CanvasController.showConfirmationAlert("Confirmation", "Supprimer", message)) return;
+        // if (!CanvasController.showConfirmationAlert("Confirmation", "Supprimer", message)) return;
 
-        for (TableController tc : selected) {
-            String name = tc.getTable().name;
+        // for (TableController tc : selected) {
+        //     String name = tc.getTable().name;
 
-            if (tc.getType() == TableType.Entity) {
-                MainApp.schema.removeEntity(name);
-            } else {
-                MainApp.schema.removeAssociation(name);
-            }
+        //     if (tc.getType() == TableType.Entity) {
+        //         MainApp.schema.removeEntity(name);
+        //     } else {
+        //         MainApp.schema.removeAssociation(name);
+        //     }
 
-            this.removeConnectionsInvolving(name);
-            super.group.getChildren().remove(tc.getRoot());
-            super.tableNodes.remove(name);
-        }
+        //     this.removeConnectionsInvolving(name);
+        //     super.group.getChildren().remove(tc.getRoot());
+        //     super.tableNodes.remove(name);
+        // }
 
-        super.selectionModel.clear();
+        // super.selectionModel.clear();
     }
 
-    private void applyDialogAttributesToTable(Entity table, List<DialogColumnRow> rows) {
-        table.columns.clear();
+    // private void applyDialogAttributesToTable(Entity table, List<DialogColumnRow> rows) {
+    //     table.columns.clear();
 
-        for (DialogColumnRow row : rows) {
-            Column col = new Column(row.getName(), __SqlType.get(row.getType(), MainApp.schema.type));
-            col.isPrimaryKey = row.isPrimaryKey();
-            col.isNotNull = row.isNotNull();
-            col.isUnique = row.isUnique();
-            col.isAutoIncrementing = row.isAutoIncrement();
-            table.addColumn(col);
-        }
-    }
+    //     for (DialogColumnRow row : rows) {
+    //         Column col = new Column(row.getName(), __SqlType.get(row.getType(), MainApp.schema.type));
+    //         col.isPrimaryKey = row.isPrimaryKey();
+    //         col.isNotNull = row.isNotNull();
+    //         col.isUnique = row.isUnique();
+    //         col.isAutoIncrementing = row.isAutoIncrement();
+    //         table.addColumn(col);
+    //     }
+    // }
 
-    private void removeConnectionsInvolving(String tableName) {
-        Iterator<Connection> it = super.connectionLines.iterator();
-        while (it.hasNext()) {
-            Connection c = it.next();
-            if (tableName.equals(c.firstTable) || tableName.equals(c.secondTable)) {
-                super.group.getChildren().removeAll(c.line, c.label);
-                it.remove();
-            }
-        }
-    }
+    // private void removeConnectionsInvolving(String tableName) {
+    //     Iterator<Connection> it = super.connectionLines.iterator();
+    //     while (it.hasNext()) {
+    //         Connection c = it.next();
+    //         if (tableName.equals(c.firstTable) || tableName.equals(c.secondTable)) {
+    //             super.group.getChildren().removeAll(c.line, c.label);
+    //             it.remove();
+    //         }
+    //     }
+    // }
 }

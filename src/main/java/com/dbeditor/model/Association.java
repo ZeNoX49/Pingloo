@@ -3,7 +3,7 @@ package com.dbeditor.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Association extends Entity {
+public class Association extends ConceptualNode {
     public final Map<String, ForeignKey> foreignKeys;
     
     public Association(String name) {
