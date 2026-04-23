@@ -100,7 +100,7 @@ public class JsonManager {
 
         Map<String, Map<String, Object>> db = (Map<String, Map<String, Object>>) root.get("db_type");
         Map<String, Object> mysql = db.get("mysql");
-        D_M.setMysqlDbData(mysql);
+        // D_M.setMysqlDbData(mysql);
     }
 
     /**

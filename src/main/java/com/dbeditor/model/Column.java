@@ -1,5 +1,6 @@
 package com.dbeditor.model;
 
+import com.dbeditor.model.other.DataDictionnary;
 import com.dbeditor.model.type.__SqlType;
 
 public class Column {
@@ -9,6 +10,7 @@ public class Column {
     public boolean isNotNull;
     public boolean isUnique;
     public boolean isAutoIncrementing;
+    public DataDictionnary dataDictionnary;
     
     public Column(String name, __SqlType type) {
         this.name = name;
@@ -22,5 +24,6 @@ public class Column {
         this.isNotNull = other.isNotNull;
         this.isUnique = other.isUnique;
         this.isAutoIncrementing = other.isAutoIncrementing;
+        this.dataDictionnary = other.dataDictionnary;
     }
 }

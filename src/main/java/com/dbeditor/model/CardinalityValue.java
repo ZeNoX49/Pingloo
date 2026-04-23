@@ -1,4 +1,4 @@
-package com.dbeditor.model.mcd;
+package com.dbeditor.model;
 
 public enum CardinalityValue {
     _01_, _11_, _0N_, _1N_;

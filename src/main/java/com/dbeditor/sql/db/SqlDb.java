@@ -1,7 +1,5 @@
 package com.dbeditor.sql.db;
 
-import com.dbeditor.model.DatabaseSchema;
-
 public abstract class SqlDb {
 
     public String dbHost;
@@ -13,7 +11,7 @@ public abstract class SqlDb {
      * Renvoie les schema de la bdd chargés à partir de la bdd
      * @param dbName nom de la bdd
      */
-    public abstract DatabaseSchema loadDb(String dbName);
+    public abstract void loadDb(String dbName);
     
     /**
      * Exécute un script SQL.

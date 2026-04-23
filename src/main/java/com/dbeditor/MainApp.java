@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.model.ConceptualSchema;
 import com.dbeditor.util.FileManager;
 import com.dbeditor.util.JsonManager;
 
@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 public class MainApp extends Application {
 	private static final Logger LOGGER = Logger.getLogger(MainApp.class.getName());
 	
-    public static DatabaseSchema schema;
+    public static ConceptualSchema schema;
 
     @Override
 	public void start(Stage stage) throws IOException {
@@ -29,7 +29,7 @@ public class MainApp extends Application {
         try {
 			J_M.load();
 
-			MainApp.schema = new DatabaseSchema("");
+			MainApp.schema = new ConceptualSchema("");
 
 	        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/canvas.fxml"));
 	        Scene scene = new Scene(loader.load(), 1280, 720);

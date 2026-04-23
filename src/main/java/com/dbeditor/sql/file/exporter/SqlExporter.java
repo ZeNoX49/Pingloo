@@ -1,7 +1,5 @@
 package com.dbeditor.sql.file.exporter;
 
-import com.dbeditor.model.DatabaseSchema;
-
 public abstract class SqlExporter {
     
     /**
@@ -9,11 +7,11 @@ public abstract class SqlExporter {
      * @param schema schema de la bdd
      * @param filepath chemin de sauvegarde
      */
-    public abstract void exportToSQL(DatabaseSchema schema, String filepath);
+    public abstract void exportToSQL(String filepath);
     
     /**
      * Créer le script sql
      * @param schema schema de la bdd
      */
-    public abstract String createSql(DatabaseSchema schema);
+    public abstract String createSql();
 }

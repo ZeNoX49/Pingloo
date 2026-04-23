@@ -1,13 +1,10 @@
 package com.dbeditor.sql.db;
 
-import com.dbeditor.model.DatabaseSchema;
-
-public class OracleSqlDb extends SqlDb {
+public class OracleDb extends SqlDb {
 
     @Override
-    public DatabaseSchema loadDb(String dbName) {
+    public void loadDb(String dbName) {
         // TODO
-        return new DatabaseSchema("");
     }
     
     @Override

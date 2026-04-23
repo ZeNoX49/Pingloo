@@ -16,10 +16,11 @@ import com.dbeditor.controller.modifier.Drag;
 import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
 import com.dbeditor.controller.view.dialogs.DialogColumnRow;
 import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
+import com.dbeditor.model.Association;
+import com.dbeditor.model.CardinalityValue;
 import com.dbeditor.model.Column;
-import com.dbeditor.model.Table;
-import com.dbeditor.model.mcd.CardinalityValue;
-import com.dbeditor.model.mcd.ConceptualSchema;
+import com.dbeditor.model.Entity;
+import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.util.ThemeManager;
 
@@ -44,13 +45,9 @@ public class McdController extends ModelView {
     }
 
     private Button btnEntity, btnAssociation;
-
-    private ConceptualSchema conceptualSchema;
     
     @Override
     public void initialization(ToolBar toolbar) {
-        this.conceptualSchema = new ConceptualSchema(MainApp.schema);
-
         this.btnEntity = super.createButton("Entité");
         this.btnAssociation = super.createButton("Association");
         toolbar.getItems().addAll(this.btnEntity, this.btnAssociation);
@@ -71,26 +68,33 @@ public class McdController extends ModelView {
                             TableController tc = super.getTableController(d);
                             if(tc == null) continue;
 
-                            Table dupli = new Table(tc.getTable());
-                            if(dupli.isPositionned()) {
-                                dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
-                            }
-
-                            while(super.tableNodes.get(dupli.name) != null) {
-                                dupli.name += " copy";
-                            }
-
                             if(tc.getType() == TableType.Entity) {
-                                this.conceptualSchema.addEntity(dupli);
-                            } else {
-                                List<Pair<String, CardinalityValue>> l = new ArrayList<>();
-                                for(Pair<Table, CardinalityValue> p : this.conceptualSchema.getLinks().get(tc.getTable().name)) {
-                                    l.add(new Pair<>(p.getKey().name, p.getValue()));
-                                }
-                                this.conceptualSchema.addAssociation(dupli.name, l);
-                            }
+                                Entity dupli = new Entity(tc.getTable());
 
-                            this.createTableNode(dupli, tc.getType());
+                                dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
+
+                                while(super.tableNodes.get(dupli.name) != null) {
+                                    dupli.name += " copy";
+                                }
+
+                                MainApp.schema.addEntity(dupli);
+
+                                this.createTableNode(dupli, TableType.Entity);
+                            }
+                            
+                            else if(tc.getType() == TableType.Association && tc.getTable() instanceof Association association) {
+                                Association dupli = new Association(association);
+
+                                dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
+
+                                while(super.tableNodes.get(dupli.name) != null) {
+                                    dupli.name += " copy";
+                                }
+
+                                MainApp.schema.addAssociation(dupli);
+
+                                this.createTableNode(dupli, TableType.Association);
+                            }
                         }
                     }
                 });
@@ -107,8 +111,6 @@ public class McdController extends ModelView {
 
     @Override
     public void open() {
-        this.conceptualSchema = new ConceptualSchema(MainApp.schema);
-
         // supprime tous les nodes sauf selectionRect
         super.group.getChildren().removeIf(node -> node != super.lasso.rect);
 
@@ -129,15 +131,15 @@ public class McdController extends ModelView {
      * Crée les nodes visuels pour les entités
      */
     private void createTableNodes() {
-        for (Table table : this.conceptualSchema.getEntitiesTables()) {
-            this.createTableNode(table, TableType.Entity);
+        for (Entity entity : MainApp.schema.getEntities()) {
+            this.createTableNode(entity, TableType.Entity);
         }
     }
 
     /**
      * Crée un node d'entité/association
      */
-    private void createTableNode(Table table, TableType tabletype) {
+    private void createTableNode(Entity table, TableType tabletype) {
         AnchorPane tcPane;
         TableController tcController;
         
@@ -161,7 +163,7 @@ public class McdController extends ModelView {
                 if(tabletype == TableType.Entity) {
                     this.editEntity(tcController);
                 } else {
-                    this.editAssociation(tcController); 
+                    this.editAssociation(tcController);
                 }
                 e.consume();
             }
@@ -188,35 +190,35 @@ public class McdController extends ModelView {
         });
         super.connectionLines.clear();
 
-        Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
-        for (String name : links.keySet()) {
-            Table table = this.conceptualSchema.getAssociationTable(name);
-
-            if(!table.isPositionned()) {
+        for (Association asso : MainApp.schema.getAssociations()) {
+            if(!asso.isPositionned()) {
                 // centrer l'association
                 double sumX = 0;
                 double sumY = 0;
 
-                List<Pair<Table, CardinalityValue>> l = links.get(name);
-                for(Pair<Table, CardinalityValue> p : l) {
-                    sumX += p.getKey().getPosX();
-                    sumY += p.getKey().getPosY();
+                for(ForeignKey fk : asso.foreignKeys.values()) {
+                    TableController tc = this.getTableController(super.tableNodes.get(fk.referencedEntity));
+                    if(tc == null) continue;
+                    Entity e = tc.getTable();
+                    sumX += e.getPosX();
+                    sumY += e.getPosY();
                 }
 
-                table.setPosition(
-                    sumX / l.size(),
-                    sumY / l.size()
+                asso.setPosition(
+                    sumX / asso.foreignKeys.size(),
+                    sumY / asso.foreignKeys.size()
                 );
             }
 
-            this.createTableNode(table, TableType.Association);
-            TableController ac = super.getTableController(super.tableNodes.get(name));
+            this.createTableNode(asso, TableType.Association);
+            TableController ac = super.getTableController(super.tableNodes.get(asso.name));
             if(ac == null) return;
 
-            for(Pair<Table, CardinalityValue> p : links.get(name)) {
+            for(ForeignKey fk : asso.foreignKeys.values()) {
                 TableController ec = super.getTableController(super.tableNodes.get(p.getKey().name));
+                if(ec == null) continue;
 
-                this.drawConnection(ec, ac, p.getValue());
+                this.drawConnection(ec, ac, fk.cardinalityValue);
             }
         }
     }
@@ -290,7 +292,7 @@ public class McdController extends ModelView {
         // String entityName = entityNode.getTable().getName();
         // String assocName  = assocNode.getTable().getName();
 
-        // // for (ConceptualSchema.Association assoc : this.conceptualSchema.getAssociations()) {
+        // // for (ConceptualSchema.Association assoc : MainApp.schema.getAssociations()) {
         // //     if (assoc.name.equals(assocName)) {
         // //         for (ConceptualSchema.Entity e : assoc.linkedEntities.keySet()) {
         // //             if (e.table.getName().equals(entityName)) {
@@ -313,14 +315,14 @@ public class McdController extends ModelView {
         dialog.showAndWait();
         if (!dialog.isConfirmed()) return;
         
-        Table table = dialog.getResultTable();
+        Entity table = dialog.getResultTable();
         
-        if (this.conceptualSchema.nameExists(table.name)) {
+        if (MainApp.schema.nameExists(table.name)) {
             CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
             return;
         }
 
-        this.conceptualSchema.addEntity(table);
+        MainApp.schema.addEntity(table);
         
         this.createTableNode(table, TableType.Entity);
     }
@@ -329,27 +331,22 @@ public class McdController extends ModelView {
      * Édite une entité existante.
      */
     private void editEntity(TableController tc) {
-        Table oldTable = tc.getTable();
+        Entity oldTable = tc.getTable();
         String oldName = oldTable.name;
     
         EntityEditorDialog dialog = new EntityEditorDialog(oldTable);
         dialog.showAndWait();
         if (!dialog.isConfirmed()) return;
 
-        Table modifiedTable = dialog.getResultTable();
+        Entity modifiedTable = dialog.getResultTable();
         String newName = modifiedTable.name;
 
-        if (!oldName.equals(newName) && this.conceptualSchema.getEntityTable(newName) != null) {
+        if (!oldName.equals(newName) && !MainApp.schema.nameExists(newName)) {
             CanvasController.showWarningAlert("Erreur", "Une entité nommée « " + newName + " » existe déjà.");
             return;
         }
 
-        // Mettre à jour dans le ConceptualSchema
-        this.conceptualSchema.updateEntity(oldName, modifiedTable);
-
-        // Mise à jour du schema global
-        MainApp.schema.tables.remove(oldName);
-        MainApp.schema.addTable(modifiedTable);
+        MainApp.schema.updateEntity(oldName, modifiedTable);
 
         // Supprime l'ancien node visuel
         super.group.getChildren().remove(tc.getRoot());
@@ -373,12 +370,12 @@ public class McdController extends ModelView {
         if(newTc == null) return;
 
         // Redessine uniquement les liens de cette entité
-        for (Entry<String, List<Pair<Table, CardinalityValue>>> entry : this.conceptualSchema.getLinks().entrySet()) {
+        for (Entry<String, List<Pair<Entity, CardinalityValue>>> entry : MainApp.schema.getLinks().entrySet()) {
             String assocName = entry.getKey();
             TableController assocTc = super.getTableController(super.tableNodes.get(assocName));
             if (assocTc == null) continue;
 
-            for (Pair<Table, CardinalityValue> p : entry.getValue()) {
+            for (Pair<Entity, CardinalityValue> p : entry.getValue()) {
                 if (p.getKey().name.equals(newName)) {
                     this.drawConnection(newTc, assocTc, p.getValue());
                     break;
@@ -391,7 +388,7 @@ public class McdController extends ModelView {
      * Ajoute une nouvelle association.
      */
     public void addAssociation() {
-        List<Table> entities = this.conceptualSchema.getEntitiesTables();
+        List<Entity> entities = MainApp.schema.getEntitiesTables();
         if (entities.isEmpty()) {
             CanvasController.showWarningAlert("Erreur", "Il faut au moins 1 entité pour créer une association.");
             return;
@@ -404,12 +401,12 @@ public class McdController extends ModelView {
         Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
         String name = result.getKey();
 
-        if (this.conceptualSchema.nameExists(name)) {
+        if (MainApp.schema.nameExists(name)) {
             CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
             return;
         }
 
-        Table asso = this.conceptualSchema.addAssociation(name, result.getValue());
+        Entity asso = MainApp.schema.addAssociation(name, result.getValue());
         this.applyDialogAttributesToTable(asso, dialog.getResultAttributes());
 
         this.createTableNode(asso, TableType.Association);
@@ -426,12 +423,12 @@ public class McdController extends ModelView {
      * Édite une association existante (double-clic sur son node).
      */
     private void editAssociation(TableController assocTc) {
-        List<Table> entities = this.conceptualSchema.getEntitiesTables();
-        Table oldTable = assocTc.getTable();
+        List<Entity> entities = MainApp.schema.getEntitiesTables();
+        Entity oldTable = assocTc.getTable();
         String oldName = oldTable.name;
 
         // TODO: erreur ici
-        Pair<String, List<Pair<Table, CardinalityValue>>> current = new Pair<>(oldName, this.conceptualSchema.getLinks().get(oldName));
+        Pair<String, List<Pair<Entity, CardinalityValue>>> current = new Pair<>(oldName, MainApp.schema.getLinks().get(oldName));
         AssociationEditorDialog dialog = new AssociationEditorDialog(entities, current);
         dialog.showAndWait();
         if (!dialog.isConfirmed()) return;
@@ -439,19 +436,19 @@ public class McdController extends ModelView {
         Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
         String newName = result.getKey();
 
-        if (!oldName.equals(newName) && this.conceptualSchema.nameExists(newName)) {
+        if (!oldName.equals(newName) && MainApp.schema.nameExists(newName)) {
             CanvasController.showWarningAlert("Erreur", "Une association nommée « " + newName + " » existe déjà.");
             return;
         }
 
         // Supprime l'ancienne association
-        this.conceptualSchema.removeAssociation(oldName);
+        MainApp.schema.removeAssociation(oldName);
         super.group.getChildren().remove(assocTc.getRoot());
         super.tableNodes.remove(oldName);
         this.removeConnectionsInvolving(oldName);
 
         // Recrée la nouvelle association
-        Table newAsso = this.conceptualSchema.addAssociation(newName, result.getValue());
+        Entity newAsso = MainApp.schema.addAssociation(newName, result.getValue());
         this.applyDialogAttributesToTable(newAsso, dialog.getResultAttributes());
 
         this.createTableNode(newAsso, TableType.Association);
@@ -488,9 +485,9 @@ public class McdController extends ModelView {
             String name = tc.getTable().name;
 
             if (tc.getType() == TableType.Entity) {
-                this.conceptualSchema.removeEntity(name);
+                MainApp.schema.removeEntity(name);
             } else {
-                this.conceptualSchema.removeAssociation(name);
+                MainApp.schema.removeAssociation(name);
             }
 
             this.removeConnectionsInvolving(name);
@@ -501,7 +498,7 @@ public class McdController extends ModelView {
         super.selectionModel.clear();
     }
 
-    private void applyDialogAttributesToTable(Table table, List<DialogColumnRow> rows) {
+    private void applyDialogAttributesToTable(Entity table, List<DialogColumnRow> rows) {
         table.columns.clear();
 
         for (DialogColumnRow row : rows) {

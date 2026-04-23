@@ -7,9 +7,9 @@ import java.util.Map;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
+import com.dbeditor.model.CardinalityValue;
 import com.dbeditor.model.Column;
-import com.dbeditor.model.Table;
-import com.dbeditor.model.mcd.CardinalityValue;
+import com.dbeditor.model.Entity;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,7 +40,7 @@ public class AssociationEditorDialog extends EditorDialog {
     private static final int MIN_ENTITIES = 2;   // Nombre minimum d'entités participantes
     private static final int MAX_ENTITIES = 4;   // Nombre maximum d'entités participantes
 
-    private final List<Table> availableEntities;
+    private final List<Entity> availableEntities;
     private final List<EntityParticipationRow> participations;
     
     private TextField tfAssociationName;
@@ -55,9 +55,9 @@ public class AssociationEditorDialog extends EditorDialog {
         private final ComboBox<String> entityCombo;
         private final ComboBox<String> cardinalityCombo;
         final HBox container;
-        private final Map<String, Table> tables;
+        private final Map<String, Entity> tables;
         
-        public EntityParticipationRow(List<Table> entities) {
+        public EntityParticipationRow(List<Entity> entities) {
             this.tables = new HashMap<>();
 
             this.container = new HBox(12);
@@ -67,7 +67,7 @@ public class AssociationEditorDialog extends EditorDialog {
             lblEntity.setPrefWidth(55);
             
             this.entityCombo = new ComboBox<>();
-            for(Table t : entities) {
+            for(Entity t : entities) {
                 this.entityCombo.getItems().add(t.name);
                 tables.put(t.name, t);
             }
@@ -89,7 +89,7 @@ public class AssociationEditorDialog extends EditorDialog {
             container.getChildren().addAll(lblEntity, this.entityCombo, lblCard, this.cardinalityCombo);
         }
         
-        public Table getEntity() {
+        public Entity getEntity() {
             return this.tables.get(this.entityCombo.getValue());
         }
         
@@ -97,7 +97,7 @@ public class AssociationEditorDialog extends EditorDialog {
             return CardinalityValue.getCardinalityValue(this.cardinalityCombo.getValue());
         }
 
-        void setEntity(Table t) {
+        void setEntity(Entity t) {
             this.entityCombo.setValue(t.name);
         }
 
@@ -111,7 +111,7 @@ public class AssociationEditorDialog extends EditorDialog {
      * @param availableEntities liste des entités disponibles
      * @param association l'association à modifier (null pour en créer une nouvelle)
      */
-    public AssociationEditorDialog(List<Table> availableEntities, Pair<String, List<Pair<Table, CardinalityValue>>> association) {
+    public AssociationEditorDialog(List<Entity> availableEntities, Pair<String, List<Pair<Entity, CardinalityValue>>> association) {
         this(availableEntities, association, null);
     }
 
@@ -121,7 +121,7 @@ public class AssociationEditorDialog extends EditorDialog {
      * @param association l'association à modifier (null pour en créer une nouvelle)
      * @param existingTable
      */
-    public AssociationEditorDialog(List<Table> availableEntities, Pair<String, List<Pair<Table, CardinalityValue>>> association, Table existingTable) {
+    public AssociationEditorDialog(List<Entity> availableEntities, Pair<String, List<Pair<Entity, CardinalityValue>>> association, Entity existingTable) {
         this.availableEntities = new ArrayList<>(availableEntities);
         this.participations = new ArrayList<>();
         this.tableAttributes = new TableView<>();
@@ -146,7 +146,7 @@ public class AssociationEditorDialog extends EditorDialog {
     /**
      * Initialise l'interface utilisateur
      */
-    private void initUI(Pair<String, List<Pair<Table, CardinalityValue>>> association) {
+    private void initUI(Pair<String, List<Pair<Entity, CardinalityValue>>> association) {
         super.stage = new Stage();
         super.stage.initModality(Modality.APPLICATION_MODAL);
         super.stage.initStyle(StageStyle.UTILITY);
@@ -174,7 +174,7 @@ public class AssociationEditorDialog extends EditorDialog {
 
         if (association != null) {
             // Chargement des participations existantes
-            for (Pair<Table, CardinalityValue> p : association.getValue()) {
+            for (Pair<Entity, CardinalityValue> p : association.getValue()) {
                 EntityParticipationRow row = new EntityParticipationRow(this.availableEntities);
                 row.setEntity(p.getKey());
                 row.setCardinality(p.getValue());
@@ -339,7 +339,7 @@ public class AssociationEditorDialog extends EditorDialog {
 
         // Vérifier qu'il n'y a pas de doublon (sauf pour association réflexive)
         if (this.participations.size() > MIN_ENTITIES) {
-            List<Table> selectedEntities = new ArrayList<>();
+            List<Entity> selectedEntities = new ArrayList<>();
             for (EntityParticipationRow row : this.participations) {
                 if (selectedEntities.contains(row.getEntity())) {
                     CanvasController.showWarningAlert("Erreur", "Une même entité ne peut pas apparaître plusieurs fois (sauf pour les associations binaires réflexives).");

@@ -1,16 +1,12 @@
 package com.dbeditor.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.dbeditor.model.ForeignKey;
-import com.dbeditor.model.Table;
+import com.dbeditor.model.Entity;
 import com.dbeditor.sql.DbType;
-import com.dbeditor.sql.db.MySqlDb;
 import com.dbeditor.sql.db.SqlDb;
 import com.dbeditor.sql.file.exporter.MsSqlExporter;
 import com.dbeditor.sql.file.exporter.MySqlExporter;
@@ -61,20 +57,20 @@ public class DbManager {
         }
     }
 
-    public void setMysqlDbData(Map<String, Object> data) {
-        this.sqlDb.put(DbType.MySql, new MySqlDb(
-            (String) data.get("host"),
-            (String) data.get("user"),
-            (String) data.get("password"),
-            (String) data.get("port")
-        ));
+    // public void setMysqlDbData(Map<String, Object> data) {
+    //     // this.sqlDb.put(DbType.MySql, new MySqlDb(
+    //     //     (String) data.get("host"),
+    //     //     (String) data.get("user"),
+    //     //     (String) data.get("password"),
+    //     //     (String) data.get("port")
+    //     // ));
         
-        List<String> t = new ArrayList<>();
-        for(Map<String, Object> table : (List<Map<String, Object>>) data.get("databases")) {
-            t.add((String) table.get("name"));
-        }
-        this.sqlTypeDatabases.put(DbType.MySql, t);
-    }
+    //     // List<String> t = new ArrayList<>();
+    //     // for(Map<String, Object> table : (List<Map<String, Object>>) data.get("databases")) {
+    //     //     t.add((String) table.get("name"));
+    //     // }
+    //     // this.sqlTypeDatabases.put(DbType.MySql, t);
+    // }
 
     public SqlDb getSqlDb(DbType type) { return this.sqlDb.get(type); }
     public SqlParser getSqlParser(DbType type) { return this.sqlParser.get(type); }
@@ -83,69 +79,68 @@ public class DbManager {
 
     /* ============================================================================================================================= */
 
+    // TODO
     /**
      * Permet de trier les tables dans l'ordre de création pour la bdd
-     * Renvoie une erreur si il y a un problème
-     * @param tables
-     * @return
+     * @return renvoie une erreur si il y a un problème
      */
-    public static List<Table> sortTables(Collection<Table> tables) {
-        List<Table> res = new ArrayList<>();
-        List<Table> toAdd = new ArrayList<>(tables);
+    public static List<Entity> sortTables() {
+        List<Entity> res = new ArrayList<>();
+        // List<Entity> toAdd = new ArrayList<>(tables);
 
-        // 1 - On ajoute toutes les tables sans FK
-        Iterator<Table> it = toAdd.iterator();
-        while(it.hasNext()) {
-            Table t = it.next();
-            if(t.getForeignKeys().isEmpty()) {
-                res.add(t);
-                it.remove();
-            }
-        }
+        // // 1 - On ajoute toutes les tables sans FK
+        // Iterator<Entity> it = toAdd.iterator();
+        // while(it.hasNext()) {
+        //     Entity t = it.next();
+        //     if(t.getForeignKeys().isEmpty()) {
+        //         res.add(t);
+        //         it.remove();
+        //     }
+        // }
 
-        // 2 - On ajoute les tables dont toutes les FK sont déjà dans res
-        boolean added;
-        do {
-            added = false;
-            it = toAdd.iterator();
-            while(it.hasNext()) {
-                Table t = it.next();
-                boolean allFKResolved = true;
+        // // 2 - On ajoute les tables dont toutes les FK sont déjà dans res
+        // boolean added;
+        // do {
+        //     added = false;
+        //     it = toAdd.iterator();
+        //     while(it.hasNext()) {
+        //         Entity t = it.next();
+        //         boolean allFKResolved = true;
 
-                for(ForeignKey fk : t.getForeignKeys()) {
-                    String refTable = fk.referencedTable;
+        //         for(ForeignKey fk : t.getForeignKeys()) {
+        //             String refTable = fk.referencedTable;
 
-                    // si c'est notre table actuelle : on passe
-                    if(refTable.equals(t.name)) continue;
+        //             // si c'est notre table actuelle : on passe
+        //             if(refTable.equals(t.name)) continue;
 
-                    boolean fkFound = false;
-                    for(Table r : res) {
-                        if(refTable.equals(r.name)) {
+        //             boolean fkFound = false;
+        //             for(Entity r : res) {
+        //                 if(refTable.equals(r.name)) {
 
-                            fkFound = true;
-                            break;
-                        }
-                    }
+        //                     fkFound = true;
+        //                     break;
+        //                 }
+        //             }
 
-                    if(!fkFound) {
-                        allFKResolved = false;
-                        break;
-                    }
-                }
+        //             if(!fkFound) {
+        //                 allFKResolved = false;
+        //                 break;
+        //             }
+        //         }
 
-                if(allFKResolved) {
-                    res.add(t);
-                    it.remove();
-                    added = true;
-                }
-            }
+        //         if(allFKResolved) {
+        //             res.add(t);
+        //             it.remove();
+        //             added = true;
+        //         }
+        //     }
 
-            // Si aucune table n'a été ajoutée, on a une FK circulaire
-            if(!added && !toAdd.isEmpty()) {
-                throw new IllegalStateException("FK circulaire détectée : " + toAdd);
-            }
+        //     // Si aucune table n'a été ajoutée, on a une FK circulaire
+        //     if(!added && !toAdd.isEmpty()) {
+        //         throw new IllegalStateException("FK circulaire détectée : " + toAdd);
+        //     }
 
-        } while(!toAdd.isEmpty());
+        // } while(!toAdd.isEmpty());
 
         return res;
     }

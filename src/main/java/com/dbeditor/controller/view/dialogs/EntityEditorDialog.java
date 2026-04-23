@@ -3,7 +3,7 @@ package com.dbeditor.controller.view.dialogs;
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.model.Column;
-import com.dbeditor.model.Table;
+import com.dbeditor.model.Entity;
 import com.dbeditor.model.type.IntSql;
 import com.dbeditor.model.type.VarcharSql;
 import com.dbeditor.model.type.__SqlType;
@@ -35,7 +35,7 @@ public class EntityEditorDialog extends EditorDialog {
     private TextField tfTableName;
     private final TableView<DialogColumnRow> tableColumns;
     private final ObservableList<DialogColumnRow> columnData;
-    private final Table resultTable;
+    private final Entity resultTable;
 
     /**
      * Constructeur pour créer une nouvelle table
@@ -43,7 +43,7 @@ public class EntityEditorDialog extends EditorDialog {
     public EntityEditorDialog() {
         this.tableColumns = new TableView<>();
         this.columnData = FXCollections.observableArrayList();
-        this.resultTable = new Table("a renommer");
+        this.resultTable = new Entity("a renommer");
 
         // Ajouter une ligne vide par défaut pour une nouvelle table
         IntSql intSql = new IntSql();
@@ -55,11 +55,11 @@ public class EntityEditorDialog extends EditorDialog {
      * Constructeur pour modifier une table existante
      * @param table la table à modifier, null pour créer une nouvelle
      */
-    public EntityEditorDialog(Table table) {
+    public EntityEditorDialog(Entity table) {
         this.tableColumns = new TableView<>();
         this.columnData = FXCollections.observableArrayList();
 
-        this.resultTable = new Table(table);
+        this.resultTable = new Entity(table);
 
         // charger les données de la table
         for (Column col : table.getColumns()) {
@@ -232,7 +232,7 @@ public class EntityEditorDialog extends EditorDialog {
     /**
      * Retourne la table créée/modifiée
      */
-    public Table getResultTable() {
+    public Entity getResultTable() {
         return this.resultTable;
     }
 }

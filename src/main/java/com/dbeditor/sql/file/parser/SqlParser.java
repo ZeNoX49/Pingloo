@@ -1,7 +1,5 @@
 package com.dbeditor.sql.file.parser;
 
-import com.dbeditor.model.DatabaseSchema;
-
 public abstract class SqlParser {
 
     /**
@@ -9,6 +7,6 @@ public abstract class SqlParser {
      * @param filePath chemin de stockage du fichier contenant la bdd
      * @return le schema de la bdd
      */
-    public abstract DatabaseSchema loadFromFile(String filePath);
+    public abstract void loadFromFile(String filePath);
     
 }

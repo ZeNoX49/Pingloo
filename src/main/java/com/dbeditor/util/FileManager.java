@@ -4,11 +4,10 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.dbeditor.model.DatabaseSchema;
+import com.dbeditor.controller.CanvasController;
 import com.dbeditor.sql.file.exporter.SqlExporter;
 import com.dbeditor.sql.file.parser.SqlParser;
 
-import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -30,39 +29,30 @@ public class FileManager {
     private Stage stage;
     private File lastUsedDirectory;
  
-    public DatabaseSchema openDatabase(FileChooser fileChooser, SqlParser parser) {
+    public void openDatabase(FileChooser fileChooser, SqlParser parser) {
         fileChooser.setInitialDirectory(this.lastUsedDirectory);
 
         File fileDir = fileChooser.showOpenDialog(this.stage);
-        if (fileDir != null) {
-            this.lastUsedDirectory = fileDir.getParentFile(); // Mémoriser le dossier
-            
-            DatabaseSchema schema = parser.loadFromFile(fileDir.getAbsolutePath());
-            if (schema != null && !schema.getTables().isEmpty()) {
-                return schema;
-            } else {
-                LOGGER.log(Level.SEVERE, "Erreur lors du chargement de la base de données");
-                return null;
-            }
+        if (fileDir == null) {
+            LOGGER.log(Level.SEVERE, "Le dossier n'existe pas ????");
+            return;
         }
 
-        LOGGER.log(Level.SEVERE, "Le dossier n'existe pas ????");
-        return null;
+        this.lastUsedDirectory = fileDir.getParentFile();
+        parser.loadFromFile(fileDir.getAbsolutePath());
     }
     
-    public void exportSQL(FileChooser fileChooser, DatabaseSchema schema, SqlExporter exporter) {
+    public void exportSQL(FileChooser fileChooser, SqlExporter exporter) {
         fileChooser.setInitialDirectory(this.lastUsedDirectory);
 
         File file = fileChooser.showSaveDialog(this.stage);
-        if (file != null) {
-            exporter.exportToSQL(schema, file.getAbsolutePath());
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Export réussi");
-            alert.setHeaderText(null);
-            alert.setContentText("La base de données a été exportée avec succès !");
-            alert.showAndWait();
+        if (file == null) {
+            LOGGER.log(Level.SEVERE, "Le fichier n'existe pas ????");
+            return;
         }
+
+        exporter.exportToSQL(file.getAbsolutePath());
+        CanvasController.showWarningAlert("Export réussi", "La base de données a été exportée avec succès !");
     }
 
     public void setStage(Stage s) { this.stage = s; }

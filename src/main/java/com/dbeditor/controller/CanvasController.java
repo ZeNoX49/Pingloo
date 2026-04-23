@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.modifier.Visual;
-import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.sql.DbType;
 import com.dbeditor.util.DbManager;
 import com.dbeditor.util.FileManager;
@@ -65,11 +64,12 @@ public class CanvasController implements Visual {
     @FXML
     private void initialize() {
         this.views = new ArrayList<>();
-        menuOpenDb = new HashMap<>();
-        menuSaveDb = new HashMap<>();
+        this.menuOpenDb = new HashMap<>();
+        this.menuSaveDb = new HashMap<>();
 
         for(DbType type : DbType.values()) {
             if(type.equals(DbType.MsSql) || type.equals(DbType.PostgreSql) || type.equals(DbType.Oracle)) continue;
+            
             this.createMenuItemOpenFile(type);
             this.createMenuItemOpenDb(type);
             this.createMenuItemSaveFile(type);
@@ -186,16 +186,13 @@ public class CanvasController implements Visual {
     }
 
     /**
-     * Permet de charger un DatabaseSchema dans toutes les vues
+     * Permet de charger un Schema dans toutes les vues
      */
-    private void open(DatabaseSchema schema) {
-        if(schema != null) {
-            MainApp.schema = schema;
-            this.tfDbName.setText(schema.name);
+    private void open() {
+        this.tfDbName.setText(MainApp.schema.name);
 
-            for(ViewController v : this.views) {
-                v.open();
-            }
+        for(ViewController v : this.views) {
+            v.open();
         }
     }
 
@@ -212,7 +209,8 @@ public class CanvasController implements Visual {
                 new FileChooser.ExtensionFilter("Fichiers " + type.toString(), "*.sql")
             );
 
-            this.open(F_M.openDatabase(fileChooser, D_M.getSqlParser(type)));
+            F_M.openDatabase(fileChooser, D_M.getSqlParser(type));
+            this.open();
         });
         this.mOpenFile.getItems().add(mi);
     }
@@ -239,7 +237,8 @@ public class CanvasController implements Visual {
         for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
             mi.setOnAction(e -> {
-                this.open(D_M.getSqlDb(type).loadDb(dbName));
+                D_M.getSqlDb(type).loadDb(dbName);
+                this.open();
             });
             menu.getItems().add(mi);
         }
@@ -259,7 +258,7 @@ public class CanvasController implements Visual {
             );
             fileChooser.setInitialFileName("export.sql");
 
-            F_M.exportSQL(fileChooser, MainApp.schema, D_M.getSqlExporter(type));
+            F_M.exportSQL(fileChooser, D_M.getSqlExporter(type));
         });
         this.mSaveFile.getItems().add(mi);
     }
@@ -286,7 +285,7 @@ public class CanvasController implements Visual {
         for(String dbName : D_M.getSqlTypeDatabases(type)) {
             MenuItem mi = new MenuItem(dbName);
             mi.setOnAction(e -> {
-                boolean good = D_M.getSqlDb(type).executeSqlScript(D_M.getSqlExporter(type).createSql(MainApp.schema));
+                boolean good = D_M.getSqlDb(type).executeSqlScript(D_M.getSqlExporter(type).createSql());
                 if(good) {
                     CanvasController.showWarningAlert("Maj effectué", "La mise à jour de la bdd a été effectué");
                 } else {

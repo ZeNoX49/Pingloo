@@ -1,11 +1,13 @@
 package com.dbeditor.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import com.dbeditor.controller.modifier.Drag;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.Column;
-import com.dbeditor.model.Table;
+import com.dbeditor.model.Entity;
 import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
@@ -36,10 +38,9 @@ public class TableController implements Visual, Drag {
     @FXML private Label name;
     @FXML private GridPane grid;
 
-    private Table table;
+    private Entity table;
     private TableType type;
 
-    // callbacks fournis par CanvasController
     private BiConsumer<Drag, MouseEvent> onSelect;
     private BiConsumer<Drag, MouseEvent> onDrag;
     private BiConsumer<Drag, MouseEvent> onDragEnd;
@@ -48,7 +49,7 @@ public class TableController implements Visual, Drag {
      * Permet de mettre en place le visuel de la table.<br>
      * Met aussi en en place l'ui et le drag
      */
-    public void createTableController(Table table, TableType type) {
+    public void createTableController(Entity table, TableType type) {
         this.table = table;
         this.type = type;
         this.createUI();
@@ -70,10 +71,11 @@ public class TableController implements Visual, Drag {
 
         this.grid.setPadding(new Insets(2));
 
-        for (int i = 0; i < this.table.getColumns().size(); i++) {
-            Column col = this.table.getColumns().get(i);
+        List<Column> columns = new ArrayList<>(this.table.columns.values());
+        for (int i = 0; i < columns.size(); i++) {
+            Column col = columns.get(i);
 
-            if(this.type == TableType.Association && col.isPrimaryKey) continue;
+            // if(this.type == TableType.Association && col.isPrimaryKey) continue;
             
             Label colName = new Label(col.name);
             if(col.isPrimaryKey || col.isUnique) {
@@ -198,8 +200,8 @@ public class TableController implements Visual, Drag {
         this.onDragEnd = onDragEnd;
     }
     
-    public Table getTable() { return this.table; }
     @Override
     public AnchorPane getRoot() { return this.pane; }
+    public Entity getTable() { return this.table; }
     public TableType getType() { return this.type; }
 }

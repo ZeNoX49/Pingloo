@@ -1,6 +1,6 @@
 package com.dbeditor.controller.view.dialogs;
 
-import com.dbeditor.model.Table;
+import com.dbeditor.model.Entity;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,7 +18,7 @@ public class TableEditorDialog extends EditorDialog {
     private TextField tfTableName;
     private final TableView<DialogColumnRow> tableColumns;
     private final ObservableList<DialogColumnRow> columnData;
-    private final Table resultTable;
+    private final Entity resultTable;
 
     // /**
     //  * Constructeur pour créer une nouvelle table
@@ -38,11 +38,11 @@ public class TableEditorDialog extends EditorDialog {
      * Constructeur pour modifier une table existante
      * @param table la table à modifier, null pour créer une nouvelle
      */
-    public TableEditorDialog(Table table) {
+    public TableEditorDialog(Entity table) {
         this.tableColumns = new TableView<>();
         this.columnData = FXCollections.observableArrayList();
 
-        this.resultTable = new Table(table);
+        this.resultTable = new Entity(table);
 
         // // charger les données de la table
         // for (Column col : table.getColumns()) {
@@ -215,7 +215,7 @@ public class TableEditorDialog extends EditorDialog {
     /**
      * Retourne la table créée/modifiée
      */
-    public Table getResultTable() {
+    public Entity getResultTable() {
         return this.resultTable;
     }
 }
