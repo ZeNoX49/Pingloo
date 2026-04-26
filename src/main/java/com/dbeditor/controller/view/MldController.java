@@ -7,7 +7,6 @@ import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.modifier.Drag;
 import com.dbeditor.controller.view.dialogs.TableEditorDialog;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
@@ -71,7 +70,7 @@ public class MldController extends ModelView {
         super.tableNodes.put(table.name, tcController);
 
         // gérer la sélection d'un table lorsqu'elle est cliquée
-        tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
+        tcController.setOnSelect((tc, e) -> super.handleSelection((TableController) tc, e));
 
         // Ajouter le menu contextuel avec clic droit
         tcPane.setOnMouseClicked(e -> {
@@ -100,13 +99,11 @@ public class MldController extends ModelView {
         super.connectionLines.forEach(connection -> super.group.getChildren().remove(connection.line));
         super.connectionLines.clear();
 
-        for (Drag d : super.tableNodes.values()) {
-            TableController fromNode = super.getTableController(d);
-            if (fromNode == null) continue;
+        for (TableController fromNode : super.tableNodes.values()) {
 
             Table fromTable = fromNode.getTable();
             for (ForeignKey fk : fromTable.getForeignKeys()) {
-                TableController toNode = super.getTableController(super.tableNodes.get(fk.referencedTable));
+                TableController toNode = super.tableNodes.get(fk.referencedTable);
                 if (toNode != null) {
                     this.drawConnection(fromNode, toNode);
                 }

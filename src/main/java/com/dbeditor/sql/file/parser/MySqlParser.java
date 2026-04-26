@@ -10,6 +10,7 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.sql.DbType;
 
@@ -137,9 +138,8 @@ public class MySqlParser extends SqlParser {
                         fkName = "fk_" + table.name.toLowerCase() + "_" + refTable.toLowerCase();
                     }
 
-                    table.addForeignKey(
-                        new ForeignKey(fkName, columnName, refTable, refColumn)
-                    );
+                    // TODO: les cardinalités
+                    table.addForeignKey(new ForeignKey(fkName, columnName, refTable, refColumn, CardinalityValue._0N_));
                 }
             }
         }

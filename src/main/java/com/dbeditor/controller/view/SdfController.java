@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.modifier.Drag;
+import com.dbeditor.controller.modifier.Draggable;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.controller.view.helpers.LassoSelector;
 import com.dbeditor.controller.view.helpers.MultiDragManager;
@@ -32,16 +32,16 @@ import javafx.scene.shape.Rectangle;
 
 public class SdfController extends View {
 
-    private class LabelSdf extends Label implements Visual, Drag {
+    private class LabelSdf extends Label implements Visual, Draggable {
 
         public LabelSdf(String text) {
             super(text);
         }
 
         // callbacks fournis par CanvasController
-        private BiConsumer<Drag, MouseEvent> onSelect;
-        private BiConsumer<Drag, MouseEvent> onDrag;
-        private BiConsumer<Drag, MouseEvent> onDragEnd;
+        private BiConsumer<Draggable, MouseEvent> onSelect;
+        private BiConsumer<Draggable, MouseEvent> onDrag;
+        private BiConsumer<Draggable, MouseEvent> onDragEnd;
 
         @Override
         public void setupDragHandlers() {
@@ -86,15 +86,15 @@ public class SdfController extends View {
         }
 
         @Override
-        public void setOnSelect(BiConsumer<Drag, MouseEvent> onSelect) {
+        public void setOnSelect(BiConsumer<Draggable, MouseEvent> onSelect) {
             this.onSelect = onSelect;
         }
         @Override
-        public void setOnDrag(BiConsumer<Drag, MouseEvent> onDrag) {
+        public void setOnDrag(BiConsumer<Draggable, MouseEvent> onDrag) {
             this.onDrag = onDrag;
         }
         @Override
-        public void setOnDragEnd(BiConsumer<Drag, MouseEvent> onDragEnd) {
+        public void setOnDragEnd(BiConsumer<Draggable, MouseEvent> onDragEnd) {
             this.onDragEnd = onDragEnd;
         }
 
@@ -117,13 +117,13 @@ public class SdfController extends View {
     private static final ThemeManager T_M = ThemeManager.getInstance();
 
     // Nodes visuels
-    private final Map<String, Drag> labels = new HashMap<>();
+    private final Map<String, LabelSdf> labels = new HashMap<>();
 
     // Helpers
     private ZoomPanHandler zoomPan;
-    private SelectionModel selectionModel;
-    private LassoSelector lasso;
-    private MultiDragManager multiDrag;
+    private SelectionModel<LabelSdf> selectionModel;
+    private LassoSelector<LabelSdf> lasso;
+    private MultiDragManager<LabelSdf> multiDrag;
 
     private Label zlLabel;
     private Pane pane;
@@ -144,14 +144,14 @@ public class SdfController extends View {
         this.pane.getChildren().add(this.group);
         
         // Initialiser le modèle de sélection -> visualizer appelle setSelected sur TableController
-        this.selectionModel = new SelectionModel((tc, selected) -> tc.setSelected(selected));
+        this.selectionModel = new SelectionModel<>((tc, selected) -> tc.setSelected(selected));
         
         // Initialiser le zoom/pan
         this.zoomPan = new ZoomPanHandler(this.pane, this.group);
         this.zoomPan.setupEvents(this.zlLabel);
 
         // Initialiser le multidrag
-        this.multiDrag = new MultiDragManager(this.selectionModel);
+        this.multiDrag = new MultiDragManager<>(this.selectionModel);
 
         // Permet au node de ne pas sortir du pane (pour ne pas les voir au dessus de la toolbar)
         Rectangle clip = new Rectangle();
@@ -160,7 +160,7 @@ public class SdfController extends View {
         this.pane.setClip(clip);
 
         // Initialiser le lasso avec la liste partagée (vide pour l'instant)
-        this.lasso = new LassoSelector(this.pane, this.group, this.labels, this.selectionModel);
+        this.lasso = new LassoSelector<>(this.pane, this.group, this.labels, this.selectionModel);
         this.lasso.setupEvents();
 
         this.updateStyle();
@@ -199,8 +199,8 @@ public class SdfController extends View {
 
             for(Column k : keys) {
                 for(Column c : columns) {
-                    LabelSdf lk = this.getLabelSdf(this.getLabelText(t, k));
-                    LabelSdf lc = this.getLabelSdf(this.getLabelText(t, c));
+                    LabelSdf lk = this.labels.get(this.getLabelText(t, k));
+                    LabelSdf lc = this.labels.get(this.getLabelText(t, c));
                     this.drawArrows(lk, lc);
                 }
             }
@@ -213,11 +213,10 @@ public class SdfController extends View {
         // TODO: les cercles (attr1, attr2 -> attr3)
         for(Table t : MainApp.schema.getTables()) {
             for(ForeignKey fk : t.getForeignKeys()) {
-                String from = fk.referencedTable+"-"+fk.referencedColumn;
-                LabelSdf lf = this.getLabelSdf(from);
+                LabelSdf lf = this.labels.get(fk.referencedTable+"-"+fk.referencedColumn);
 
                 for(Column c : t.getColumns()) {
-                    LabelSdf lt = this.getLabelSdf(this.getLabelText(t, c));
+                    LabelSdf lt = this.labels.get(this.getLabelText(t, c));
                     this.drawArrows(lf, lt);
                 }
             }
@@ -237,7 +236,7 @@ public class SdfController extends View {
         ls.setLayoutX(x);
         ls.setLayoutY(y);
         ls.setupDragHandlers();
-        ls.setOnSelect((d, e) -> this.handleSelection(d, e));
+        ls.setOnSelect((d, e) -> this.handleSelection((LabelSdf) d, e));
         this.labels.put(name, ls);
         this.group.getChildren().add(ls);
         this.multiDrag.attach(ls);
@@ -300,7 +299,7 @@ public class SdfController extends View {
         
         this.zlLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
         
-        for (Drag d : this.labels.values()) {
+        for (Draggable d : this.labels.values()) {
             if(d instanceof LabelSdf ls) ls.updateStyle();
         }
     }
@@ -316,7 +315,7 @@ public class SdfController extends View {
     /**
      * Gère la sélection d'une label
      */
-    private void handleSelection(Drag label, MouseEvent e) {
+    private void handleSelection(LabelSdf label, MouseEvent e) {
         if (e.isControlDown()) {
             this.selectionModel.toggle(label);
             return;
@@ -330,14 +329,6 @@ public class SdfController extends View {
         
         this.selectionModel.clear();
         this.selectionModel.select(label);
-    }
-
-    private LabelSdf getLabelSdf(String name) {
-        Drag d = this.labels.get(name);
-        if(d != null && d instanceof LabelSdf ls) {
-            return ls;
-        }
-        return null;
     }
     
 }

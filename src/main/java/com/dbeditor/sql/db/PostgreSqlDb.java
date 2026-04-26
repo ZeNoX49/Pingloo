@@ -23,6 +23,7 @@ import com.dbeditor.model.Column;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.sql.DbType;
 
@@ -195,7 +196,8 @@ public class PostgreSqlDb extends SqlDb {
                     fkName != null ? fkName : (tableName + "_" + fkColumn + "_fk"),
                     fkColumn,
                     referencedTableName,
-                    pkColumn
+                    pkColumn,
+                    CardinalityValue._0N_ // TODO: les cardinalités
                 ));
             }
         }

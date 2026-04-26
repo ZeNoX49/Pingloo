@@ -2,7 +2,7 @@ package com.dbeditor.controller;
 
 import java.util.function.BiConsumer;
 
-import com.dbeditor.controller.modifier.Drag;
+import com.dbeditor.controller.modifier.Draggable;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
@@ -23,7 +23,7 @@ import javafx.scene.shape.Ellipse;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-public class TableController implements Visual, Drag {
+public class TableController implements Visual, Draggable {
     public enum TableType {
         Table, Entity, Association;
     }
@@ -40,9 +40,9 @@ public class TableController implements Visual, Drag {
     private TableType type;
 
     // callbacks fournis par CanvasController
-    private BiConsumer<Drag, MouseEvent> onSelect;
-    private BiConsumer<Drag, MouseEvent> onDrag;
-    private BiConsumer<Drag, MouseEvent> onDragEnd;
+    private BiConsumer<Draggable, MouseEvent> onSelect;
+    private BiConsumer<Draggable, MouseEvent> onDrag;
+    private BiConsumer<Draggable, MouseEvent> onDragEnd;
 
     /**
      * Permet de mettre en place le visuel de la table.<br>
@@ -72,8 +72,6 @@ public class TableController implements Visual, Drag {
 
         for (int i = 0; i < this.table.getColumns().size(); i++) {
             Column col = this.table.getColumns().get(i);
-
-            if(this.type == TableType.Association && col.isPrimaryKey) continue;
             
             Label colName = new Label(col.name);
             if(col.isPrimaryKey || col.isUnique) {
@@ -186,15 +184,15 @@ public class TableController implements Visual, Drag {
     }
 
     @Override
-    public void setOnSelect(BiConsumer<Drag, MouseEvent> onSelect) {
+    public void setOnSelect(BiConsumer<Draggable, MouseEvent> onSelect) {
         this.onSelect = onSelect;
     }
     @Override
-    public void setOnDrag(BiConsumer<Drag, MouseEvent> onDrag) {
+    public void setOnDrag(BiConsumer<Draggable, MouseEvent> onDrag) {
         this.onDrag = onDrag;
     }
     @Override
-    public void setOnDragEnd(BiConsumer<Drag, MouseEvent> onDragEnd) {
+    public void setOnDragEnd(BiConsumer<Draggable, MouseEvent> onDragEnd) {
         this.onDragEnd = onDragEnd;
     }
     

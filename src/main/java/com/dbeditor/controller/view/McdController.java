@@ -12,7 +12,6 @@ import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.modifier.Drag;
 import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
 import com.dbeditor.controller.view.dialogs.DialogColumnRow;
 import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
@@ -65,12 +64,9 @@ public class McdController extends ModelView {
                     }
 
                     else if (e.getCode() == KeyCode.D && e.isControlDown()) {
-                        List<Drag> selectedTables = this.selectionModel.getSelected();
+                        List<TableController> selectedTables = this.selectionModel.getSelected();
 
-                        for(Drag d : selectedTables) {
-                            TableController tc = super.getTableController(d);
-                            if(tc == null) continue;
-
+                        for(TableController tc : selectedTables) {
                             Table dupli = new Table(tc.getTable());
                             if(dupli.isPositionned()) {
                                 dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
@@ -152,7 +148,7 @@ public class McdController extends ModelView {
         super.tableNodes.put(table.name, tcController);
 
         // Gérer la sélection
-        tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
+        tcController.setOnSelect((tc, e) -> super.handleSelection((TableController) tc, e));
 
         // Menu contextuel
         tcPane.setOnMouseClicked(e -> {
@@ -210,11 +206,10 @@ public class McdController extends ModelView {
             }
 
             this.createTableNode(table, TableType.Association);
-            TableController ac = super.getTableController(super.tableNodes.get(name));
-            if(ac == null) return;
+            TableController ac = super.tableNodes.get(name);
 
             for(Pair<Table, CardinalityValue> p : links.get(name)) {
-                TableController ec = super.getTableController(super.tableNodes.get(p.getKey().name));
+                TableController ec = super.tableNodes.get(p.getKey().name);
 
                 this.drawConnection(ec, ac, p.getValue());
             }
@@ -369,14 +364,12 @@ public class McdController extends ModelView {
         // Recrée le node avec le nouveau nom
         this.createTableNode(modifiedTable, TableType.Entity);
 
-        TableController newTc = super.getTableController(super.tableNodes.get(newName));
-        if(newTc == null) return;
+        TableController newTc = super.tableNodes.get(newName);
 
         // Redessine uniquement les liens de cette entité
         for (Entry<String, List<Pair<Table, CardinalityValue>>> entry : this.conceptualSchema.getLinks().entrySet()) {
             String assocName = entry.getKey();
-            TableController assocTc = super.getTableController(super.tableNodes.get(assocName));
-            if (assocTc == null) continue;
+            TableController assocTc = super.tableNodes.get(assocName);
 
             for (Pair<Table, CardinalityValue> p : entry.getValue()) {
                 if (p.getKey().name.equals(newName)) {
@@ -413,10 +406,10 @@ public class McdController extends ModelView {
         this.applyDialogAttributesToTable(asso, dialog.getResultAttributes());
 
         this.createTableNode(asso, TableType.Association);
-        TableController assoCon = super.getTableController(this.tableNodes.get(asso.name));
+        TableController assoCon = this.tableNodes.get(asso.name);
 
         for(Pair<String, CardinalityValue> p : result.getValue()) {
-            this.drawConnection(super.getTableController(this.tableNodes.get(p.getKey())), assoCon, p.getValue());
+            this.drawConnection(this.tableNodes.get(p.getKey()), assoCon, p.getValue());
         }
 
         super.lasso.rect.toFront();
@@ -455,10 +448,10 @@ public class McdController extends ModelView {
         this.applyDialogAttributesToTable(newAsso, dialog.getResultAttributes());
 
         this.createTableNode(newAsso, TableType.Association);
-        TableController newAssoTc = super.getTableController(super.tableNodes.get(newName));
+        TableController newAssoTc = super.tableNodes.get(newName);
 
         for (Pair<String, CardinalityValue> p : result.getValue()) {
-            TableController entityTc = super.getTableController(super.tableNodes.get(p.getKey()));
+            TableController entityTc = super.tableNodes.get(p.getKey());
             this.drawConnection(entityTc, newAssoTc, p.getValue());
         }
 
@@ -469,14 +462,7 @@ public class McdController extends ModelView {
      * Supprime les entités et associations sélectionnées
      */
     public void deleteSelected() {
-        List<Drag> selectedDrag = new ArrayList<>(super.selectionModel.getSelected());
-        if (selectedDrag.isEmpty()) return;
-
-        List<TableController> selected = new ArrayList<>();
-        for(Drag d : selectedDrag) {
-            TableController tc = super.getTableController(d);
-            if(d != null) selected.add(tc);
-        }
+        List<TableController> selected = new ArrayList<>(super.selectionModel.getSelected());
 
         String message = selected.size() == 1
             ? "Supprimer « " + selected.get(0).getTable().name + " » ?"

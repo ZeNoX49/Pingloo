@@ -5,24 +5,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import com.dbeditor.controller.modifier.Drag;
+import com.dbeditor.controller.modifier.Draggable;
 
 /**
  * Modèle simple de sélection
  */
-public class SelectionModel {
-    private final List<Drag> selected = new ArrayList<>();
+public class SelectionModel<D extends Draggable> {
+    private final List<D> selected = new ArrayList<>();
     // callback pour appliquer visuellement la sélection : (Node, selected?)
-    private final BiConsumer<Drag, Boolean> visualizer;
+    private final BiConsumer<D, Boolean> visualizer;
 
-    public SelectionModel(BiConsumer<Drag, Boolean> visualizer) {
+    public SelectionModel(BiConsumer<D, Boolean> visualizer) {
         this.visualizer = visualizer;
     }
 
     /**
      * Sélectionne le node si il n'est pas déja sélectionné
      */
-    public void select(Drag node) {
+    public void select(D node) {
         if (!this.selected.contains(node)) {
             this.selected.add(node);
             this.visualizer.accept(node, true);
@@ -32,7 +32,7 @@ public class SelectionModel {
     /**
      * Désélectionne le node si il est déja sélectionné
      */
-    public void deselect(Drag node) {
+    public void deselect(D node) {
         if (this.selected.remove(node)) {
             this.visualizer.accept(node, false);
         }
@@ -42,7 +42,7 @@ public class SelectionModel {
      * Si le node est sélectionnée, le désélectionne<br>
      * Sinon le sélectionne
      */
-    public void toggle(Drag node) {
+    public void toggle(D node) {
         if (this.selected.contains(node)) {
             this.deselect(node);
         } else {
@@ -54,7 +54,7 @@ public class SelectionModel {
      * Déselectionne toutes les value
      */
     public void clear() {
-        for (Drag node : new ArrayList<>(this.selected)) {
+        for (D node : new ArrayList<>(this.selected)) {
             this.deselect(node);
         }
     }
@@ -63,15 +63,15 @@ public class SelectionModel {
      * Retourne tout les node sélectionnées
      * @return
      */
-    public List<Drag> getSelected() {
+    public List<D> getSelected() {
         return List.copyOf(this.selected);
     }
 
     /**
      * Sélectionne une liste de nodes
      */
-    public void selectAll(Collection<Drag> nodes) {
-        for (Drag node : nodes) {
+    public void selectAll(Collection<D> nodes) {
+        for (D node : nodes) {
             this.select(node);
         }
     }
@@ -80,7 +80,7 @@ public class SelectionModel {
      * Vérifie si le node est déja sélectionné
      * @return bool
      */
-    public boolean contains(Drag node) {
+    public boolean contains(D node) {
         return this.selected.contains(node);
     }
 }
