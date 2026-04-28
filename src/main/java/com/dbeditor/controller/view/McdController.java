@@ -4,35 +4,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.dbeditor.MainApp;
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
-import com.dbeditor.controller.view.dialogs.AssociationEditorDialog;
-import com.dbeditor.controller.view.dialogs.DialogColumnRow;
-import com.dbeditor.controller.view.dialogs.EntityEditorDialog;
-import com.dbeditor.model.Column;
+import com.dbeditor.controller.view.dialogs.AssociationEditorController;
+import com.dbeditor.controller.view.dialogs.EntityEditorController;
+import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.model.mcd.CardinalityValue;
 import com.dbeditor.model.mcd.ConceptualSchema;
-import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.util.ThemeManager;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.util.Pair;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class McdController extends ModelView {
     private static final ThemeManager T_M = ThemeManager.getInstance();
@@ -79,11 +79,7 @@ public class McdController extends ModelView {
                             if(tc.getType() == TableType.Entity) {
                                 this.conceptualSchema.addEntity(dupli);
                             } else {
-                                List<Pair<String, CardinalityValue>> l = new ArrayList<>();
-                                for(Pair<Table, CardinalityValue> p : this.conceptualSchema.getLinks().get(tc.getTable().name)) {
-                                    l.add(new Pair<>(p.getKey().name, p.getValue()));
-                                }
-                                this.conceptualSchema.addAssociation(dupli.name, l);
+                                this.conceptualSchema.addAssociation(dupli);
                             }
 
                             this.createTableNode(dupli, tc.getType());
@@ -93,12 +89,8 @@ public class McdController extends ModelView {
             }
         });
 
-        this.btnEntity.setOnAction(e -> {
-            this.addEntity();
-        });
-        this.btnAssociation.setOnAction(e -> {
-            this.addAssociation();
-        });
+        this.btnEntity.setOnAction(e -> this.addEntity());
+        this.btnAssociation.setOnAction(e -> this.addAssociation());
     }
 
     @Override
@@ -125,7 +117,7 @@ public class McdController extends ModelView {
      * Crée les nodes visuels pour les entités
      */
     private void createTableNodes() {
-        for (Table table : this.conceptualSchema.getEntitiesTables()) {
+        for (Table table : this.conceptualSchema.getAllEntities()) {
             this.createTableNode(table, TableType.Entity);
         }
     }
@@ -184,34 +176,33 @@ public class McdController extends ModelView {
         });
         super.connectionLines.clear();
 
-        Map<String, List<Pair<Table, CardinalityValue>>> links = this.conceptualSchema.getLinks();
-        for (String name : links.keySet()) {
-            Table table = this.conceptualSchema.getAssociationTable(name);
+        for (Table table : this.conceptualSchema.getAllAssociations()) {
 
             if(!table.isPositionned()) {
                 // centrer l'association
                 double sumX = 0;
                 double sumY = 0;
 
-                List<Pair<Table, CardinalityValue>> l = links.get(name);
-                for(Pair<Table, CardinalityValue> p : l) {
-                    sumX += p.getKey().getPosX();
-                    sumY += p.getKey().getPosY();
+                for(ForeignKey fk : table.getForeignKeys()) {
+                    Table ref = this.conceptualSchema.getEntity(fk.referencedTable);
+                    sumX += ref.getPosX();
+                    sumY += ref.getPosY();
                 }
 
                 table.setPosition(
-                    sumX / l.size(),
-                    sumY / l.size()
+                    sumX / table.getForeignKeys().size(),
+                    sumY / table.getForeignKeys().size()
                 );
             }
 
             this.createTableNode(table, TableType.Association);
-            TableController ac = super.tableNodes.get(name);
+            TableController ac = super.tableNodes.get(table.name);
 
-            for(Pair<Table, CardinalityValue> p : links.get(name)) {
-                TableController ec = super.tableNodes.get(p.getKey().name);
+            for(ForeignKey fk : table.getForeignKeys()) {
+                Table ref = this.conceptualSchema.getEntity(fk.referencedTable);
+                TableController ec = super.tableNodes.get(ref.name);
 
-                this.drawConnection(ec, ac, p.getValue());
+                this.drawConnection(ec, ac, fk.cardinalityValue);
             }
         }
     }
@@ -242,13 +233,6 @@ public class McdController extends ModelView {
     
         // Texte de la cardinalité
         Label cardinalityLabel = new Label(cardinality.toString());
-        cardinalityLabel.setOnMouseClicked(e -> {
-            if (e.getButton() == MouseButton.PRIMARY) {
-                if (e.getClickCount() == 2) {
-                    this.editCardinality(cardinalityLabel, fromEntity, toAsso);
-                }
-            }
-        });
 
         // Bind le Label au centre de la ligne
         cardinalityLabel.layoutXProperty().bind(
@@ -266,49 +250,17 @@ public class McdController extends ModelView {
         super.connectionLines.add(new Connection(fromEntity.getTable().name, toAsso.getTable().name, line, cardinalityLabel));
     }
 
-    // TODO
-    /**
-     *   // Édition inline de la cardinalité (double-clic sur le label).
-     *   // Change la cardinalité dans le ConceptualSchema et rafraîchit.
-     */
-    private void editCardinality(Label cardLabel, TableController entityNode, TableController assocNode) {
-        // CardinalityValue[] values = CardinalityValue.values();
-        // String current = cardLabel.getText();
-        // CardinalityValue currentCard = CardinalityValue.getCardinalityValue(current);
-        // int idx = 0;
-        // for (int i = 0; i < values.length; i++) {
-        //     if (values[i] == currentCard) { idx = i; break; }
-        // }
-        // CardinalityValue next = values[(idx + 1) % values.length];
-
-        // // Mettre à jour dans le modèle
-        // String entityName = entityNode.getTable().getName();
-        // String assocName  = assocNode.getTable().getName();
-
-        // // for (ConceptualSchema.Association assoc : this.conceptualSchema.getAssociations()) {
-        // //     if (assoc.name.equals(assocName)) {
-        // //         for (ConceptualSchema.Entity e : assoc.linkedEntities.keySet()) {
-        // //             if (e.table.getName().equals(entityName)) {
-        // //                 assoc.linkedEntities.put(e, next);
-        // //                 break;
-        // //             }
-        // //         }
-        // //     }
-        // // }
-
-        // cardLabel.setText(next.toString());
-    }
-
     /**
      * Ajoute une nouvelle entité
      */
     @FXML
     public void addEntity() {
-        EntityEditorDialog dialog = new EntityEditorDialog();
-        dialog.showAndWait();
-        if (!dialog.isConfirmed()) return;
+        EntityEditorController dialogCon = this.loadEntityEditorDialog(null, "Créer une entité");
+
+        dialogCon.showAndWait();
+        if (!dialogCon.isConfirmed()) return;
         
-        Table table = dialog.getResultTable();
+        Table table = dialogCon.getResultTable();
         
         if (this.conceptualSchema.nameExists(table.name)) {
             CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
@@ -327,14 +279,15 @@ public class McdController extends ModelView {
         Table oldTable = tc.getTable();
         String oldName = oldTable.name;
     
-        EntityEditorDialog dialog = new EntityEditorDialog(oldTable);
-        dialog.showAndWait();
-        if (!dialog.isConfirmed()) return;
+        EntityEditorController dialogCon = this.loadEntityEditorDialog(oldTable, "Modifier une entité");
 
-        Table modifiedTable = dialog.getResultTable();
+        dialogCon.showAndWait();
+        if (!dialogCon.isConfirmed()) return;
+
+        Table modifiedTable = dialogCon.getResultTable();
         String newName = modifiedTable.name;
 
-        if (!oldName.equals(newName) && this.conceptualSchema.getEntityTable(newName) != null) {
+        if (!oldName.equals(newName) && this.conceptualSchema.getEntity(newName) != null) {
             CanvasController.showWarningAlert("Erreur", "Une entité nommée « " + newName + " » existe déjà.");
             return;
         }
@@ -366,17 +319,38 @@ public class McdController extends ModelView {
 
         TableController newTc = super.tableNodes.get(newName);
 
+        // TODO
         // Redessine uniquement les liens de cette entité
-        for (Entry<String, List<Pair<Table, CardinalityValue>>> entry : this.conceptualSchema.getLinks().entrySet()) {
-            String assocName = entry.getKey();
-            TableController assocTc = super.tableNodes.get(assocName);
+        for (Table asso : this.conceptualSchema.getAllAssociations()) {
+            TableController assocTc = super.tableNodes.get(asso.name);
 
-            for (Pair<Table, CardinalityValue> p : entry.getValue()) {
-                if (p.getKey().name.equals(newName)) {
-                    this.drawConnection(newTc, assocTc, p.getValue());
+            for (ForeignKey fk : asso.getForeignKeys()) {
+                if (fk.referencedTable.equals(newName)) {
+                    this.drawConnection(newTc, assocTc, fk.cardinalityValue);
                     break;
                 }
             }
+        }
+    }
+
+    private EntityEditorController loadEntityEditorDialog(Table table, String name) {
+        try {
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UTILITY);
+            stage.setTitle(name);
+            stage.setResizable(true);
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialogs/entityEditor.fxml"));
+            VBox root = loader.load();
+            EntityEditorController dialogCon = loader.getController();
+            dialogCon.setData(stage, table);
+
+            stage.setScene(new Scene(root));
+
+            return dialogCon;
+        } catch (IOException e) {
+            throw new Error("Une erreur est survenue lors de la création du visuel : \n" + e.getMessage(), e);
         }
     }
 
@@ -384,32 +358,32 @@ public class McdController extends ModelView {
      * Ajoute une nouvelle association.
      */
     public void addAssociation() {
-        List<Table> entities = this.conceptualSchema.getEntitiesTables();
+        List<Table> entities = this.conceptualSchema.getAllEntities();
         if (entities.isEmpty()) {
             CanvasController.showWarningAlert("Erreur", "Il faut au moins 1 entité pour créer une association.");
             return;
         }
 
-        AssociationEditorDialog dialog = new AssociationEditorDialog(entities, null);
+        AssociationEditorController dialog = this.loadAssociationEditorDialog(entities, null, "Créer une association");
         dialog.showAndWait();
         if (!dialog.isConfirmed()) return;
 
-        Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
-        String name = result.getKey();
+        Table asso = dialog.getResultTable();
+        String name = asso.name;
 
         if (this.conceptualSchema.nameExists(name)) {
             CanvasController.showWarningAlert("Erreur", "Ce nom est déja utilisé.");
             return;
         }
 
-        Table asso = this.conceptualSchema.addAssociation(name, result.getValue());
-        this.applyDialogAttributesToTable(asso, dialog.getResultAttributes());
+        this.conceptualSchema.addAssociation(asso);
 
         this.createTableNode(asso, TableType.Association);
-        TableController assoCon = this.tableNodes.get(asso.name);
+        TableController assoTc = this.tableNodes.get(name);
 
-        for(Pair<String, CardinalityValue> p : result.getValue()) {
-            this.drawConnection(this.tableNodes.get(p.getKey()), assoCon, p.getValue());
+        for (ForeignKey fk : asso.getForeignKeys()) {
+            TableController entityTc = super.tableNodes.get(fk.referencedTable);
+            this.drawConnection(entityTc, assoTc, fk.cardinalityValue);
         }
 
         super.lasso.rect.toFront();
@@ -419,18 +393,16 @@ public class McdController extends ModelView {
      * Édite une association existante (double-clic sur son node).
      */
     private void editAssociation(TableController assocTc) {
-        List<Table> entities = this.conceptualSchema.getEntitiesTables();
+        List<Table> entities = this.conceptualSchema.getAllEntities();
         Table oldTable = assocTc.getTable();
         String oldName = oldTable.name;
 
-        // TODO: erreur ici
-        Pair<String, List<Pair<Table, CardinalityValue>>> current = new Pair<>(oldName, this.conceptualSchema.getLinks().get(oldName));
-        AssociationEditorDialog dialog = new AssociationEditorDialog(entities, current);
+        AssociationEditorController dialog = this.loadAssociationEditorDialog(entities, oldTable, "modifier une association");
         dialog.showAndWait();
         if (!dialog.isConfirmed()) return;
 
-        Pair<String, List<Pair<String, CardinalityValue>>> result = dialog.getResultAssociation();
-        String newName = result.getKey();
+        Table newTable = dialog.getResultTable();
+        String newName = newTable.name;
 
         if (!oldName.equals(newName) && this.conceptualSchema.nameExists(newName)) {
             CanvasController.showWarningAlert("Erreur", "Une association nommée « " + newName + " » existe déjà.");
@@ -444,18 +416,38 @@ public class McdController extends ModelView {
         this.removeConnectionsInvolving(oldName);
 
         // Recrée la nouvelle association
-        Table newAsso = this.conceptualSchema.addAssociation(newName, result.getValue());
-        this.applyDialogAttributesToTable(newAsso, dialog.getResultAttributes());
+        this.conceptualSchema.addAssociation(newTable);
 
-        this.createTableNode(newAsso, TableType.Association);
+        this.createTableNode(newTable, TableType.Association);
         TableController newAssoTc = super.tableNodes.get(newName);
 
-        for (Pair<String, CardinalityValue> p : result.getValue()) {
-            TableController entityTc = super.tableNodes.get(p.getKey());
-            this.drawConnection(entityTc, newAssoTc, p.getValue());
+        for (ForeignKey fk : newTable.getForeignKeys()) {
+            TableController entityTc = super.tableNodes.get(fk.referencedTable);
+            this.drawConnection(entityTc, newAssoTc, fk.cardinalityValue);
         }
 
         super.lasso.rect.toFront();
+    }
+
+    private AssociationEditorController loadAssociationEditorDialog(List<Table> entities, Table table, String name) {
+        try {
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.UTILITY);
+            stage.setTitle(name);
+            stage.setResizable(true);
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialogs/associationEditor.fxml"));
+            VBox root = loader.load();
+            AssociationEditorController dialogCon = loader.getController();
+            dialogCon.setData(entities, stage, table);
+
+            stage.setScene(new Scene(root));
+
+            return dialogCon;
+        } catch (IOException e) {
+            throw new Error("Une erreur est survenue lors de la création du visuel : \n" + e.getMessage(), e);
+        }
     }
 
     /**
@@ -485,19 +477,6 @@ public class McdController extends ModelView {
         }
 
         super.selectionModel.clear();
-    }
-
-    private void applyDialogAttributesToTable(Table table, List<DialogColumnRow> rows) {
-        table.columns.clear();
-
-        for (DialogColumnRow row : rows) {
-            Column col = new Column(row.getName(), __SqlType.get(row.getType(), MainApp.schema.type));
-            col.isPrimaryKey = row.isPrimaryKey();
-            col.isNotNull = row.isNotNull();
-            col.isUnique = row.isUnique();
-            col.isAutoIncrementing = row.isAutoIncrement();
-            table.addColumn(col);
-        }
     }
 
     private void removeConnectionsInvolving(String tableName) {

@@ -2,10 +2,14 @@ package com.dbeditor.controller;
 
 import java.util.function.BiConsumer;
 
+import com.dbeditor.MainApp;
 import com.dbeditor.controller.modifier.Draggable;
 import com.dbeditor.controller.modifier.Visual;
+import com.dbeditor.model.Attribut;
 import com.dbeditor.model.Column;
+import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.type.__SqlType;
 import com.dbeditor.sql.DbType;
 import com.dbeditor.util.ThemeManager;
 
@@ -70,31 +74,49 @@ public class TableController implements Visual, Draggable {
 
         this.grid.setPadding(new Insets(2));
 
-        for (int i = 0; i < this.table.getColumns().size(); i++) {
-            Column col = this.table.getColumns().get(i);
-            
-            Label colName = new Label(col.name);
-            if(col.isPrimaryKey || col.isUnique) {
-                colName.setFont(Font.font("System", FontWeight.BOLD, 12));
-                // uniquement pour les clés primaire
-                if(!col.isUnique) colName.setUnderline(true);
-            } else {
-                colName.setFont(Font.font("System", 12));
+        if(this.type == TableType.Table) {
+            int i = 0;
+            for (String attrName : this.table.getAttributs().keySet()) {
+                if(this.table.getAttributs().get(attrName)) {
+                    Column col = this.table.columns.get(attrName);
+                    this.createGridLine(i, col, col.type);
+                } else {
+                    ForeignKey fk  = this.table.foreignKeys.get(attrName);
+                    Column refCol = MainApp.schema.tables.get(fk.referencedTable).columns.get(fk.referencedColumn);
+                    this.createGridLine(i, fk, refCol.type);
+                }
+                i++;
             }
-            this.grid.add(colName, 0, i);
-            GridPane.setMargin(colName, new Insets(1, 1, 1, 3));
-            
-            Label colType = new Label(col.type.getRepr(DbType.MySql));
-            if(col.isPrimaryKey || col.isNotNull) {
-                colType.setFont(Font.font("System", FontWeight.BOLD, 11));
-            } else {
-                colType.setFont(Font.font("System", 11));
+        } else {
+            for (int i = 0; i < this.table.getColumns().size(); i++) {
+                Column col = this.table.getColumns().get(i);
+                this.createGridLine(i, col, col.type);
             }
-            this.grid.add(colType, 1, i);
-            GridPane.setMargin(colType, new Insets(1, 3, 1, 1));
         }
 
         this.updateStyle();
+    }
+
+    private void createGridLine(int i, Attribut attr, __SqlType type) {
+        Label colName = new Label(attr.name);
+        if(attr.isPrimaryKey || attr.isUnique) {
+            colName.setFont(Font.font("System", FontWeight.BOLD, 12));
+            // uniquement pour les clés primaire
+            if(attr.isPrimaryKey) colName.setUnderline(true);
+        } else {
+            colName.setFont(Font.font("System", 12));
+        }
+        this.grid.add(colName, 0, i);
+        GridPane.setMargin(colName, new Insets(1, 1, 1, 3));
+        
+        Label colType = new Label(type.getRepr(DbType.MySql));
+        if(attr.isPrimaryKey || attr.isNotNull) {
+            colType.setFont(Font.font("System", FontWeight.BOLD, 11));
+        } else {
+            colType.setFont(Font.font("System", 11));
+        }
+        this.grid.add(colType, 1, i);
+        GridPane.setMargin(colType, new Insets(1, 3, 1, 1));
     }
     
     @Override

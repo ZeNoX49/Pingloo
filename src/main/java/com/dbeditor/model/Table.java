@@ -33,18 +33,21 @@ public final class Table {
     }
 
     public void addForeignKey(ForeignKey fk) {
-        this.foreignKeys.put(fk.columnName, fk);
+        this.foreignKeys.put(fk.name, fk);
         // la colonne sera (surement) déja référencé, donc on l'enlève
-        if(this.attributs.get(fk.columnName)) {
-            fk.isPrimaryKey = this.columns.get(fk.columnName).isPrimaryKey;
-            this.columns.remove(fk.columnName);
+        Column col = this.columns.remove(fk.name);
+        if (col != null) {
+            fk.isPrimaryKey = col.isPrimaryKey;
         }
-        this.attributs.put(fk.columnName, false);
+        this.attributs.put(fk.name, false);
     }
     public List<ForeignKey> getForeignKeys() {
         return new ArrayList<>(this.foreignKeys.values());
     }
 
+    /**
+     * si true -> colonne
+     */
     public LinkedHashMap<String, Boolean> getAttributs() {
         return new LinkedHashMap<>(this.attributs);
     }

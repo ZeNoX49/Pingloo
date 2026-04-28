@@ -2,25 +2,19 @@ package com.dbeditor.model;
 
 import com.dbeditor.model.type.__SqlType;
 
-public class Column {
-    public String name;
+public class Column extends Attribut {
     public __SqlType type;
-    public boolean isPrimaryKey;
-    public boolean isNotNull;
-    public boolean isUnique;
     public boolean isAutoIncrementing;
     
     public Column(String name, __SqlType type) {
-        this.name = name;
+        super(name);
         this.type = type;
+        this.isAutoIncrementing = false;
     }
     
     public Column(Column other) {
-        this.name = other.name;
+        super(other);
         this.type = other.type;
-        this.isPrimaryKey = other.isPrimaryKey;
-        this.isNotNull = other.isNotNull;
-        this.isUnique = other.isUnique;
         this.isAutoIncrementing = other.isAutoIncrementing;
     }
 }

@@ -52,7 +52,7 @@ public class MySqlExporter extends SqlExporter {
             
             for (int i = 0; i < table.getForeignKeys().size(); i++) {
                 ForeignKey fk = table.getForeignKeys().get(i);
-                sql.append("\tCONSTRAINT %s FOREIGN KEY(%s) REFERENCES %s(%s)".formatted(fk.fkName, fk.columnName, fk.referencedTable, fk.referencedColumn));
+                sql.append("\tCONSTRAINT %s FOREIGN KEY(%s) REFERENCES %s(%s)".formatted(fk.fkName, fk.name, fk.referencedTable, fk.referencedColumn));
                 
                 if (i < table.getForeignKeys().size() - 1) {
                     sql.append(",");

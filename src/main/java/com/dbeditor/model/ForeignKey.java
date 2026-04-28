@@ -2,25 +2,31 @@ package com.dbeditor.model;
 
 import com.dbeditor.model.mcd.CardinalityValue;
 
-public class ForeignKey {
+/**
+ * CONSTRAINT {@code fkName} FOREIGN KEY ({@code name}) REFERENCES {@code referencedEntity}({@code referencedColumn}),
+ */
+public class ForeignKey extends Attribut {
     public String fkName;
-    public String columnName;
     public String referencedTable;
     public String referencedColumn;
-    public boolean isPrimaryKey;
     public CardinalityValue cardinalityValue;
 
+    /**
+     * CONSTRAINT {@code fkName} FOREIGN KEY ({@code columnName (name)}) REFERENCES {@code referencedEntity}({@code referencedColumn}),
+     */
     public ForeignKey(String fkName, String columnName, String referencedTable, String referencedColumn, CardinalityValue cardinalityValue) {
+        super(columnName);
         this.fkName = fkName;
-        this.columnName = columnName;
         this.referencedTable = referencedTable;
         this.referencedColumn = referencedColumn;
-        this.isPrimaryKey = false;
         this.cardinalityValue = cardinalityValue;
     }
 
     public ForeignKey(ForeignKey other) {
-        this(other.fkName, other.columnName, other.referencedTable, other.referencedColumn, other.cardinalityValue);
-        this.isPrimaryKey = other.isPrimaryKey;
+        super(other);
+        this.fkName = other.fkName;
+        this.referencedTable = other.referencedTable;
+        this.referencedColumn = other.referencedColumn;
+        this.cardinalityValue = other.cardinalityValue;
     }
 }

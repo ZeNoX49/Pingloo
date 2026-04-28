@@ -1,5 +1,5 @@
 
-package com.dbeditor.controller.view.dialogs;
+package com.dbeditor.controller.view.dialogs.ColumnData;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;

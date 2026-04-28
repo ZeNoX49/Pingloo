@@ -1,5 +1,6 @@
 package com.dbeditor.controller.view.dialogs;
 
+import com.dbeditor.controller.view.dialogs.ColumnData.DialogColumnRow;
 import com.dbeditor.model.Table;
 
 import javafx.collections.FXCollections;
@@ -148,35 +149,8 @@ public class TableEditorDialog extends EditorDialog {
         return footer;
     }
 
-    /**
-     * Ajoute une nouvelle colonne vide
-     */
-    private void addColumn() {
-        // VarcharSql varcharSql = new VarcharSql(255);
-        // this.columnData.add(new DialogColumnRow("nouvelle_colonne", varcharSql.getRepr(MainApp.schema.type), false, false, false, false));
-        
-        // // Sélectionner la nouvelle ligne et démarrer l'édition du nom
-        // int lastIndex = this.columnData.size() - 1;
-        // this.tableColumns.getSelectionModel().select(lastIndex);
-        // this.tableColumns.scrollTo(lastIndex);
-    }
-
-    /**
-     * Supprime la colonne sélectionnée
-     */
-    private void removeSelectedColumn() {
-        // DialogColumnRow selected = this.tableColumns.getSelectionModel().getSelectedItem();
-        // if (selected == null) {
-        //     CanvasController.showWarningAlert("Aucune sélection", "Veuillez sélectionner une colonne à supprimer.");
-        //     return;
-        // }
-        // this.columnData.remove(selected);
-    }
-
-    /**
-     * Valide et sauvegarde les données
-     */
-    private boolean validateAndSave() {
+    @Override
+    protected boolean validateAndSave() {
         // String name = this.tfTableName.getText().trim();
         
         // if (name.isEmpty()) {
@@ -212,10 +186,14 @@ public class TableEditorDialog extends EditorDialog {
         return true;
     }
 
-    /**
-     * Retourne la table créée/modifiée
-     */
-    public Table getResultTable() {
-        return this.resultTable;
+    @Override
+    public void updateStyle() {
+        super.updateStyle();
+        // TODO
+    }
+
+    @Override
+    protected void buildTable() {
+        // TODO
     }
 }

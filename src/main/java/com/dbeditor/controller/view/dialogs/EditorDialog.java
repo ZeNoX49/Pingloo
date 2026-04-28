@@ -1,7 +1,16 @@
 package com.dbeditor.controller.view.dialogs;
 
+import com.dbeditor.MainApp;
+import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.modifier.Visual;
+import com.dbeditor.controller.view.dialogs.ColumnData.DialogColumnRow;
+import com.dbeditor.model.Table;
+import com.dbeditor.model.type.VarcharSql;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -10,12 +19,50 @@ import javafx.stage.Stage;
 
 public abstract class EditorDialog implements Visual {
     
+    @FXML private TableView<DialogColumnRow> tableColumns;
+    @FXML private Button btnCancel;
+    @FXML private Button btnConfirm;
+
+    protected ObservableList<DialogColumnRow> columnData;
+    protected Table resultTable;
+
     protected Stage stage;
     protected boolean confirmed = false;
 
+    /**
+     * @param table la table à modifier, null pour créer une nouvelle
+     */
+    protected void setData(Stage stage, Table table) {
+        this.stage = stage;
+        this.columnData = FXCollections.observableArrayList();
+        this.resultTable = table == null ? new Table("a renommer") : new Table(table);
+
+        this.tableColumns.setItems(this.columnData);
+        this.setupTableColumns(this.tableColumns);
+
+        this.btnCancel.setOnAction(e -> {
+            this.confirmed = false;
+            this.stage.close();
+        });
+        this.btnConfirm.setOnAction(e -> {
+            if(this.validateAndSave()) {
+                this.confirmed = true;
+                this.stage.close();
+            }
+        });
+    }
+
+    /**
+     * Valide et sauvegarde les données
+     */
+    protected abstract boolean validateAndSave();
+    
     @Override
     public void updateStyle() {
         // TODO
+        this.tableColumns.setStyle(this.tableColumns.getStyle());
+        this.btnCancel.setStyle(this.btnCancel.getStyle());
+        this.btnConfirm.setStyle(this.btnConfirm.getStyle());
     }
     
     @Override
@@ -27,10 +74,6 @@ public abstract class EditorDialog implements Visual {
      * Configure les colonnes de la TableView
      */
     protected void setupTableColumns(TableView<DialogColumnRow> tableColumns) {
-        tableColumns.setEditable(true);
-        tableColumns.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
-        tableColumns.setPlaceholder(new javafx.scene.control.Label("Aucune colonne. Cliquez sur « Ajouter »."));
-
         // --- Nom ---
         TableColumn<DialogColumnRow, String> colName = new TableColumn<>("Nom");
         colName.setCellValueFactory(data -> data.getValue().nameProperty());
@@ -82,6 +125,25 @@ public abstract class EditorDialog implements Visual {
         tableColumns.getColumns().setAll(colName, colType, colPK, colNN, colUQ, colAI);
     }
 
+    protected void addColumn() {
+        VarcharSql varcharSql = new VarcharSql(255);
+        this.columnData.add(new DialogColumnRow("nouvelle_colonne", varcharSql.getRepr(MainApp.schema.type), false, false, false, false));
+        
+        // Sélectionner la nouvelle ligne et démarrer l'édition du nom
+        int lastIndex = this.columnData.size() - 1;
+        this.tableColumns.getSelectionModel().select(lastIndex);
+        this.tableColumns.scrollTo(lastIndex);
+    }
+
+    protected void removeSelectedColumn() {
+        DialogColumnRow selected = this.tableColumns.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            CanvasController.showWarningAlert("Aucune sélection", "Veuillez sélectionner une colonne à supprimer.");
+            return;
+        }
+        this.columnData.remove(selected);
+    }
+
     /**
      * Affiche le dialogue et attend la fermeture
      */
@@ -95,5 +157,15 @@ public abstract class EditorDialog implements Visual {
     public boolean isConfirmed() {
         return this.confirmed;
     }
+
+    /**
+     * Retourne la table créée/modifiée
+     */
+    public Table getResultTable() {
+        this.buildTable();
+        return this.resultTable;
+    }
+
+    protected abstract void buildTable();
     
 }

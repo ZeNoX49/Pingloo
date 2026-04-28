@@ -15,6 +15,7 @@ module com.dbeditor {
     opens com.dbeditor.controller to javafx.fxml;
     opens com.dbeditor.controller.parameter to javafx.fxml;
     opens com.dbeditor.controller.view to javafx.fxml;
+    opens com.dbeditor.controller.view.dialogs to javafx.fxml;
 
     exports com.dbeditor;
     exports com.dbeditor.controller;
@@ -23,6 +24,7 @@ module com.dbeditor {
     exports com.dbeditor.controller.view;
     exports com.dbeditor.controller.view.helpers;
     exports com.dbeditor.controller.view.dialogs;
+    exports com.dbeditor.controller.view.dialogs.ColumnData;
     exports com.dbeditor.model;
     exports com.dbeditor.model.mcd;
     exports com.dbeditor.model.type;

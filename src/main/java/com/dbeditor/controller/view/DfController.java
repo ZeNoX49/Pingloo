@@ -90,7 +90,7 @@ public class DfController extends TextView {
             }
 
             for (ForeignKey f : t.getForeignKeys()) {
-                fk.add(f.columnName);
+                fk.add(f.name);
             }
 
             text.append(String.join(", ", pk));
@@ -124,7 +124,7 @@ public class DfController extends TextView {
             }
 
             for (ForeignKey f : t.getForeignKeys()) {
-                fk.add("{" + f.referencedTable + "}" + f.columnName);
+                fk.add("{" + f.referencedTable + "}" + f.name);
             }
 
             text.append("[").append(t.name).append("] ");

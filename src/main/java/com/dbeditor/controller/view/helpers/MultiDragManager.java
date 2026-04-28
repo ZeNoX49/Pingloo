@@ -10,8 +10,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 
 /**
- * Manager qui permet de déplacer plusieurs Node "Drag" ensemble.
- * Il s'appuie sur les callbacks fournis par Node "Drag" (setOnDrag, setOnDragEnd).
+ * Manager qui permet de déplacer plusieurs node "Draggable" ensemble.
+ * Il s'appuie sur les callbacks fournis par node "Draggable" (setOnDrag, setOnDragEnd).
  */
 public class MultiDragManager<D extends Draggable> {
     private final SelectionModel<D> selectionModel;
@@ -24,7 +24,7 @@ public class MultiDragManager<D extends Draggable> {
     }
 
     /**
-     * Attache la logique multi-drag à un Node "Drag"
+     * Attache la logique multi-drag à un node "Draggable"
      */
     public void attach(D node) {
         node.setOnDrag((t, e) -> this.handleDrag(node, e));
