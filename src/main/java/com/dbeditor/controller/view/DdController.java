@@ -7,6 +7,7 @@ import com.dbeditor.MainApp;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
+import com.dbeditor.model.other.DataDictionnary;
 import com.dbeditor.model.other.DataDictionnary.DD_Nature;
 import com.dbeditor.model.other.DataDictionnary.DD_Type;
 
@@ -39,31 +40,31 @@ public class DdController extends GridView {
         private final ObjectProperty<DD_Type> type;
         private final ObjectProperty<DD_Nature> nature;
 
-        public Data(String table, String name, String description, DD_Type type, DD_Nature nature) {
+        public Data(String table, String name, DataDictionnary dataDictionnary) {
             this.table = new SimpleStringProperty(table);
             this.name = new SimpleStringProperty(name);
-            this.description = new SimpleStringProperty(description);
-            this.type = new SimpleObjectProperty<>(type);
-            this.nature = new SimpleObjectProperty<>(nature);
+            this.description = new SimpleStringProperty(dataDictionnary.description);
+            this.type = new SimpleObjectProperty<>(dataDictionnary.type);
+            this.nature = new SimpleObjectProperty<>(dataDictionnary.nature);
         }
 
-        public String getTable() { return table.get(); }
+        // public String getTable() { return table.get(); }
         public void setTable(String value) { table.set(value); }
         public StringProperty tableProperty() { return table; }
 
-        public String getName() { return name.get(); }
+        // public String getName() { return name.get(); }
         public void setName(String value) { name.set(value); }
         public StringProperty nameProperty() { return name; }
 
-        public String getDescription() { return description.get(); }
+        // public String getDescription() { return description.get(); }
         public void setDescription(String value) { description.set(value); }
         public StringProperty descriptionProperty() { return description; }
 
-        public DD_Type getType() { return type.get(); }
+        // public DD_Type getType() { return type.get(); }
         public void setType(DD_Type value) { type.set(value); }
         public ObjectProperty<DD_Type> typeProperty() { return type; }
 
-        public DD_Nature getNature() { return nature.get(); }
+        // public DD_Nature getNature() { return nature.get(); }
         public void setNature(DD_Nature value) { nature.set(value); }
         public ObjectProperty<DD_Nature> natureProperty() { return nature; }
     }
@@ -130,7 +131,7 @@ public class DdController extends GridView {
 
         for (Table t : MainApp.schema.getTables()) {
             for (Column c : t.getColumns()) {
-                data.add(new Data(t.name, c.name, "", DD_Type.AN, DD_Nature.E));
+                data.add(new Data(t.name, c.name, c.dataDictionnary));
             }
         }
 
@@ -138,12 +139,17 @@ public class DdController extends GridView {
     }
 
     @Override
-    public void updateType() {
+    public void createSync() {
         // TODO
     }
 
     @Override
     public void updateStyle() {
+        // TODO
+    }
+
+    @Override
+    public void updateType() {
         // TODO
     }
 

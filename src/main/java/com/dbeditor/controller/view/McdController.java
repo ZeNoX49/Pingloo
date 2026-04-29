@@ -12,6 +12,7 @@ import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
 import com.dbeditor.controller.view.dialogs.AssociationEditorController;
 import com.dbeditor.controller.view.dialogs.EntityEditorController;
+import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 import com.dbeditor.model.mcd.CardinalityValue;
@@ -64,26 +65,7 @@ public class McdController extends ModelView {
                     }
 
                     else if (e.getCode() == KeyCode.D && e.isControlDown()) {
-                        List<TableController> selectedTables = this.selectionModel.getSelected();
-
-                        for(TableController tc : selectedTables) {
-                            Table dupli = new Table(tc.getTable());
-                            if(dupli.isPositionned()) {
-                                dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
-                            }
-
-                            while(super.tableNodes.get(dupli.name) != null) {
-                                dupli.name += " copy";
-                            }
-
-                            if(tc.getType() == TableType.Entity) {
-                                this.conceptualSchema.addEntity(dupli);
-                            } else {
-                                this.conceptualSchema.addAssociation(dupli);
-                            }
-
-                            this.createTableNode(dupli, tc.getType());
-                        }
+                        this.duplicateTables();
                     }
                 });
             }
@@ -91,6 +73,27 @@ public class McdController extends ModelView {
 
         this.btnEntity.setOnAction(e -> this.addEntity());
         this.btnAssociation.setOnAction(e -> this.addAssociation());
+    }
+
+    private void duplicateTables() {
+        for(TableController tc : this.selectionModel.getSelected()) {
+            Table dupli = new Table(tc.getTable());
+            if(dupli.isPositionned()) {
+                dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
+            }
+
+            while(super.tableNodes.get(dupli.name) != null) {
+                dupli.name += " copy";
+            }
+
+            if(tc.getType() == TableType.Entity) {
+                this.conceptualSchema.addEntity(dupli);
+            } else {
+                this.conceptualSchema.addAssociation(dupli);
+            }
+
+            this.createTableNode(dupli, tc.getType());
+        }
     }
 
     @Override
@@ -111,6 +114,15 @@ public class McdController extends ModelView {
         super.lasso.rect.toFront();
 
         super.updateStyle();
+    }
+
+    @Override
+    public void createSync() {
+        DatabaseSchema schema = new DatabaseSchema(MainApp.schema.name);
+
+        for(Table t : this.conceptualSchema.getAllEntities()) {
+            schema.addTable(t);
+        }
     }
 
     /**

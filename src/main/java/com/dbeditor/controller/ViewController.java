@@ -83,7 +83,8 @@ public class ViewController implements Visual, DbUpdate {
         this.setupCombobox();
         this.setupSplit();
 
-        this.btnSync.setOnMouseClicked((e) -> {
+        this.btnSync.setOnMouseClicked(e -> {
+            this.view.createSync();
             this.sync.accept(this);
         });
     }

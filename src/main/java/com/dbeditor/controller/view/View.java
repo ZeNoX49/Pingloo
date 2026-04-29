@@ -19,6 +19,11 @@ public abstract class View implements Visual, DbUpdate {
      * remplace le initialize FXML
      */
     public abstract void initialization(ToolBar toolbar);
+    
+    /**
+     * met a jour le MainApp.schema avec la version actuelle
+     */
+    public abstract void createSync();
 
     /**
      * Renvoie le root de la vue pour l'affciher

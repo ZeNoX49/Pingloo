@@ -42,6 +42,11 @@ public class MldController extends ModelView {
         super.updateStyle();
     }
 
+    @Override
+    public void createSync() {
+        // TODO
+    }
+
     /**
      * Permet de créer le visuel des tables à partir d'un DatabaseSchema
      */

@@ -227,6 +227,11 @@ public class SdfController extends View {
         this.updateStyle();
     }
 
+    @Override
+    public void createSync() {
+        // TODO
+    }
+
     private String getLabelText(Table t, Column c) {
         return t.name+"-"+c.name;
     }

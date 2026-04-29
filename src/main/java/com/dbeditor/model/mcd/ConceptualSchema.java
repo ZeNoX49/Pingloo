@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.dbeditor.MainApp;
 import com.dbeditor.model.DatabaseSchema;
 import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
@@ -25,6 +24,17 @@ public class ConceptualSchema {
                 this.associations.put(table.name, table);
             } else {
                 this.entities.put(table.name, table);
+            }
+        }
+
+        for(Table table : this.entities.values()) {
+            for(ForeignKey fk : table.getForeignKeys()) {
+                String name = table.name+"_"+fk.referencedTable;
+                int num = 1;
+                while(this.nameExists(name+"_"+num)) {
+                    num++;
+                }
+                this.associations.put(name+"_"+num, new InvAsso(name+"_"+num, table, fk));
             }
         }
     }
@@ -45,7 +55,7 @@ public class ConceptualSchema {
         return nb >= 2;
     }
 
-    public boolean nameExists(String name) {
+    public final boolean nameExists(String name) {
         return this.entities.containsKey(name) || this.associations.containsKey(name);
     }
 
@@ -55,7 +65,6 @@ public class ConceptualSchema {
      */
     public void addEntity(Table table) {
         this.entities.put(table.name, table);
-        MainApp.schema.addTable(table);
     }
 
     /**
@@ -67,9 +76,6 @@ public class ConceptualSchema {
         if (old == null) return;
 
         this.entities.put(updatedTable.name, updatedTable);
-
-        MainApp.schema.tables.remove(oldName);
-        MainApp.schema.addTable(updatedTable);
 
         // mettre à jour les associations qui référencent l'ancienne entité
         for(Table t : this.associations.values()) {
@@ -88,8 +94,6 @@ public class ConceptualSchema {
     public void removeEntity(String name) {
         Table e = this.entities.remove(name);
         if (e == null) return;
-
-        MainApp.schema.tables.remove(name);
 
         // supprimer les associations qui contiennent cette entité
         Iterator<Entry<String, Table>> itAssociation = this.associations.entrySet().iterator();
@@ -117,7 +121,6 @@ public class ConceptualSchema {
      */
     public void addAssociation(Table table) {
         this.associations.put(table.name, table);
-        MainApp.schema.addTable(table);
     }
 
     /**
@@ -129,19 +132,13 @@ public class ConceptualSchema {
         if (old == null) return;
 
         this.associations.put(updatedTable.name, updatedTable);
-
-        MainApp.schema.tables.remove(oldName);
-        MainApp.schema.addTable(updatedTable);
     }
 
     /**
      * Supprime une association par son nom.
      */
     public void removeAssociation(String name) {
-        Table asso = this.associations.remove(name);
-        if (asso == null) return;
-
-        MainApp.schema.tables.remove(name);
+        this.associations.remove(name);
     }
 
     /**
@@ -172,5 +169,23 @@ public class ConceptualSchema {
      */
     public List<Table> getAllAssociations() {
         return new ArrayList<>(this.associations.values());
+    }
+
+    /**
+     * Association Invisible
+     */
+    public class InvAsso extends Table {
+        public final Table originTable;
+        public final ForeignKey originFk;
+
+        public InvAsso(String name, Table originTable, ForeignKey originFk) {
+            super(name);
+            this.originTable = originTable;
+            this.originFk = originFk;
+
+            super.addForeignKey(new ForeignKey("", originTable.name, originTable.name, "", originFk.cardinalityValue));
+            super.addForeignKey(new ForeignKey("", originFk.referencedTable, originFk.referencedTable, "", originFk.cardinalityValue));
+        }
+
     }
 }

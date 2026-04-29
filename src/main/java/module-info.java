@@ -27,6 +27,7 @@ module com.dbeditor {
     exports com.dbeditor.controller.view.dialogs.ColumnData;
     exports com.dbeditor.model;
     exports com.dbeditor.model.mcd;
+    exports com.dbeditor.model.other;
     exports com.dbeditor.model.type;
     exports com.dbeditor.sql;
     exports com.dbeditor.sql.db;

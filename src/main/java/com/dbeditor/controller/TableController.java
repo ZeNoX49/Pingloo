@@ -1,5 +1,6 @@
 package com.dbeditor.controller;
 
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 
 import com.dbeditor.MainApp;
@@ -74,23 +75,23 @@ public class TableController implements Visual, Draggable {
 
         this.grid.setPadding(new Insets(2));
 
+        int i = 0;
         if(this.type == TableType.Table) {
-            int i = 0;
-            for (String attrName : this.table.getAttributs().keySet()) {
-                if(this.table.getAttributs().get(attrName)) {
-                    Column col = this.table.columns.get(attrName);
-                    this.createGridLine(i, col, col.type);
+            for (Entry<String, Boolean> entry : this.table.getAttributs().entrySet()) {
+                if(entry.getValue()) {
+                    Column col = this.table.columns.get(entry.getKey());
+                    this.createGridLine(i++, col, col.type);
                 } else {
-                    ForeignKey fk  = this.table.foreignKeys.get(attrName);
+                    ForeignKey fk  = this.table.foreignKeys.get(entry.getKey());
                     Column refCol = MainApp.schema.tables.get(fk.referencedTable).columns.get(fk.referencedColumn);
-                    this.createGridLine(i, fk, refCol.type);
+                    this.createGridLine(i++, fk, refCol.type);
                 }
-                i++;
             }
         } else {
-            for (int i = 0; i < this.table.getColumns().size(); i++) {
-                Column col = this.table.getColumns().get(i);
-                this.createGridLine(i, col, col.type);
+            for (Entry<String, Boolean> entry : this.table.getAttributs().entrySet()) {
+                if(!entry.getValue()) continue;
+                Column col = this.table.columns.get(entry.getKey());
+                this.createGridLine(i++, col, col.type);
             }
         }
 

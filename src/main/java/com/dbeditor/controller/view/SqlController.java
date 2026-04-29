@@ -21,6 +21,11 @@ public class SqlController extends TextView {
     }
 
     @Override
+    public void createSync() {
+        // TODO
+    }
+
+    @Override
     public void updateStyle() {
         // TODO
     }

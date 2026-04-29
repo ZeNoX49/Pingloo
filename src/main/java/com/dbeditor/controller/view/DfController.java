@@ -69,6 +69,16 @@ public class DfController extends TextView {
     }
 
     @Override
+    public void createSync() {
+        // TODO
+    }
+
+    @Override
+    public void updateStyle() {
+        // TODO
+    }
+
+    @Override
     public void updateType() {
         // TODO
     }
@@ -140,11 +150,6 @@ public class DfController extends TextView {
         }
 
         this.otherTextArea.setText(text.toString());
-    }
-
-    @Override
-    public void updateStyle() {
-        // TODO
     }
 
     @Override

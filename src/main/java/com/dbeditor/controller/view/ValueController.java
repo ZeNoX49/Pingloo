@@ -45,12 +45,17 @@ public class ValueController extends GridView {
     }
 
     @Override
-    public void updateStyle() {
+    public void open() {
         // TODO
     }
 
     @Override
-    public void open() {
+    public void createSync() {
+        // TODO
+    }
+
+    @Override
+    public void updateStyle() {
         // TODO
     }
 
