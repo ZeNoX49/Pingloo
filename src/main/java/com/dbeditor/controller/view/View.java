@@ -1,0 +1,38 @@
+package com.dbeditor.controller.view;
+
+import com.dbeditor.controller.ViewType;
+import com.dbeditor.controller.modifier.DbUpdate;
+import com.dbeditor.controller.modifier.Visual;
+
+import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Pane;
+
+public abstract class View implements Visual, DbUpdate {
+
+    /**
+     * Donne le ViewType de la vue actuelle
+     */
+    public abstract ViewType getViewType();
+
+    /**
+     * Permet d'initialiser les bases de la vue, remplace le initialize FXML
+     */
+    public abstract void initialization(ToolBar toolbar);
+
+    // /**
+    //  * met a jour le MainApp.schema avec la version actuelle
+    //  */
+    // public abstract void createSync();
+
+    /**
+     * Renvoie le root de la vue pour l'affciher
+     */
+    public abstract Pane getRoot();
+
+    protected Button createButton(String text) {
+        Button button = new Button(text);
+        // TODO: style
+        return button;
+    }
+}

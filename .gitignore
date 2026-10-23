@@ -2,3 +2,25 @@
 target/
 src/test/
 src/main/resources/userPreferences.json
+
+# temporaire
+src/main/java/com/dbeditor/controller/parameter/DbParamController.java
+src/main/java/com/dbeditor/controller/view/dialogs/
+src/main/java/com/dbeditor/controller/view/DdController.java
+src/main/java/com/dbeditor/controller/view/DfController.java
+src/main/java/com/dbeditor/controller/view/GridView.java
+src/main/java/com/dbeditor/controller/view/McdController.java
+src/main/java/com/dbeditor/controller/view/SdfController.java
+src/main/java/com/dbeditor/controller/view/SqlController.java
+src/main/java/com/dbeditor/controller/view/TextView.java
+src/main/java/com/dbeditor/controller/view/ValueController.java
+src/main/java/com/dbeditor/manager/DbManager.java
+src/main/java/com/dbeditor/manager/FileManager.java
+src/main/java/com/dbeditor/model/mcd/
+src/main/java/com/dbeditor/model/other/
+src/main/java/com/dbeditor/model/type/
+src/main/java/com/dbeditor/sql/db/
+src/main/java/com/dbeditor/sql/file/
+src/main/resources/fxml/dialogs/
+src/main/resources/fxml/parameter/dbParam.fxml
+src/main/resources/fxml/dialog.fxml

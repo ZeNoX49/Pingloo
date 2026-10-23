@@ -2,10 +2,32 @@ module com.dbeditor {
     requires transitive javafx.controls;
     requires transitive javafx.fxml;
     requires transitive javafx.graphics;
+    // requires javafx.base;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
 
     opens com.dbeditor to javafx.fxml;
+    opens com.dbeditor.controller to javafx.fxml;
+    opens com.dbeditor.controller.parameter to javafx.fxml;
+    opens com.dbeditor.controller.view to javafx.fxml;
+    // opens com.dbeditor.controller.view.dialogs to javafx.fxml;
 
     exports com.dbeditor;
+    exports com.dbeditor.controller;
+    exports com.dbeditor.controller.modifier;
+    exports com.dbeditor.controller.parameter;
+    exports com.dbeditor.controller.view;
+    exports com.dbeditor.controller.view.helpers;
+    // exports com.dbeditor.controller.view.dialogs;
+    // exports com.dbeditor.controller.view.dialogs.DialogData;
+    exports com.dbeditor.manager;
+    exports com.dbeditor.model;
+    // exports com.dbeditor.model.mcd;
+    // exports com.dbeditor.model.other;
+    // exports com.dbeditor.model.type;
+    exports com.dbeditor.sql;
+    // exports com.dbeditor.sql.db;
+    // exports com.dbeditor.sql.file.exporter;
+    // exports com.dbeditor.sql.file.parser;
+    exports com.dbeditor.theme;
 }
