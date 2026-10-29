@@ -41,7 +41,8 @@ public class MainApp extends Application {
 			
             stage.setOnCloseRequest(e -> J_M.save());
         } catch (IOException e) {
-            System.err.println("Erreur de chargement de la scène : /fxml/canvas.fxml\n" + e);
+            System.err.println("Erreur de chargement de la scène : /fxml/canvas.fxml");
+            e.printStackTrace();
         }
     }
 

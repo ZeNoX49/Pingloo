@@ -66,9 +66,9 @@ public class CanvasController implements Visual {
         //     this.createMenuItemDatabse(type);
         // }
 
-        this.miLightTheme.setOnAction(e -> this.changeTheme(1));
-        this.miDarkTheme.setOnAction(e -> this.changeTheme(2));
-        this.miPersoTheme.setOnAction(e -> this.changeTheme(3));
+        this.miLightTheme.setOnAction(e -> this.changeTheme(ThemeManager.ThemeType.LIGHT));
+        this.miDarkTheme.setOnAction(e -> this.changeTheme(ThemeManager.ThemeType.DARK));
+        this.miPersoTheme.setOnAction(e -> this.changeTheme(ThemeManager.ThemeType.PERSO));
 
         this.tfDbName.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused && MainApp.schema != null) {
@@ -116,8 +116,8 @@ public class CanvasController implements Visual {
     //     this.views.add(v);
     // }
 
-    private void changeTheme(int idTheme) {
-        T_M.changeTheme(idTheme);
+    private void changeTheme(ThemeManager.ThemeType themeType) {
+        T_M.changeTheme(themeType);
         this.updateStyle();
     }
 
@@ -162,7 +162,8 @@ public class CanvasController implements Visual {
             modalStage.setScene(scene);
             modalStage.showAndWait();
         } catch (IOException e) {
-            System.err.println("Erreur de chargement de la scène : theme.fxml\n" + e);
+            System.err.println("Erreur de chargement de la scène : theme.fxml");
+            e.printStackTrace();
         }
     }
 

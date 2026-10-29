@@ -3,11 +3,6 @@ package com.dbeditor.theme;
 public class DarkTheme implements Theme {
 
     @Override
-    public int getId() {
-        return 2;
-    }
-
-    @Override
     public String getBackgroundColor() {
         return "#1e293b";
     }

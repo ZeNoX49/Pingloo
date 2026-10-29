@@ -63,10 +63,6 @@ public class PersoTheme implements Theme {
     }
 
     /* ==================================================================================================== */
-    @Override
-    public int getId() {
-        return 3;
-    }
 
     @Override
     public String getBackgroundColor() {

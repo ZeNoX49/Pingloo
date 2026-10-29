@@ -3,11 +3,6 @@ package com.dbeditor.theme;
 public class LightTheme implements Theme {
 
     @Override
-    public int getId() {
-        return 1;
-    }
-
-    @Override
     public String getBackgroundColor() {
         return "#f8fafc";
     }

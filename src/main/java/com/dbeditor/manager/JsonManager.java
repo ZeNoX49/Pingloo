@@ -66,7 +66,7 @@ public class JsonManager extends Singleton<JsonManager> {
         try {
             Map<String, Object> root = mapper.readValue(file, Map.class);
 
-            T_M.changeTheme((int) root.get("id_theme"));
+            T_M.changeTheme(ThemeManager.ThemeType.valueOf((String) root.get("theme_type")));
 
             // String lud = (String) root.get("last_used_directory");
             // if (lud == null || lud.trim().isEmpty()) {
@@ -95,7 +95,7 @@ public class JsonManager extends Singleton<JsonManager> {
 
         Map<String, Object> root = new HashMap<>();
         // root.put("last_used_directory", F_M.getLastUserDirectory());
-        root.put("id_theme", T_M.getThemeId());
+        root.put("theme_type", T_M.getThemeType());
 
         Map<String, String> themes = new HashMap<>();
         themes.put("background_color", T_M.getPersoTheme().getBackgroundColor());
@@ -129,7 +129,8 @@ public class JsonManager extends Singleton<JsonManager> {
             mapper.writeValue(JsonManager.PATH_TO_FILE_USER_DATA.toFile(), root);
             System.out.println("Sauvegarde JSON réussie vers " + JsonManager.PATH_TO_FILE_USER_DATA);
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'écriture du fichier JSON\n" + e);
+            System.err.println("Erreur lors de l'écriture du fichier JSON");
+            e.printStackTrace();
         }
     }
 
@@ -142,7 +143,7 @@ public class JsonManager extends Singleton<JsonManager> {
 
         Map<String, Object> root = new HashMap<>();
         // root.put("last_used_directory", System.getProperty("user.dir"));
-        root.put("id_theme", 2);
+        root.put("theme_type", ThemeManager.ThemeType.DARK);
 
         Map<String, String> themes = new HashMap<>();
         themes.put("background_color", "#333");
@@ -170,7 +171,8 @@ public class JsonManager extends Singleton<JsonManager> {
             mapper.writeValue(JsonManager.PATH_TO_FILE_USER_DATA.toFile(), root);
             System.out.println("Sauvegarde JSON réussie vers " + JsonManager.PATH_TO_FILE_USER_DATA);
         } catch (IOException e) {
-            System.err.println("Erreur lors de l'écriture du fichier JSON\n" + e);
+            System.err.println("Erreur lors de l'écriture du fichier JSON");
+            e.printStackTrace();
         }
     }
 

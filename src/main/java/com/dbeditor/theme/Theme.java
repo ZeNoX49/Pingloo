@@ -2,23 +2,22 @@ package com.dbeditor.theme;
 
 public interface Theme {
 
-    public abstract int getId();
+    public String getBackgroundColor();
 
-    public abstract String getBackgroundColor();
+    public String getCardColor();
 
-    public abstract String getCardColor();
+    public String getBorderColor();
 
-    public abstract String getBorderColor();
+    public String getSelectionBorderColor();
 
-    public abstract String getSelectionBorderColor();
+    public String getHeaderColor();
 
-    public abstract String getHeaderColor();
+    public String getTextColor();
 
-    public abstract String getTextColor();
+    public String getSecondaryTextColor();
 
-    public abstract String getSecondaryTextColor();
+    public String getToolbarColor();
 
-    public abstract String getToolbarColor();
+    public String getToolbarBorderColor();
 
-    public abstract String getToolbarBorderColor();
 }

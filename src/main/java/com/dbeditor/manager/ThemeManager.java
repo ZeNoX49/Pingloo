@@ -10,34 +10,37 @@ import com.dbeditor.theme.Theme;
 
 public class ThemeManager extends Singleton<ThemeManager> {
 
-    private int id;
-    private final Map<Integer, Theme> themes;
+    public static enum ThemeType {
+        LIGHT, DARK, PERSO;
+    }
+
+    private final Map<ThemeType, Theme> themes;
+    private ThemeType themeType;
     private Theme theme;
 
     protected ThemeManager() {
         this.themes = new HashMap<>();
-        this.themes.put(1, new LightTheme());
-        this.themes.put(2, new DarkTheme());
-        this.themes.put(3, new PersoTheme());
+        this.themes.put(ThemeType.LIGHT, new LightTheme());
+        this.themes.put(ThemeType.DARK, new DarkTheme());
+        this.themes.put(ThemeType.PERSO, new PersoTheme());
 
-        this.id = 2;
-        this.theme = this.themes.get(this.id);
+        this.changeTheme(ThemeType.DARK);
     }
 
     public Theme getTheme() {
         return this.theme;
     }
 
-    public void changeTheme(int id) {
-        this.id = id;
-        this.theme = this.themes.get(id);
+    public final void changeTheme(ThemeType themeType) {
+        this.themeType = themeType;
+        this.theme = this.themes.get(themeType);
     }
 
     public PersoTheme getPersoTheme() {
-        return (PersoTheme) this.themes.get(3);
+        return (PersoTheme) this.themes.get(ThemeType.PERSO);
     }
 
-    public int getThemeId() {
-        return this.id;
+    protected ThemeType getThemeType() {
+        return this.themeType;
     }
 }
