@@ -36,11 +36,6 @@ public class ViewController implements Visual, DbUpdate {
     // private Popup popup;
     private ObservableList<Node> baseItemToolbar;
 
-    @FXML
-    void initialize() {
-        this.baseItemToolbar = FXCollections.observableArrayList(toolbar.getItems());
-    }
-
     /**
      * Permet de charger les données à la création de la vue
      *
@@ -50,16 +45,21 @@ public class ViewController implements Visual, DbUpdate {
      * @param registrar fonction fournie par CanvasController pour enregistrer
      * la paire (controller, pane)
      */
-    // public void setData(Pane parent, Pane viewPane, ViewType viewType, Consumer<ViewController> registrar, Runnable sync) {
-    public void setData(ViewType viewType) {    
+    // public ViewController(Pane parent, Pane viewPane, ViewType viewType, Consumer<ViewController> registrar, Runnable sync) {
+    public ViewController(ViewType viewType) {    
         // this.parent = parent;
         // this.viewPane = viewPane;
         this.view = viewType.getController();
         // this.registrar = registrar;
         // this.sync = sync;
+    }
+
+    @FXML
+    private void initialize() {
+        this.baseItemToolbar = FXCollections.observableArrayList(toolbar.getItems());
 
         // vue de base
-        this.cb.setValue(viewType.toString());
+        this.cb.setValue(this.view.getViewType().toString());
 
         this.view.initialization(this.toolbar);
         Pane newPane = this.view.getRoot();

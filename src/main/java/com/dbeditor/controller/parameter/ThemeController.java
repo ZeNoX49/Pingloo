@@ -13,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 // TODO: manque des styles pour certain labels
+// TODO: pouvoir copier le theme light ou dark
 public class ThemeController {
 
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);

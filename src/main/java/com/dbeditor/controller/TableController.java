@@ -1,6 +1,5 @@
 package com.dbeditor.controller;
 
-import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 
 import com.dbeditor.controller.modifier.Draggable;
@@ -9,7 +8,6 @@ import com.dbeditor.manager.Singleton;
 import com.dbeditor.manager.ThemeManager;
 import com.dbeditor.model.Attribut;
 import com.dbeditor.model.Column;
-import com.dbeditor.model.ForeignKey;
 import com.dbeditor.model.Table;
 
 import javafx.fxml.FXML;
@@ -29,8 +27,8 @@ import javafx.scene.text.FontWeight;
 public class TableController implements Visual, Draggable<TableController> {
 
     public enum TableType {
-        // Table, Entity, Association;
-        Table;
+        // Entity, Association, Table;
+        Entity, Association;
     }
 
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
@@ -41,21 +39,21 @@ public class TableController implements Visual, Draggable<TableController> {
     @FXML private Label name;
     @FXML private GridPane grid;
 
-    private Table table;
-    private TableType type;
+    private final Table table;
+    private final TableType type;
 
     // callbacks fournis par CanvasController
     private BiConsumer<TableController, MouseEvent> onSelect;
     private BiConsumer<TableController, MouseEvent> onDrag;
     private BiConsumer<TableController, MouseEvent> onDragEnd;
 
-    /**
-     * Permet de mettre en place le visuel de la table. Met aussi en en place
-     * l'ui et le drag
-     */
-    public void createTableController(Table table, TableType type) {
+    public TableController(Table table, TableType type) {
         this.table = table;
         this.type = type;
+    }
+
+    @FXML
+    private void initialize() {
         this.createUI();
         this.setupDragHandlers();
     }
@@ -76,24 +74,20 @@ public class TableController implements Visual, Draggable<TableController> {
         this.grid.setPadding(new Insets(2));
 
         int i = 0;
-        // if (this.type == TableType.Table) {
-        for (Entry<String, Boolean> entry : this.table.getAttributs().entrySet()) {
-            if (entry.getValue()) {
-                Column col = this.table.columns.get(entry.getKey());
-                this.createGridLine(i++, col, col.type);
-            } else {
-                ForeignKey fk = this.table.foreignKeys.get(entry.getKey());
-                this.createGridLine(i++, fk, fk.referencedColumn.type);
-            }
-        }
-        // } else {
+        // TODO: if (this.type == TableType.Table) {
         //     for (Entry<String, Boolean> entry : this.table.getAttributs().entrySet()) {
-        //         if (!entry.getValue()) {
-        //             continue;
+        //         if (entry.getValue()) {
+        //             Column col = this.table.columns.get(entry.getKey());
+        //             this.createGridLine(i++, col, col.type);
+        //         } else {
+        //             ForeignKey fk = this.table.foreignKeys.get(entry.getKey());
+        //             this.createGridLine(i++, fk, fk.referencedColumn.type);
         //         }
-        //         Column col = this.table.columns.get(entry.getKey());
-        //         this.createGridLine(i++, col, col.type);
         //     }
+        // } else {
+        for (Column col : this.table.getColumns()) {
+            this.createGridLine(i++, col, col.type);
+        }
         // }
 
         this.updateStyle();
@@ -125,30 +119,30 @@ public class TableController implements Visual, Draggable<TableController> {
 
     @Override
     public void updateStyle() {
-        // if (this.type == TableType.Association) {
-        //     this.pane.setStyle("-fx-background-color: transparent");
-        //     this.ellipse.setStyle(
-        //             "-fx-background-color: " + T_M.getTheme().getCardColor() + "; "
-        //             + "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; "
-        //             + "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
-        //     );
-        //     this.hName.setStyle(
-        //             "-fx-translate-x: 1px; -fx-translate-y: 1px;"
-        //     );
-        // } else {
-        this.pane.setStyle(
-                "-fx-background-color: " + T_M.getTheme().getCardColor() + "; "
-                + "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; "
-                + (this.type.equals(TableType.Table) ? "-fx-border-radius: 8; -fx-background-radius: 8; " : "")
-                + "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
-        );
-        this.ellipse.setStyle("-fx-background-color: transparent");
-        this.hName.setStyle(
-                "-fx-background-color: " + T_M.getTheme().getHeaderColor() + "; "
-                + (this.type.equals(TableType.Table) ? "-fx-background-radius: 8 8 0 0; " : "")
-                + "-fx-translate-x: 1px; -fx-translate-y: 1px;"
-        );
-        // }
+        if (this.type == TableType.Association) {
+            this.pane.setStyle("-fx-background-color: transparent");
+            this.ellipse.setStyle(
+                    "-fx-background-color: " + T_M.getTheme().getCardColor() + "; "
+                    + "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; "
+                    + "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
+            );
+            this.hName.setStyle(
+                    "-fx-translate-x: 1px; -fx-translate-y: 1px;"
+            );
+        } else {
+            this.pane.setStyle(
+                    "-fx-background-color: " + T_M.getTheme().getCardColor() + "; "
+                    + "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; "
+                    // TODO: TableType.Table -> + (this.type.equals(TableType.Table) ? "-fx-border-radius: 8; -fx-background-radius: 8; " : "")
+                    + "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
+            );
+            this.ellipse.setStyle("-fx-background-color: transparent");
+            this.hName.setStyle(
+                    "-fx-background-color: " + T_M.getTheme().getHeaderColor() + "; "
+                    // TODO: TableType.Table -> + (this.type.equals(TableType.Table) ? "-fx-background-radius: 8 8 0 0; " : "")
+                    + "-fx-translate-x: 1px; -fx-translate-y: 1px;"
+            );
+        }
 
         for (Node node : grid.getChildren()) {
             if (node instanceof Label label) {
@@ -226,16 +220,17 @@ public class TableController implements Visual, Draggable<TableController> {
         this.onDragEnd = onDragEnd;
     }
 
-    public Table getTable() {
-        return this.table;
-    }
-
     @Override
     public AnchorPane getRoot() {
         return this.pane;
     }
 
+    public Table getTable() {
+        return this.table;
+    }
+
     public TableType getType() {
         return this.type;
     }
+
 }

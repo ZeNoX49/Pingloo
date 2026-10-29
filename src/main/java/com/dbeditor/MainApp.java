@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.dbeditor.manager.JsonManager;
 import com.dbeditor.manager.Singleton;
-import com.dbeditor.model.DatabaseSchema;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -17,8 +16,6 @@ import javafx.stage.Stage;
 
 public class MainApp extends Application {
 
-    public static DatabaseSchema schema;
-
     @Override
     public void start(Stage stage) throws IOException {
         JsonManager J_M = Singleton.getInstance(JsonManager.class);
@@ -26,8 +23,6 @@ public class MainApp extends Application {
 
         try {
             J_M.load();
-
-            MainApp.schema = new DatabaseSchema("");
 
             FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/canvas.fxml"));
             Scene scene = new Scene(loader.load(), 1280, 720);

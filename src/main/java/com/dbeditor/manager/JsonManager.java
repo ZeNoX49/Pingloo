@@ -81,7 +81,8 @@ public class JsonManager extends Singleton<JsonManager> {
             // Map<String, Object> mysql = db.get("mysql");
             // D_M.setMysqlDbData(mysql);
         } catch (IOException e) {
-            throw new Error("Imposible de lire le JSON : " + e.getMessage());
+            System.err.println("Imposible de lire le JSON");
+            e.printStackTrace();
         }
     }
 

@@ -9,6 +9,7 @@ import com.dbeditor.MainApp;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.manager.Singleton;
 import com.dbeditor.manager.ThemeManager;
+import com.dbeditor.model.DatabaseSchema;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,6 +36,8 @@ public class CanvasController implements Visual {
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
     // private static final FileManager F_M = Singleton.getInstance(FileManager.class);
 
+    public static DatabaseSchema schema;
+
     @FXML private ToolBar toolBar;
     // @FXML private Menu mOpenFile, mOpenDb;
     // @FXML private Menu mSaveFile, mSaveDb;
@@ -51,6 +54,8 @@ public class CanvasController implements Visual {
 
     @FXML
     private void initialize() {
+        CanvasController.schema = new DatabaseSchema("");
+
         this.views = new ArrayList<>();
         // this.menuOpenDb = new HashMap<>();
         // this.menuSaveDb = new HashMap<>();
@@ -71,8 +76,8 @@ public class CanvasController implements Visual {
         this.miPersoTheme.setOnAction(e -> this.changeTheme(ThemeManager.ThemeType.PERSO));
 
         this.tfDbName.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && MainApp.schema != null) {
-                MainApp.schema.name = this.tfDbName.getText();
+            if (!isFocused && CanvasController.schema != null) {
+                CanvasController.schema.name = this.tfDbName.getText();
             }
         });
 
@@ -87,12 +92,9 @@ public class CanvasController implements Visual {
     private void createBaseView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view.fxml"));
+            ViewController controller = new ViewController(ViewType.MCD); // TODO: ancienne version -> (this.spPane, pane, ViewType.MCD, (view) -> this.views.add(view), () -> this.sync())
+            loader.setController(controller);
             Pane pane = loader.load();
-            ViewController controller = loader.getController();
-
-            // on fournit la fonction d'enregistrement au controller
-            // controller.setData(this.spPane, pane, ViewType.MCD, (view) -> this.views.add(view), () -> this.sync());
-            controller.setData(ViewType.MLD);
 
             this.views.add(controller);
 
@@ -101,7 +103,8 @@ public class CanvasController implements Visual {
 
             this.spPane.getChildren().add(pane);
         } catch (IOException e) {
-            throw new Error("Une erreur est survenue lors de la création du visuel");
+            System.err.println("Une erreur est survenue lors de la création du visuel");
+            e.printStackTrace();
         }
     }
 

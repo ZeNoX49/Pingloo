@@ -8,22 +8,25 @@ import java.util.Map;
 
 public class Table {
 
+    private static enum TableColumnType {
+        COLUMN, FOREIGN_KEY;
+    }
+
     public String name;
-    /** si valeur == true -> colonne */
-    private final LinkedHashMap<String, Boolean> attributs;
+    private final LinkedHashMap<String, TableColumnType> attributesOrder;
     public final Map<String, Column> columns;
     public final Map<String, ForeignKey> foreignKeys;
 
     public Table(String name) {
         this.name = name;
-        this.attributs = new LinkedHashMap<>();
+        this.attributesOrder = new LinkedHashMap<>();
         this.columns = new HashMap<>();
         this.foreignKeys = new HashMap<>();
     }
 
     // public Table(Table other) {
     //     this(other.name);
-    //     for (Entry<String, Boolean> entry : other.attributs.entrySet()) {
+    //     for (Entry<String, Boolean> entry : other.attributesOrder.entrySet()) {
     //         if (entry.getValue()) {
     //             this.addColumn(new Column(other.columns.get(entry.getKey())));
     //         } else {
@@ -37,32 +40,41 @@ public class Table {
 
     public final void addColumn(Column col) {
         this.columns.put(col.name, col);
-        this.attributs.put(col.name, true);
+        this.attributesOrder.put(col.name, TableColumnType.COLUMN);
     }
 
     public List<Column> getColumns() {
-        return new ArrayList<>(this.columns.values());
+        List<Column> result = new ArrayList<>();
+
+        for (Map.Entry<String, TableColumnType> entry : this.attributesOrder.entrySet()) {
+            if (entry.getValue() == TableColumnType.COLUMN) {
+                result.add(columns.get(entry.getKey()));
+            }
+        }
+
+        return result;
     }
 
     public final void addForeignKey(ForeignKey fk) {
         this.foreignKeys.put(fk.name, fk);
-        // la colonne sera (surement) déja référencé, donc on l'enlève
-        Column col = this.columns.remove(fk.name);
-        if (col != null) {
-            fk.isPrimaryKey = col.isPrimaryKey;
-        }
-        this.attributs.put(fk.name, false);
+        // // la colonne sera (surement) déja référencé, donc on l'enlève
+        // Column col = this.columns.remove(fk.name);
+        // if (col != null) {
+        //     fk.isPrimaryKey = col.isPrimaryKey;
+        // }
+        this.attributesOrder.put(fk.name, TableColumnType.FOREIGN_KEY);
     }
 
     public List<ForeignKey> getForeignKeys() {
-        return new ArrayList<>(this.foreignKeys.values());
-    }
+        List<ForeignKey> result = new ArrayList<>();
 
-    /**
-     * si valeur == true -> colonne
-     */
-    public LinkedHashMap<String, Boolean> getAttributs() {
-        return new LinkedHashMap<>(this.attributs);
+        for (Map.Entry<String, TableColumnType> entry : this.attributesOrder.entrySet()) {
+            if (entry.getValue() == TableColumnType.FOREIGN_KEY) {
+                result.add(foreignKeys.get(entry.getKey()));
+            }
+        }
+
+        return result;
     }
 
     /* =================================================================== */

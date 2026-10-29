@@ -10,6 +10,8 @@ import javafx.scene.layout.Pane;
 
 public abstract class View implements Visual, DbUpdate {
 
+    // private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
+
     /**
      * Donne le ViewType de la vue actuelle
      */
@@ -21,7 +23,7 @@ public abstract class View implements Visual, DbUpdate {
     public abstract void initialization(ToolBar toolbar);
 
     // /**
-    //  * met a jour le MainApp.schema avec la version actuelle
+    //  * met a jour le schema avec la version actuelle
     //  */
     // public abstract void createSync();
 
@@ -30,7 +32,7 @@ public abstract class View implements Visual, DbUpdate {
      */
     public abstract Pane getRoot();
 
-    protected Button createButton(String text) {
+    protected final Button createButton(String text) {
         Button button = new Button(text);
         // TODO: style
         return button;
