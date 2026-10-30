@@ -1,5 +1,7 @@
 package com.dbeditor.controller.view.dialogs;
 
+import java.util.Collection;
+
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.view.dialogs.dialog_data.DialogColumnEntry;
 import com.dbeditor.manager.Singleton;
@@ -28,8 +30,8 @@ public class EntityEditorController extends EditorDialog {
     /**
      * @param table la table à modifier, null pour créer une nouvelle
      */
-    public EntityEditorController(Stage stage, Table table) {
-        super(stage, table);
+    public EntityEditorController(Stage stage, Table table, Collection<String> existingNames) {
+        super(stage, table, existingNames);
     }
 
     @FXML
@@ -66,6 +68,10 @@ public class EntityEditorController extends EditorDialog {
             CanvasController.showWarningAlert("Erreur", "Le nom de la table ne peut pas être vide.");
             return false;
         }
+        if (this.existingNames.contains(name)) {
+            CanvasController.showWarningAlert("Erreur", "Le nom de la table doit être unique.");
+            return false;
+        }
         if (this.columnData.isEmpty()) {
             CanvasController.showWarningAlert("Erreur", "La table doit contenir au moins une colonne.");
             return false;
@@ -83,7 +89,8 @@ public class EntityEditorController extends EditorDialog {
     @Override
     protected void buildTable() {
         this.resultTable.name = this.tfTableName.getText().trim();
-        this.resultTable.columns.clear();
+        this.resultTable.clearAttributes();
+        
         for (DialogColumnEntry row : this.columnData) {
             // TODO: sql type -> Column col = new Column(row.getName(), __SqlType.get(row.getType(), CanvasController.schema.type));
             Column col = new Column(row.getName(), row.getType());

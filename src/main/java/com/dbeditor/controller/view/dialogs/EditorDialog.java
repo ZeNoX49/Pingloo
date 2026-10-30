@@ -1,5 +1,7 @@
 package com.dbeditor.controller.view.dialogs;
 
+import java.util.Collection;
+
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.view.dialogs.dialog_data.DialogColumnEntry;
 import com.dbeditor.manager.Singleton;
@@ -28,6 +30,7 @@ public abstract class EditorDialog {
     @FXML private Button btnConfirm;
     
     protected final Stage stage;
+    protected final Collection<String> existingNames;
     protected final ObservableList<DialogColumnEntry> columnData;
     protected final Table resultTable;
     protected boolean confirmed = false;
@@ -35,16 +38,17 @@ public abstract class EditorDialog {
     /**
      * @param table la table à modifier, null pour créer une nouvelle
      */
-    public EditorDialog(Stage stage, Table table) {
+    public EditorDialog(Stage stage, Table table, Collection<String> existingNames) {
         this.stage = stage;
+        this.existingNames = existingNames;
         this.columnData = FXCollections.observableArrayList();
 
         if (table == null) {
             this.resultTable = new Table("");
             this.resultTable.addColumn(new Column("id", "INT"));
         } else {
-            // TODO: dupli -> this.resultTable = new Table(table);
-            this.resultTable = new Table("temp");
+            this.resultTable = table;
+            this.existingNames.remove(table.name);
         }
     }
 

@@ -6,7 +6,7 @@ import com.dbeditor.controller.modifier.Draggable;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.manager.Singleton;
 import com.dbeditor.manager.ThemeManager;
-import com.dbeditor.model.Attribut;
+import com.dbeditor.model.Attribute;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 
@@ -59,6 +59,14 @@ public class TableController implements Visual, Draggable<TableController> {
     }
 
     /**
+     * permet de recharger les données de la table après une modification
+     */
+    public void reload() {
+        this.grid.getChildren().clear();
+        this.initialize();
+    }
+
+    /**
      * Permet de créer l'UI de la table
      */
     private void createUI() {
@@ -93,7 +101,7 @@ public class TableController implements Visual, Draggable<TableController> {
         this.updateStyle();
     }
 
-    private void createGridLine(int i, Attribut attr, String type) {
+    private void createGridLine(int i, Attribute attr, String type) {
         Label colName = new Label(attr.name);
         if (attr.isPrimaryKey || attr.isUnique) {
             colName.setFont(Font.font("System", FontWeight.BOLD, 12));

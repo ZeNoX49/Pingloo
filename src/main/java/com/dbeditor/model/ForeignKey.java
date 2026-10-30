@@ -4,12 +4,12 @@ package com.dbeditor.model;
  * CONSTRAINT {@code fkName} FOREIGN KEY ({@code name}) REFERENCES
  * {@code referencedEntity}({@code referencedColumn})
  */
-public class ForeignKey extends Attribut {
+public class ForeignKey extends Attribute {
 
     public String fkName;
     public Table referencedTable;
     public Column referencedColumn;
-    // public CardinalityValue cardinalityValue;
+    // TODO: public CardinalityValue cardinalityValue;
 
     /**
      * CONSTRAINT {@code fkName} FOREIGN KEY ({@code columnName (name)})
@@ -24,11 +24,12 @@ public class ForeignKey extends Attribut {
         // this.cardinalityValue = cardinalityValue;
     }
 
-    // public ForeignKey(ForeignKey other) {
-    //     super(other);
-    //     this.fkName = other.fkName;
-    //     this.referencedTable = other.referencedTable;
-    //     this.referencedColumn = other.referencedColumn;
-    //     this.cardinalityValue = other.cardinalityValue;
-    // }
+    public ForeignKey(ForeignKey other) {
+        super(other);
+        this.fkName = other.fkName;
+        this.referencedTable = other.referencedTable;
+        this.referencedColumn = other.referencedColumn;
+        // this.cardinalityValue = other.cardinalityValue;
+    }
+
 }

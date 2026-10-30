@@ -52,7 +52,7 @@ public abstract class ModelView extends View {
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
 
     // Nodes visuels
-    protected final Map<String, TableController> tableNodes = new HashMap<>();
+    protected final Map<TableController, String> tableNodes = new HashMap<>();
     protected final List<Connection> connectionLines = new ArrayList<>();
 
     // Helpers
@@ -103,7 +103,7 @@ public abstract class ModelView extends View {
 
         this.zlLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
 
-        for (TableController tc : this.tableNodes.values()) {
+        for (TableController tc : this.tableNodes.keySet()) {
             tc.updateStyle();
         }
 

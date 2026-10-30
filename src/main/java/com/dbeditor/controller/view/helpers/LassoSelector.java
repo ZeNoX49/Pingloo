@@ -22,12 +22,12 @@ public class LassoSelector<D extends Draggable<?>> {
     private final Group content;   // parent local pour le rectangle
     private final SelectionModel<D> selectionModel;
     public final Rectangle rect;
-    private final Map<String, D> nodes;
+    private final Map<D, String> nodes;
 
     private Point2D startLocal;
     private boolean dragging = false;
 
-    public LassoSelector(Pane viewportPane, Group content, Map<String, D> nodes, SelectionModel<D> selectionModel) {
+    public LassoSelector(Pane viewportPane, Group content, Map<D, String> nodes, SelectionModel<D> selectionModel) {
         this.viewportPane = viewportPane;
         this.content = content;
         this.selectionModel = selectionModel;
@@ -108,7 +108,7 @@ public class LassoSelector<D extends Draggable<?>> {
         // sélectionner les tables qui intersectent
         Bounds rectBounds = this.rect.getBoundsInParent();
         this.selectionModel.clear();
-        for (D node : this.nodes.values()) {
+        for (D node : this.nodes.keySet()) {
             if (node.getRoot().getBoundsInParent().intersects(rectBounds)) {
                 this.selectionModel.select(node);
             }

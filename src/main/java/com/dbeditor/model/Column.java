@@ -1,11 +1,11 @@
 package com.dbeditor.model;
 
-public class Column extends Attribut {
+public class Column extends Attribute {
 
-    // public __SqlType type;
+    // TODO: public __SqlType type;
     public String type;
     public boolean isAutoIncrementing;
-    // public final DataDictionnary dataDictionnary;
+    // TODO: public final DataDictionnary dataDictionnary;
 
     public Column(String name, String type) {
         super(name);
@@ -14,10 +14,11 @@ public class Column extends Attribut {
         // this.dataDictionnary = new DataDictionnary("", DataDictionnary.DD_Type.AN, DataDictionnary.DD_Nature.E);
     }
 
-    // public Column(Column other) {
-    //     super(other);
-    //     this.type = other.type;
-    //     this.isAutoIncrementing = other.isAutoIncrementing;
-    //     // this.dataDictionnary = other.dataDictionnary;
-    // }
+    public Column(Column other) {
+        super(other);
+        this.type = other.type;
+        this.isAutoIncrementing = other.isAutoIncrementing;
+        // this.dataDictionnary = other.dataDictionnary;
+    }
+
 }

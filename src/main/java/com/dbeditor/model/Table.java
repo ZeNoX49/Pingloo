@@ -1,80 +1,72 @@
 package com.dbeditor.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Table {
 
-    private static enum TableColumnType {
-        COLUMN, FOREIGN_KEY;
-    }
-
     public String name;
-    private final LinkedHashMap<String, TableColumnType> attributesOrder;
-    public final Map<String, Column> columns;
-    public final Map<String, ForeignKey> foreignKeys;
+    private final List<Attribute> attributes;
 
     public Table(String name) {
         this.name = name;
-        this.attributesOrder = new LinkedHashMap<>();
-        this.columns = new HashMap<>();
-        this.foreignKeys = new HashMap<>();
+        this.attributes = new ArrayList<>();
     }
 
-    // public Table(Table other) {
-    //     this(other.name);
-    //     for (Entry<String, Boolean> entry : other.attributesOrder.entrySet()) {
-    //         if (entry.getValue()) {
-    //             this.addColumn(new Column(other.columns.get(entry.getKey())));
-    //         } else {
-    //             this.addForeignKey(new ForeignKey(other.foreignKeys.get(entry.getKey())));
-    //         }
-    //     }
-    //     if (other.positionned) {
-    //         this.setPosition(other.posX, other.posY);
-    //     }
-    // }
+    public Table(Table other) {
+        this(other.name);
 
-    public final void addColumn(Column col) {
-        this.columns.put(col.name, col);
-        this.attributesOrder.put(col.name, TableColumnType.COLUMN);
-    }
-
-    public List<Column> getColumns() {
-        List<Column> result = new ArrayList<>();
-
-        for (Map.Entry<String, TableColumnType> entry : this.attributesOrder.entrySet()) {
-            if (entry.getValue() == TableColumnType.COLUMN) {
-                result.add(columns.get(entry.getKey()));
+        for (Attribute attribute : other.attributes) {
+            if (attribute instanceof Column col) {
+                this.addColumn(new Column(col));
+            } else if (attribute instanceof ForeignKey fk) {
+                this.addForeignKey(new ForeignKey(fk));
             }
         }
 
-        return result;
+        if (other.positionned) {
+            this.setPosition(other.posX + 10, other.posY + 10);
+        }
+    }
+
+    public final void addColumn(Column col) {
+        this.attributes.add(col);
     }
 
     public final void addForeignKey(ForeignKey fk) {
-        this.foreignKeys.put(fk.name, fk);
-        // // la colonne sera (surement) déja référencé, donc on l'enlève
-        // Column col = this.columns.remove(fk.name);
-        // if (col != null) {
-        //     fk.isPrimaryKey = col.isPrimaryKey;
-        // }
-        this.attributesOrder.put(fk.name, TableColumnType.FOREIGN_KEY);
+        this.attributes.add(fk);
+    }
+
+    public List<Column> getColumns() {
+        return this.attributes.stream()
+                .filter(Column.class::isInstance)
+                .map(Column.class::cast)
+                .toList();
     }
 
     public List<ForeignKey> getForeignKeys() {
-        List<ForeignKey> result = new ArrayList<>();
+        return this.attributes.stream()
+                .filter(ForeignKey.class::isInstance)
+                .map(ForeignKey.class::cast)
+                .toList();
+    }
 
-        for (Map.Entry<String, TableColumnType> entry : this.attributesOrder.entrySet()) {
-            if (entry.getValue() == TableColumnType.FOREIGN_KEY) {
-                result.add(foreignKeys.get(entry.getKey()));
-            }
-        }
+    // public List<Attribute> getAttributes() {
+    //     return new ArrayList<>(this.attributes);
+    // }
 
-        return result;
+    // public void removeAttribute(Attribute attribute) {
+    //     this.attributes.remove(attribute);
+    // }
+
+    // public void renameAttribute(Attribute attribute, String newName) {
+    //     if (this.attributes.contains(attribute)) {
+    //         attribute.name = newName;
+    //     }
+    // }
+
+    public void clearAttributes() {
+        this.attributes.clear();
     }
 
     /* =================================================================== */
@@ -101,4 +93,5 @@ public class Table {
     public boolean isPositionned() {
         return this.positionned;
     }
+
 }

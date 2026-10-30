@@ -1,7 +1,9 @@
 package com.dbeditor.controller.view;
 
 import java.io.IOException;
+import java.util.List;
 
+import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
 import com.dbeditor.controller.TableController.TableType;
 import com.dbeditor.controller.ViewType;
@@ -14,6 +16,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -42,42 +46,22 @@ public class McdController extends ModelView {
 
         super.initialization(toolbar);
 
-        // this.getRoot().sceneProperty().addListener((obs, oldScene, newScene) -> {
-        //     if (newScene != null) {
-        //         newScene.setOnKeyPressed(e -> {
-        //             if (e.getCode() == KeyCode.DELETE) {
-        //                 this.deleteSelected();
-        //             } else if (e.getCode() == KeyCode.D && e.isControlDown()) {
-        //                 this.duplicateTables();
-        //             }
-        //         });
-        //     }
-        // });
+        // TODO: peut ajouter un ctrl c / v -> List<TableController> copied -> si une seul .setPosition(e.getX(), e.getY()) | si > 1 faire en fonction de la bouding box (faire gaffe a où est le (0, 0) des tables)
+        this.getRoot().sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.setOnKeyPressed(e -> {
+                    if (e.getCode() == KeyCode.DELETE) {
+                        this.deleteSelected();
+                    } else if (e.getCode() == KeyCode.D && e.isControlDown()) {
+                        this.duplicateTables();
+                    }
+                });
+            }
+        });
 
         this.btnEntity.setOnAction(e -> this.addEntity());
         // this.btnAssociation.setOnAction(e -> this.addAssociation());
     }
-
-    // private void duplicateTables() {
-    //     for (TableController tc : this.selectionModel.getSelected()) {
-    //         Table dupli = new Table(tc.getTable());
-    //         if (dupli.isPositionned()) {
-    //             dupli.setPosition(dupli.getPosX() + 10, dupli.getPosY() + 10);
-    //         }
-
-    //         while (super.tableNodes.get(dupli.name) != null) {
-    //             dupli.name += " copy";
-    //         }
-
-    //         if (tc.getType() == TableType.Entity) {
-    //             this.conceptualSchema.addEntity(dupli);
-    //         } else {
-    //             this.conceptualSchema.addAssociation(dupli);
-    //         }
-
-    //         this.createTableNode(dupli, tc.getType());
-    //     }
-    // }
 
     @Override
     public void open() {
@@ -112,6 +96,25 @@ public class McdController extends ModelView {
     //     }
     // }
 
+    private void duplicateTables() {
+        for (TableController tc : this.selectionModel.getSelected()) {
+            Table dupli = new Table(tc.getTable());
+
+            while (super.tableNodes.values().contains(dupli.name)) {
+                dupli.name += " copy";
+            }
+
+            // TODO:
+            // if (tc.getType() == TableType.Entity) {
+            //     this.conceptualSchema.addEntity(dupli);
+            // } else {
+            //     this.conceptualSchema.addAssociation(dupli);
+            // }
+
+            this.createTableNode(dupli, tc.getType());
+        }
+    }
+
     /**
      * Crée un node d'entité/association
      */
@@ -122,23 +125,23 @@ public class McdController extends ModelView {
             loader.setController(tcController);
             AnchorPane tcPane = loader.load();
 
-            super.tableNodes.put(table.name, tcController);
+            super.tableNodes.put(tcController, table.name);
 
             // Gérer la sélection
             tcController.setOnSelect((tc, e) -> super.handleSelection(tc, e));
 
-            // // Menu contextuel
-            // tcPane.setOnMouseClicked(e -> {
-            //     // si double clique gauche -> modifier la table ou l'association
-            //     if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
-            //         if (tabletype == TableType.Entity) {
-            //             this.editEntity(tcController);
-            //         } else {
-            //             this.editAssociation(tcController);
-            //         }
-            //         e.consume();
-            //     }
-            // });
+            // Menu contextuel
+            tcPane.setOnMouseClicked(e -> {
+                // si double clique gauche -> modifier la table ou l'association
+                if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
+                    if (tabletype == TableType.Entity) {
+                        this.editEntity(tcController);
+                    } else {
+                        // TODO: this.editAssociation(tcController);
+                    }
+                    e.consume();
+                }
+            });
 
             // mettre a jour la position lors d'un déplacement
             tcPane.layoutXProperty().addListener((a, b, c) -> table.setPosition(tcPane.getLayoutX(), table.getPosY()));
@@ -265,54 +268,31 @@ public class McdController extends ModelView {
         this.createTableNode(table, TableType.Entity);
     }
 
-    // /**
-    //  * Édite une entité existante.
-    //  */
-    // private void editEntity(TableController tc) {
-    //     Table oldTable = tc.getTable();
-    //     String oldName = oldTable.name;
+    /**
+     * Édite une entité existante.
+     */
+    private void editEntity(TableController tc) {
+        EntityEditorController dialogCon = this.loadEntityEditorDialog(tc.getTable(), "Modifier une entité");
+        if (dialogCon == null) {
+            return;
+        }
 
-    //     EntityEditorController dialogCon = this.loadEntityEditorDialog(oldTable, "Modifier une entité");
-    //     dialogCon.showAndWait();
-    //     if (!dialogCon.isConfirmed()) {
-    //         return;
-    //     }
+        dialogCon.showAndWait();
+        if (!dialogCon.isConfirmed()) {
+            return;
+        }
 
-    //     Table modifiedTable = dialogCon.getResultTable();
-    //     String newName = modifiedTable.name;
+        // construit la nouvelle table
+        dialogCon.getResultTable();
 
-    //     if (!oldName.equals(newName) && this.conceptualSchema.getEntity(newName) != null) {
-    //         CanvasController.showWarningAlert("Erreur", "Une entité nommée « " + newName + " » existe déjà.");
-    //         return;
-    //     }
+        // TODO: // Mettre à jour dans le ConceptualSchema
+        // this.conceptualSchema.updateEntity(oldName, modifiedTable);
 
-    //     // Mettre à jour dans le ConceptualSchema
-    //     this.conceptualSchema.updateEntity(oldName, modifiedTable);
-
-    //     // Supprime l'ancien node visuel
-    //     super.group.getChildren().remove(tc.getRoot());
-    //     super.tableNodes.remove(oldName);
-    //     this.removeConnectionsInvolving(oldName);
-
-    //     // Recrée le node avec le nouveau nom
-    //     this.createTableNode(modifiedTable, TableType.Entity);
-    //     TableController newTc = super.tableNodes.get(newName);
-
-    //     // Redessiner uniquement les connexions impliquant cette entité
-    //     for (Table asso : this.conceptualSchema.getAllAssociations()) {
-    //         TableController assocTc = super.tableNodes.get(asso.name);
-    //         if (assocTc == null) {
-    //             continue;
-    //         }
-
-    //         for (ForeignKey fk : asso.getForeignKeys()) {
-    //             if (fk.referencedTable.equals(newName)) {
-    //                 this.drawConnection(newTc, assocTc, fk.cardinalityValue);
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
+        // recharge le noeud pour avoir les modifications
+        tc.reload();
+        // met a jour le nom dans la map
+        super.tableNodes.put(tc, dialogCon.getResultTable().name);
+    }
 
     private EntityEditorController loadEntityEditorDialog(Table table, String name) {
         try {
@@ -323,7 +303,7 @@ public class McdController extends ModelView {
             stage.setResizable(true);
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialogs/entityEditor.fxml"));
-            EntityEditorController controller = new EntityEditorController(stage, table);
+            EntityEditorController controller = new EntityEditorController(stage, table, super.tableNodes.values());
             loader.setController(controller);
             VBox root = loader.load();
 
@@ -452,77 +432,83 @@ public class McdController extends ModelView {
     //     }
     // }
 
-    // /**
-    //  * Supprime les entités et associations sélectionnées
-    //  */
-    // public void deleteSelected() {
-    //     List<TableController> selected = new ArrayList<>(super.selectionModel.getSelected());
+    /**
+     * Supprime les entités et associations sélectionnées
+     */
+    public void deleteSelected() {
+        List<TableController> selected = super.selectionModel.getSelected();
 
-    //     String message = selected.size() == 1
-    //             ? "Supprimer « " + selected.get(0).getTable().name + " » ?"
-    //             : "Supprimer " + selected.size() + " éléments ?";
+        String message = selected.size() == 1
+                ? "Supprimer « " + selected.get(0).getTable().name + " » ?"
+                : "Supprimer " + selected.size() + " éléments ?";
 
-    //     if (!CanvasController.showConfirmationAlert("Confirmation", "Supprimer", message)) {
-    //         return;
-    //     }
+        if (!CanvasController.showConfirmationAlert("Confirmation", "Supprimer", message)) {
+            return;
+        }
 
-    //     // Identifier les associations visuelles à supprimer AVANT de toucher au modèle
-    //     // (car removeEntity() les retire du modèle, on a besoin des noms maintenant)
-    //     Set<String> assoNodesToRemove = new HashSet<>();
+        for (TableController tc : selected) {
+            super.group.getChildren().remove(tc.getRoot());
+            super.tableNodes.remove(tc);
+        }
 
-    //     for (TableController tc : selected) {
+        // TODO: suppression plus complexe
+        // // Identifier les associations visuelles à supprimer AVANT de toucher au modèle
+        // // (car removeEntity() les retire du modèle, on a besoin des noms maintenant)
+        // Set<String> assoNodesToRemove = new HashSet<>();
 
-    //         if (tc.getType() == TableType.Entity) {
-    //             String entityName = tc.getTable().name;
-    //             for (Table asso : this.conceptualSchema.getAllAssociations()) {
-    //                 for (ForeignKey fk : asso.getForeignKeys()) {
-    //                     if (entityName.equals(fk.referencedTable)) {
-    //                         assoNodesToRemove.add(asso.name);
-    //                         break;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
+        // for (TableController tc : selected) {
 
-    //     // Supprimer les nœuds d'associations liées (visuellement seulement ici)
-    //     for (String assoName : assoNodesToRemove) {
-    //         TableController assoTc = super.tableNodes.get(assoName);
-    //         if (assoTc != null) {
-    //             super.group.getChildren().remove(assoTc.getRoot());
-    //             super.tableNodes.remove(assoName);
-    //         }
-    //         this.removeConnectionsInvolving(assoName);
-    //     }
+        //     if (tc.getType() == TableType.Entity) {
+        //         String entityName = tc.getTable().name;
+        //         for (Table asso : this.conceptualSchema.getAllAssociations()) {
+        //             for (ForeignKey fk : asso.getForeignKeys()) {
+        //                 if (entityName.equals(fk.referencedTable)) {
+        //                     assoNodesToRemove.add(asso.name);
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-    //     // Supprimer les éléments sélectionnés
-    //     for (TableController tc : selected) {
-    //         String name = tc.getTable().name;
+        // // Supprimer les nœuds d'associations liées (visuellement seulement ici)
+        // for (String assoName : assoNodesToRemove) {
+        //     TableController assoTc = super.tableNodes.get(assoName);
+        //     if (assoTc != null) {
+        //         super.group.getChildren().remove(assoTc.getRoot());
+        //         super.tableNodes.remove(assoName);
+        //     }
+        //     this.removeConnectionsInvolving(assoName);
+        // }
 
-    //         if (tc.getType() == TableType.Entity) {
-    //             // removeEntity retourne les associations (réelles + InvAsso) supprimées
-    //             List<String> removedAssos = this.conceptualSchema.removeEntity(name);
+        // // Supprimer les éléments sélectionnés
+        // for (TableController tc : selected) {
+        //     String name = tc.getTable().name;
 
-    //             // Nettoyer les nœuds visuels des associations supprimées
-    //             for (String assoName : removedAssos) {
-    //                 TableController assoTc = super.tableNodes.get(assoName);
-    //                 if (assoTc != null) {
-    //                     super.group.getChildren().remove(assoTc.getRoot());
-    //                     super.tableNodes.remove(assoName);
-    //                 }
-    //                 this.removeConnectionsInvolving(assoName);
-    //             }
-    //         } else {
-    //             this.conceptualSchema.removeAssociation(name);
-    //         }
+        //     if (tc.getType() == TableType.Entity) {
+        //         // removeEntity retourne les associations (réelles + InvAsso) supprimées
+        //         List<String> removedAssos = this.conceptualSchema.removeEntity(name);
 
-    //         this.removeConnectionsInvolving(name);
-    //         super.group.getChildren().remove(tc.getRoot());
-    //         super.tableNodes.remove(name);
-    //     }
+        //         // Nettoyer les nœuds visuels des associations supprimées
+        //         for (String assoName : removedAssos) {
+        //             TableController assoTc = super.tableNodes.get(assoName);
+        //             if (assoTc != null) {
+        //                 super.group.getChildren().remove(assoTc.getRoot());
+        //                 super.tableNodes.remove(assoName);
+        //             }
+        //             this.removeConnectionsInvolving(assoName);
+        //         }
+        //     } else {
+        //         this.conceptualSchema.removeAssociation(name);
+        //     }
 
-    //     super.selectionModel.clear();
-    // }
+        //     this.removeConnectionsInvolving(name);
+        //     super.group.getChildren().remove(tc.getRoot());
+        //     super.tableNodes.remove(name);
+        // }
+
+        super.selectionModel.clear();
+    }
 
     // private void removeConnectionsInvolving(String tableName) {
     //     Iterator<Connection> it = super.connectionLines.iterator();
