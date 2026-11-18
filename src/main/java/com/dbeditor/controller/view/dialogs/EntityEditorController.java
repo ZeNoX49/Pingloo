@@ -55,7 +55,7 @@ public class EntityEditorController extends EditorDialog {
         this.btnAdd.setOnAction(e -> super.addColumn());
         this.btnDelete.setOnAction(e -> super.removeSelectedColumn());
 
-        this.lName.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
+        this.lName.setStyle("-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";");
         this.tfTableName.setStyle(this.tfTableName.getStyle());
         this.btnAdd.setStyle(this.btnAdd.getStyle());
         this.btnDelete.setStyle(this.btnDelete.getStyle());

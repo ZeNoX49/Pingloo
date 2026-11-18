@@ -130,8 +130,8 @@ public class TableController implements Visual, Draggable<TableController> {
         if (this.type == TableType.Association) {
             this.pane.setStyle("-fx-background-color: transparent");
             this.ellipse.setStyle(
-                    "-fx-background-color: " + T_M.getTheme().getCardColor() + "; "
-                    + "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; "
+                    "-fx-background-color: " + T_M.getCurrentTheme().getCardColor() + "; "
+                    + "-fx-border-color: " + T_M.getCurrentTheme().getBorderColor() + "; "
                     + "-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
             );
             this.hName.setStyle(
@@ -139,14 +139,14 @@ public class TableController implements Visual, Draggable<TableController> {
             );
         } else {
             this.pane.setStyle(
-                    "-fx-background-color: " + T_M.getTheme().getCardColor() + "; "
-                    + "-fx-border-color: " + T_M.getTheme().getBorderColor() + "; "
+                    "-fx-background-color: " + T_M.getCurrentTheme().getCardColor() + "; "
+                    + "-fx-border-color: " + T_M.getCurrentTheme().getBorderColor() + "; "
                     // TODO: TableType.Table -> + (this.type.equals(TableType.Table) ? "-fx-border-radius: 8; -fx-background-radius: 8; " : "")
                     + "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 2);"
             );
             this.ellipse.setStyle("-fx-background-color: transparent");
             this.hName.setStyle(
-                    "-fx-background-color: " + T_M.getTheme().getHeaderColor() + "; "
+                    "-fx-background-color: " + T_M.getCurrentTheme().getHeaderColor() + "; "
                     // TODO: TableType.Table -> + (this.type.equals(TableType.Table) ? "-fx-background-radius: 8 8 0 0; " : "")
                     + "-fx-translate-x: 1px; -fx-translate-y: 1px;"
             );
@@ -155,9 +155,9 @@ public class TableController implements Visual, Draggable<TableController> {
         for (Node node : grid.getChildren()) {
             if (node instanceof Label label) {
                 if (GridPane.getColumnIndex(node) == 0) {
-                    label.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
+                    label.setStyle("-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";");
                 } else {
-                    label.setStyle("-fx-text-fill: " + T_M.getTheme().getSecondaryTextColor() + ";");
+                    label.setStyle("-fx-text-fill: " + T_M.getCurrentTheme().getSecondaryTextColor() + ";");
                 }
             }
         }
@@ -207,7 +207,7 @@ public class TableController implements Visual, Draggable<TableController> {
     @Override
     public void setSelected(boolean selected) {
         if (selected) {
-            this.pane.setStyle(this.pane.getStyle() + "; -fx-border-color: " + T_M.getTheme().getSelectionBorderColor() + ";");
+            this.pane.setStyle(this.pane.getStyle() + "; -fx-border-color: " + T_M.getCurrentTheme().getSelectionBorderColor() + ";");
         } else {
             this.updateStyle(); // remet le style normal
         }

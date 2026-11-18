@@ -27,20 +27,21 @@ public class ThemeManager extends Singleton<ThemeManager> {
         this.changeTheme(ThemeType.DARK);
     }
 
-    public Theme getTheme() {
-        return this.theme;
-    }
-
     public final void changeTheme(ThemeType themeType) {
         this.themeType = themeType;
         this.theme = this.themes.get(themeType);
     }
 
-    public PersoTheme getPersoTheme() {
-        return (PersoTheme) this.themes.get(ThemeType.PERSO);
+    public Theme getTheme(ThemeType tt) {
+        return this.themes.get(tt);
     }
 
-    protected ThemeType getThemeType() {
+    public Theme getCurrentTheme() {
+        return this.theme;
+    }
+
+    protected ThemeType getCurrentThemeType() {
         return this.themeType;
     }
+
 }

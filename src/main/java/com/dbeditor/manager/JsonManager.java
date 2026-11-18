@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.dbeditor.theme.PersoTheme;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -75,7 +76,8 @@ public class JsonManager extends Singleton<JsonManager> {
             //     F_M.setLastUsedDirectory(lud);
             // }
 
-            T_M.getPersoTheme().loadColor((Map<String, String>) root.get("perso_theme"));
+            PersoTheme pt = (PersoTheme) T_M.getTheme(ThemeManager.ThemeType.PERSO);
+            pt.loadColor((Map<String, String>) root.get("perso_theme"));
 
             // Map<String, Map<String, Object>> db = (Map<String, Map<String, Object>>) root.get("db_type");
             // Map<String, Object> mysql = db.get("mysql");
@@ -96,18 +98,19 @@ public class JsonManager extends Singleton<JsonManager> {
 
         Map<String, Object> root = new HashMap<>();
         // root.put("last_used_directory", F_M.getLastUserDirectory());
-        root.put("theme_type", T_M.getThemeType());
+        root.put("theme_type", T_M.getCurrentThemeType());
 
         Map<String, String> themes = new HashMap<>();
-        themes.put("background_color", T_M.getPersoTheme().getBackgroundColor());
-        themes.put("card_color", T_M.getPersoTheme().getCardColor());
-        themes.put("border_color", T_M.getPersoTheme().getBorderColor());
-        themes.put("selection_border_color", T_M.getPersoTheme().getSelectionBorderColor());
-        themes.put("header_color", T_M.getPersoTheme().getHeaderColor());
-        themes.put("text_color", T_M.getPersoTheme().getTextColor());
-        themes.put("secondary_text_color", T_M.getPersoTheme().getSecondaryTextColor());
-        themes.put("toolbar_color", T_M.getPersoTheme().getToolbarColor());
-        themes.put("toolbar_border_color", T_M.getPersoTheme().getToolbarBorderColor());
+        PersoTheme pt = (PersoTheme) T_M.getTheme(ThemeManager.ThemeType.PERSO);
+        themes.put("background_color", pt.getBackgroundColor());
+        themes.put("card_color", pt.getCardColor());
+        themes.put("border_color", pt.getBorderColor());
+        themes.put("selection_border_color", pt.getSelectionBorderColor());
+        themes.put("header_color", pt.getHeaderColor());
+        themes.put("text_color", pt.getTextColor());
+        themes.put("secondary_text_color", pt.getSecondaryTextColor());
+        themes.put("toolbar_color", pt.getToolbarColor());
+        themes.put("toolbar_border_color", pt.getToolbarBorderColor());
         root.put("perso_theme", themes);
 
         // Map<String, Map<String, Object>> db = new HashMap<>();

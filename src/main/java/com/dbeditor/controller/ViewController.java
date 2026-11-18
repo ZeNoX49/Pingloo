@@ -95,8 +95,8 @@ public class ViewController implements Visual, DbUpdate {
     @Override
     public void updateStyle() {
         this.toolbar.setStyle(
-                "-fx-background-color: " + T_M.getTheme().getToolbarColor() + "; "
-                + "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + "; "
+                "-fx-background-color: " + T_M.getCurrentTheme().getToolbarColor() + "; "
+                + "-fx-border-color: " + T_M.getCurrentTheme().getToolbarBorderColor() + "; "
                 + "-fx-border-width: 0 0 1 0;"
         );
         this.view.updateStyle();

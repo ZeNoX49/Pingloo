@@ -53,7 +53,7 @@ public abstract class EditorDialog {
     }
 
     protected void initialization() {
-        this.root.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor());
+        this.root.setStyle("-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor());
         this.tableColumns.setStyle(this.tableColumns.getStyle());
         this.btnCancel.setStyle(this.btnCancel.getStyle());
         this.btnConfirm.setStyle(this.btnConfirm.getStyle());

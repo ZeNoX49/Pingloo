@@ -99,9 +99,9 @@ public abstract class ModelView extends View {
 
     @Override
     public void updateStyle() {
-        this.pane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
+        this.pane.setStyle("-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor() + ";");
 
-        this.zlLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
+        this.zlLabel.setStyle("-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";");
 
         for (TableController tc : this.tableNodes.keySet()) {
             tc.updateStyle();
@@ -112,8 +112,8 @@ public abstract class ModelView extends View {
         //         continue;
         //     }
         //     c.label.setStyle(
-        //             "-fx-background-color: " + T_M.getTheme().getBackgroundColor() + "; "
-        //             + "-fx-text-fill: " + T_M.getTheme().getTextColor() + ";"
+        //             "-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor() + "; "
+        //             + "-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";"
         //             + "-fx-font-size: 15;"
         //     );
         // }

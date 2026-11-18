@@ -126,15 +126,15 @@ public class CanvasController implements Visual {
 
     @Override
     public void updateStyle() {
-        this.spPane.setStyle("-fx-background-color: " + T_M.getTheme().getBackgroundColor() + ";");
+        this.spPane.setStyle("-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor() + ";");
 
         this.toolBar.setStyle(
-                "-fx-background-color: " + T_M.getTheme().getToolbarColor() + ";"
-                + "-fx-border-color: " + T_M.getTheme().getToolbarBorderColor() + ";"
+                "-fx-background-color: " + T_M.getCurrentTheme().getToolbarColor() + ";"
+                + "-fx-border-color: " + T_M.getCurrentTheme().getToolbarBorderColor() + ";"
                 + "-fx-border-width: 0 0 1 0;"
         );
 
-        this.appNameLabel.setStyle("-fx-text-fill: " + T_M.getTheme().getTextColor() + ";");
+        this.appNameLabel.setStyle("-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";");
 
         for (ViewController v : this.views) {
             v.updateStyle();
