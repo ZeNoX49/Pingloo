@@ -5,9 +5,6 @@ src/main/resources/userPreferences.json
 
 # temporaire
 src/main/java/com/dbeditor/controller/parameter/DbParamController.java
-src/main/java/com/dbeditor/controller/view/dialogs/dialog_data/DialogAttribute.java
-src/main/java/com/dbeditor/controller/view/dialogs/dialog_data/DialogForeignKey.java
-src/main/java/com/dbeditor/controller/view/dialogs/AssociationEditorController.java
 src/main/java/com/dbeditor/controller/view/dialogs/TableEditorDialog.java
 src/main/java/com/dbeditor/controller/view/DdController.java
 src/main/java/com/dbeditor/controller/view/DfController.java
@@ -24,6 +21,5 @@ src/main/java/com/dbeditor/model/other/
 src/main/java/com/dbeditor/model/type/
 src/main/java/com/dbeditor/sql/db/
 src/main/java/com/dbeditor/sql/file/
-src/main/resources/fxml/dialogs/associationEditor.fxml
 src/main/resources/fxml/parameter/dbParam.fxml
-src/main/resources/fxml/dialog.fxml
+*.loo

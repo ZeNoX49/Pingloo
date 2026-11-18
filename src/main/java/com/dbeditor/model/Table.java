@@ -18,9 +18,9 @@ public class Table {
 
         for (Attribute attribute : other.attributes) {
             if (attribute instanceof Column col) {
-                this.addColumn(new Column(col));
+                this.addAttribute(new Column(col));
             } else if (attribute instanceof ForeignKey fk) {
-                this.addForeignKey(new ForeignKey(fk));
+                this.addAttribute(new ForeignKey(fk));
             }
         }
 
@@ -29,12 +29,12 @@ public class Table {
         }
     }
 
-    public final void addColumn(Column col) {
-        this.attributes.add(col);
+    public final void addAttribute(Attribute attr) {
+        this.attributes.add(attr);
     }
 
-    public final void addForeignKey(ForeignKey fk) {
-        this.attributes.add(fk);
+    public void removeAttribute(Attribute attr) {
+        this.attributes.remove(attr);
     }
 
     public List<Column> getColumns() {
@@ -44,29 +44,17 @@ public class Table {
                 .toList();
     }
 
+    public Column getPrimaryKeyColumn() {
+        List<Column> cols = this.getColumns();
+        cols = cols.stream().filter(Column::isPrimaryKey).toList();
+        return cols.size() == 1 ? cols.get(0) : null;
+    }
+
     public List<ForeignKey> getForeignKeys() {
         return this.attributes.stream()
                 .filter(ForeignKey.class::isInstance)
                 .map(ForeignKey.class::cast)
                 .toList();
-    }
-
-    // public List<Attribute> getAttributes() {
-    //     return new ArrayList<>(this.attributes);
-    // }
-
-    // public void removeAttribute(Attribute attribute) {
-    //     this.attributes.remove(attribute);
-    // }
-
-    // public void renameAttribute(Attribute attribute, String newName) {
-    //     if (this.attributes.contains(attribute)) {
-    //         attribute.name = newName;
-    //     }
-    // }
-
-    public void clearAttributes() {
-        this.attributes.clear();
     }
 
     /* =================================================================== */

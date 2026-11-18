@@ -29,8 +29,8 @@ public class MultiDragManager<D extends Draggable<?>> {
      * Attache la logique multi-drag à un node "Draggable"
      */
     public void attach(D node) {
-        node.setOnDrag((t, e) -> this.handleDrag(node, e));
-        node.setOnDragEnd((t, e) -> this.handleDragEnd(e));
+        node.setOnDrag((e) -> this.handleDrag(node, e));
+        node.setOnDragEnd((e) -> this.handleDragEnd(e));
     }
 
     private void handleDrag(D node, MouseEvent e) {

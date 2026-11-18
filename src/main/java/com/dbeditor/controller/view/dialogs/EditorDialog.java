@@ -45,7 +45,6 @@ public abstract class EditorDialog {
 
         if (table == null) {
             this.resultTable = new Table("");
-            this.resultTable.addColumn(new Column("id", "INT"));
         } else {
             this.resultTable = table;
             this.existingNames.remove(table.name);
@@ -66,7 +65,7 @@ public abstract class EditorDialog {
             this.stage.close();
         });
         this.btnConfirm.setOnAction(e -> {
-            if (this.validateAndSave()) {
+            if (this.isValid()) {
                 this.confirmed = true;
                 this.stage.close();
             }
@@ -129,10 +128,10 @@ public abstract class EditorDialog {
     }
 
     protected void addColumn() {
-        // TODO: sql type
-        // VarcharSql varcharSql = new VarcharSql(255);
-        // this.columnData.add(new DialogEntry("nouvelle_colonne", varcharSql.getRepr(CanvasController.schema.type), false, false, false, false));
-        this.columnData.add(new DialogColumnEntry("nouvelle_colonne", "VARCHAR(255)", false, false, false, false));
+        // TODO: sql type -> Column col = new Column("nouvelle_colonne", new VarcharSql(255).getRepr(CanvasController.schema.type));
+        Column col = new Column("nouvelle_colonne", "VARCHAR(255)");
+        this.resultTable.addAttribute(col);
+        this.columnData.add(new DialogColumnEntry(col));
         
         // Sélectionner la nouvelle ligne et démarrer l'édition du nom
         int lastIndex = this.columnData.size() - 1;
@@ -146,6 +145,7 @@ public abstract class EditorDialog {
             CanvasController.showWarningAlert("Aucune sélection", "Veuillez sélectionner une colonne à supprimer.");
             return;
         }
+        selected.removeFromTable(this.resultTable);
         this.columnData.remove(selected);
     }
 
@@ -164,18 +164,15 @@ public abstract class EditorDialog {
     }
 
     /**
-     * Retourne la table créée/modifiée
+     * retourne la table créée / modifiée
      */
     public Table getResultTable() {
-        this.buildTable();
         return this.resultTable;
     }
 
     /**
      * Valide et sauvegarde les données
      */
-    protected abstract boolean validateAndSave();
-
-    protected abstract void buildTable();
+    protected abstract boolean isValid();
     
 }

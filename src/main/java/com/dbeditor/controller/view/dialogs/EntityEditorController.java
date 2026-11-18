@@ -1,6 +1,7 @@
 package com.dbeditor.controller.view.dialogs;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.view.dialogs.dialog_data.DialogColumnEntry;
@@ -39,17 +40,19 @@ public class EntityEditorController extends EditorDialog {
         super.initialization();
 
         this.tfTableName.setText(super.resultTable.name);
+        this.tfTableName.textProperty().addListener((obs, old, newVal) -> super.resultTable.name = newVal.trim());
 
         // charger les données de la table
-        for (Column col : super.resultTable.getColumns()) {
-            super.columnData.add(new DialogColumnEntry(
-                    col.name,
-                    col.type, // TODO: sql type -> col.type.getRepr(CanvasController.schema.type),
-                    col.isPrimaryKey,
-                    col.isNotNull,
-                    col.isUnique,
-                    col.isAutoIncrementing
-            ));
+        List<Column> columns = super.resultTable.getColumns();
+        if (columns.isEmpty()) {
+            Column col = new Column("id", "INT");
+            col.setPrimaryKey(true);
+            this.resultTable.addAttribute(col);
+            super.columnData.add(new DialogColumnEntry(col));
+        } else {
+            for (Column col : columns) {
+                super.columnData.add(new DialogColumnEntry(col));
+            }
         }
 
         this.btnAdd.setOnAction(e -> super.addColumn());
@@ -62,44 +65,38 @@ public class EntityEditorController extends EditorDialog {
     }
 
     @Override
-    protected boolean validateAndSave() {
-        String name = this.tfTableName.getText().trim();
+    protected boolean isValid() {
+        String name = super.resultTable.name;
+
         if (name.isEmpty()) {
-            CanvasController.showWarningAlert("Erreur", "Le nom de la table ne peut pas être vide.");
+            CanvasController.showWarningAlert("Erreur", "Le nom de l'entité ne peut pas être vide");
             return false;
         }
+
         if (this.existingNames.contains(name)) {
-            CanvasController.showWarningAlert("Erreur", "Le nom de la table doit être unique.");
+            CanvasController.showWarningAlert("Erreur", "Le nom de l'entité doit être unique");
             return false;
         }
+
         if (this.columnData.isEmpty()) {
-            CanvasController.showWarningAlert("Erreur", "La table doit contenir au moins une colonne.");
+            CanvasController.showWarningAlert("Erreur", "L'entité doit contenir au moins une colonne");
             return false;
         }
-        // Vérifier que toutes les colonnes ont un nom
+
         for (DialogColumnEntry row : this.columnData) {
             if (row.getName().isBlank()) {
-                CanvasController.showWarningAlert("Erreur", "Toutes les colonnes doivent avoir un nom.");
+                CanvasController.showWarningAlert("Erreur", "Toutes les colonnes doivent avoir un nom");
                 return false;
             }
         }
-        return true;
-    }
-    
-    @Override
-    protected void buildTable() {
-        this.resultTable.name = this.tfTableName.getText().trim();
-        this.resultTable.clearAttributes();
-        
-        for (DialogColumnEntry row : this.columnData) {
-            // TODO: sql type -> Column col = new Column(row.getName(), __SqlType.get(row.getType(), CanvasController.schema.type));
-            Column col = new Column(row.getName(), row.getType());
-            col.isPrimaryKey = row.isPrimaryKey();
-            col.isNotNull = row.isNotNull();
-            col.isUnique = row.isUnique();
-            col.isAutoIncrementing = row.isAutoIncrement();
-            this.resultTable.addColumn(col);
+
+        long nbPK = this.columnData.stream().filter(DialogColumnEntry::isPrimaryKey).count();
+        if (nbPK > 1) {
+            CanvasController.showWarningAlert("Erreur", "L'entité ne peut avoir qu'une seul clé primaire");
+            return false;
         }
+        
+        return true;
     }
 
 }

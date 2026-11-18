@@ -36,8 +36,6 @@ public class CanvasController implements Visual {
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
     // private static final FileManager F_M = Singleton.getInstance(FileManager.class);
 
-    public static DatabaseSchema schema;
-
     @FXML private ToolBar toolBar;
     // @FXML private Menu mOpenFile, mOpenDb;
     // @FXML private Menu mSaveFile, mSaveDb;
@@ -48,13 +46,14 @@ public class CanvasController implements Visual {
     @FXML private Label appNameLabel;
     @FXML private StackPane spPane;
 
+    private DatabaseSchema schema;
     private List<ViewController> views;
     // private Map<DbType, Menu> menuOpenDb;
     // private Map<DbType, Menu> menuSaveDb;
 
     @FXML
     private void initialize() {
-        CanvasController.schema = new DatabaseSchema("");
+        this.schema = new DatabaseSchema("");
 
         this.views = new ArrayList<>();
         // this.menuOpenDb = new HashMap<>();
@@ -76,8 +75,8 @@ public class CanvasController implements Visual {
         this.miPersoTheme.setOnAction(e -> this.changeTheme(ThemeManager.ThemeType.PERSO));
 
         this.tfDbName.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused && CanvasController.schema != null) {
-                CanvasController.schema.name = this.tfDbName.getText();
+            if (!isFocused && this.schema != null) {
+                this.schema.name = this.tfDbName.getText();
             }
         });
 
@@ -92,7 +91,7 @@ public class CanvasController implements Visual {
     private void createBaseView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/view.fxml"));
-            ViewController controller = new ViewController(ViewType.MCD); // TODO: ancienne version -> (this.spPane, pane, ViewType.MCD, (view) -> this.views.add(view), () -> this.sync())
+            ViewController controller = new ViewController(ViewType.MCD, () -> this.schema); // TODO: ancienne version -> (this.spPane, pane, ViewType.MCD, (view) -> this.views.add(view), () -> this.sync())
             loader.setController(controller);
             Pane pane = loader.load();
 
@@ -112,11 +111,6 @@ public class CanvasController implements Visual {
     //     for (ViewController vc : this.views) {
     //         vc.open();
     //     }
-    // }
-
-    // // utiliser lors des splits
-    // public void registerView(ViewController v) {
-    //     this.views.add(v);
     // }
 
     private void changeTheme(ThemeManager.ThemeType themeType) {
