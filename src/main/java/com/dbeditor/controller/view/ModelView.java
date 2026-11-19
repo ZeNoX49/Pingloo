@@ -47,6 +47,14 @@ public abstract class ModelView extends View {
         public void removeFrom(Group group) {
             group.getChildren().removeAll(this.line, this.label);
         }
+
+        public TableController getTableController(int num) {
+            return switch (num) {
+                case 1 -> this.firstTable;
+                case 2 -> this.secondTable;
+                default -> null;
+            };
+        }
     }
 
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);

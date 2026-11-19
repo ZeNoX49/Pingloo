@@ -3,9 +3,11 @@ package com.dbeditor.controller.view;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.dbeditor.controller.CanvasController;
 import com.dbeditor.controller.TableController;
@@ -117,7 +119,20 @@ public class McdController extends ModelView {
 
             this.conceptualSchema.addTable(dupli);
 
-            this.createTableNode(dupli, tc.getType());
+            TableController assoTc = this.createTableNode(dupli, tc.getType());
+
+            if (assoTc.getType() == TableType.Association) {
+                List<TableController> entities = super.tableNodes.keySet().stream().filter(con -> con.getType() == TableType.Entity).toList();
+
+                for (ForeignKey fk : assoTc.getTable().getForeignKeys()) {
+                    for (TableController con : entities) {
+                        if (con.getTable().equals(fk.referencedTable)) {
+                            drawConnection(con, assoTc, fk.cardinalityValue);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -150,7 +165,6 @@ public class McdController extends ModelView {
             });
 
             // mettre a jour la position lors d'un déplacement
-            // TODO: a voir si ca peu pas etre fait une fois le déplacement fini
             tcPane.layoutXProperty().addListener((a, b, c) -> table.setPosition(tcPane.getLayoutX(), table.getPosY()));
             tcPane.layoutYProperty().addListener((a, b, c) -> table.setPosition(table.getPosX(), tcPane.getLayoutY()));
 
@@ -298,8 +312,8 @@ public class McdController extends ModelView {
             stage.setTitle(name);
             stage.setResizable(true);
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialogs/entityEditor.fxml"));
-            EntityEditorController controller = new EntityEditorController(stage, table, super.tableNodes.values());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialog.fxml"));
+            EntityEditorController controller = new EntityEditorController(stage, table, new HashSet<>(super.tableNodes.values()));
             loader.setController(controller);
             VBox root = loader.load();
 
@@ -346,7 +360,7 @@ public class McdController extends ModelView {
             tables.put(tc.getTable().name, tc);
         }
 
-        AssociationEditorController dialog = this.loadAssociationEditorDialog(null, "Créer une association", tables);
+        AssociationEditorController dialog = this.loadAssociationEditorDialog(tcAsso.getTable(), "Créer une association", tables);
         if (dialog == null) {
             return;
         }
@@ -391,8 +405,8 @@ public class McdController extends ModelView {
             stage.setTitle(name);
             stage.setResizable(true);
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialogs/associationEditor.fxml"));
-            AssociationEditorController controller = new AssociationEditorController(stage, table, entitiesName, super.tableNodes.values(), n -> tables.get(n).getTable());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialog.fxml"));
+            AssociationEditorController controller = new AssociationEditorController(stage, table, entitiesName, new HashSet<>(super.tableNodes.values()), n -> tables.get(n).getTable());
             loader.setController(controller);
             VBox root = loader.load();
 
@@ -420,66 +434,29 @@ public class McdController extends ModelView {
             return;
         }
 
-        for (TableController tc : selected) {
+        Consumer<TableController> deleteTc = (tc) -> {
             super.group.getChildren().remove(tc.getRoot());
             super.tableNodes.remove(tc);
+            this.conceptualSchema.removeTable(tc.getTable());
+        };
+
+        List<TableController> selectedEntity = selected.stream().filter(tc -> tc.getType() == TableType.Entity).toList();
+        List<TableController> selectedAsso = new ArrayList<>(selected.stream().filter(tc -> tc.getType() == TableType.Association).toList());
+        
+        for (TableController tc : selectedEntity) {
+            for (Connection c : super.connectionLines) {
+                TableController assoTc = c.getTableController(2);   // normalement l'association
+                if (c.involves(tc) & !selectedAsso.contains(assoTc)) {
+                    selectedAsso.add(assoTc);
+                }
+            }
+            deleteTc.accept(tc);
         }
 
-        // TODO: suppression plus complexe
-        // // Identifier les associations visuelles à supprimer AVANT de toucher au modèle
-        // // (car removeEntity() les retire du modèle, on a besoin des noms maintenant)
-        // Set<String> assoNodesToRemove = new HashSet<>();
-
-        // for (TableController tc : selected) {
-
-        //     if (tc.getType() == TableType.Entity) {
-        //         String entityName = tc.getTable().name;
-        //         for (Table asso : this.conceptualSchema.getAllAssociations()) {
-        //             for (ForeignKey fk : asso.getForeignKeys()) {
-        //                 if (entityName.equals(fk.referencedTable)) {
-        //                     assoNodesToRemove.add(asso.name);
-        //                     break;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-
-        // // Supprimer les nœuds d'associations liées (visuellement seulement ici)
-        // for (String assoName : assoNodesToRemove) {
-        //     TableController assoTc = super.tableNodes.get(assoName);
-        //     if (assoTc != null) {
-        //         super.group.getChildren().remove(assoTc.getRoot());
-        //         super.tableNodes.remove(assoName);
-        //     }
-        //     this.removeConnectionsInvolving(assoName);
-        // }
-
-        // // Supprimer les éléments sélectionnés
-        // for (TableController tc : selected) {
-        //     String name = tc.getTable().name;
-
-        //     if (tc.getType() == TableType.Entity) {
-        //         // removeEntity retourne les associations (réelles + InvAsso) supprimées
-        //         List<String> removedAssos = this.conceptualSchema.removeEntity(name);
-
-        //         // Nettoyer les nœuds visuels des associations supprimées
-        //         for (String assoName : removedAssos) {
-        //             TableController assoTc = super.tableNodes.get(assoName);
-        //             if (assoTc != null) {
-        //                 super.group.getChildren().remove(assoTc.getRoot());
-        //                 super.tableNodes.remove(assoName);
-        //             }
-        //             this.removeConnectionsInvolving(assoName);
-        //         }
-        //     } else {
-        //         this.conceptualSchema.removeAssociation(name);
-        //     }
-
-        //     this.removeConnectionsInvolving(name);
-        //     super.group.getChildren().remove(tc.getRoot());
-        //     super.tableNodes.remove(name);
-        // }
+        for (TableController tc : selectedAsso) {
+            this.removeConnectionsInvolving(tc);
+            deleteTc.accept(tc);
+        }
 
         super.selectionModel.clear();
     }

@@ -190,8 +190,8 @@ public class ThemeController {
         this.cpSecondaryTextColor.setValue(Color.web(theme.getSecondaryTextColor()));
         this.cpToolbarColor.setValue(Color.web(theme.getToolbarColor()));
         this.cpToolbarBorderColor.setValue(Color.web(theme.getToolbarBorderColor()));
-        this.cpLassoColor.setValue(Color.web("4A90E235"));  // TODO:
-        this.cpLassoBorderColor.setValue(Color.web("4A90E2"));  // TODO:
+        this.cpLassoColor.setValue(Color.web("#4A90E235"));  // TODO:
+        this.cpLassoBorderColor.setValue(Color.web("#4A90E2"));  // TODO:
     }
 
 }

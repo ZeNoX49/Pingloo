@@ -30,15 +30,14 @@ public class DialogColumnEntry {
         this.autoIncrement = new SimpleBooleanProperty(column.isAutoIncrementing);
     }
 
-    public void setName(String value) { this.name.set(value); this.column.name = value; }
+    public void setName(String value) { this.name.set(value); }
     public SimpleStringProperty nameProperty() { return this.name; }
 
-    public void setType(String value) { this.type.set(value); this.column.type = value; }
+    public void setType(String value) { this.type.set(value); }
     public SimpleStringProperty typeProperty() { return this.type; }
 
     public void setPrimaryKey(boolean value) {
         this.primaryKey.set(value);
-        this.column.setPrimaryKey(value);
         if (value) {
             this.setNotNull(true);
             this.setUnique(true);
@@ -46,13 +45,13 @@ public class DialogColumnEntry {
     }
     public SimpleBooleanProperty primaryKeyProperty() { return this.primaryKey; }
 
-    public void setNotNull(boolean value) { this.notNull.set(value); this.column.isNotNull = value; }
+    public void setNotNull(boolean value) { this.notNull.set(value); }
     public SimpleBooleanProperty notNullProperty() { return this.notNull; }
 
-    public void setUnique(boolean value) { this.unique.set(value); this.column.isUnique = value; }
+    public void setUnique(boolean value) { this.unique.set(value); }
     public SimpleBooleanProperty uniqueProperty() { return this.unique; }
 
-    public void setAutoIncrement(boolean value) { this.autoIncrement.set(value); this.column.isAutoIncrementing = value; }
+    public void setAutoIncrement(boolean value) { this.autoIncrement.set(value); }
     public SimpleBooleanProperty autoIncrementProperty() { return this.autoIncrement; }
 
     // pour la validation
@@ -61,6 +60,16 @@ public class DialogColumnEntry {
 
     public void removeFromTable(Table table) {
         table.removeAttribute(this.column);
+    }
+
+    public Column buildColumn() {
+        this.column.name = this.name.get();
+        this.column.type = this.type.get();
+        this.column.setPrimaryKey(this.primaryKey.get());
+        this.column.isNotNull = this.notNull.get();
+        this.column.isUnique = this.unique.get();
+        this.column.isAutoIncrementing = this.autoIncrement.get();
+        return this.column;
     }
 
 }

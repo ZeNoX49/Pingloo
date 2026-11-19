@@ -2,21 +2,15 @@ package com.dbeditor.controller.view.dialogs;
 
 import java.util.Collection;
 
-import com.dbeditor.controller.CanvasController;
-import com.dbeditor.controller.view.dialogs.dialog_data.DialogColumnEntry;
 import com.dbeditor.manager.Singleton;
 import com.dbeditor.manager.ThemeManager;
-import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -25,15 +19,17 @@ public abstract class EditorDialog {
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
 
     @FXML private VBox root;
-    @FXML private TableView<DialogColumnEntry> tableColumns;
+    @FXML protected Label lName;
+    @FXML protected TextField tfName;
+    @FXML protected HBox hboxBuilder;
     @FXML private Button btnCancel;
     @FXML private Button btnConfirm;
     
-    protected final Stage stage;
+    private final Stage stage;
+    private boolean confirmed = false;
+
     protected final Collection<String> existingNames;
-    protected final ObservableList<DialogColumnEntry> columnData;
     protected final Table resultTable;
-    protected boolean confirmed = false;
 
     /**
      * @param table la table à modifier, null pour créer une nouvelle
@@ -41,7 +37,6 @@ public abstract class EditorDialog {
     public EditorDialog(Stage stage, Table table, Collection<String> existingNames) {
         this.stage = stage;
         this.existingNames = existingNames;
-        this.columnData = FXCollections.observableArrayList();
 
         if (table == null) {
             this.resultTable = new Table("");
@@ -52,13 +47,15 @@ public abstract class EditorDialog {
     }
 
     protected void initialization() {
+        this.tfName.setText(this.resultTable.name);
+
+        // TODO: style
         this.root.setStyle("-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor());
-        this.tableColumns.setStyle(this.tableColumns.getStyle());
+        this.hboxBuilder.setStyle(this.hboxBuilder.getStyle());
+        this.lName.setStyle("-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";");
+        this.tfName.setStyle(this.tfName.getStyle());
         this.btnCancel.setStyle(this.btnCancel.getStyle());
         this.btnConfirm.setStyle(this.btnConfirm.getStyle());
-
-        this.tableColumns.setItems(this.columnData);
-        this.setupTableColumns();
 
         this.btnCancel.setOnAction(e -> {
             this.confirmed = false;
@@ -66,87 +63,11 @@ public abstract class EditorDialog {
         });
         this.btnConfirm.setOnAction(e -> {
             if (this.isValid()) {
+                this.buildTable();
                 this.confirmed = true;
                 this.stage.close();
             }
         });
-    }
-
-     /**
-     * Configure les colonnes de la TableView
-     */
-    private void setupTableColumns() {
-        // --- Nom ---
-        TableColumn<DialogColumnEntry, String> colName = new TableColumn<>("Name");
-        colName.setCellValueFactory(data -> data.getValue().nameProperty());
-        colName.setCellFactory(TextFieldTableCell.forTableColumn());
-        colName.setOnEditCommit(e -> e.getRowValue().setName(e.getNewValue()));
-        colName.setPrefWidth(150);
-        colName.setMinWidth(100);
-
-        // --- Type ---
-        TableColumn<DialogColumnEntry, String> colType = new TableColumn<>("Type");
-        colType.setCellValueFactory(data -> data.getValue().typeProperty());
-        colType.setCellFactory(TextFieldTableCell.forTableColumn());
-        colType.setOnEditCommit(e -> e.getRowValue().setType(e.getNewValue()));
-        colType.setPrefWidth(130);
-        colType.setMinWidth(80);
-
-        // --- PK ---
-        TableColumn<DialogColumnEntry, Boolean> colPK = new TableColumn<>("Primary Key");
-        colPK.setCellValueFactory(data -> data.getValue().primaryKeyProperty());
-        colPK.setCellFactory(CheckBoxTableCell.forTableColumn(colPK));
-        colPK.setStyle("-fx-alignment: CENTER;");
-        colPK.setPrefWidth(50);
-        colPK.setMaxWidth(60);
-
-        // --- NOT NULL ---
-        TableColumn<DialogColumnEntry, Boolean> colNN = new TableColumn<>("Not Null");
-        colNN.setCellValueFactory(data -> data.getValue().notNullProperty());
-        colNN.setCellFactory(CheckBoxTableCell.forTableColumn(colNN));
-        colNN.setStyle("-fx-alignment: CENTER;");
-        colNN.setPrefWidth(50);
-        colNN.setMaxWidth(60);
-
-        // --- UNIQUE ---
-        TableColumn<DialogColumnEntry, Boolean> colUQ = new TableColumn<>("Unique");
-        colUQ.setCellValueFactory(data -> data.getValue().uniqueProperty());
-        colUQ.setCellFactory(CheckBoxTableCell.forTableColumn(colUQ));
-        colUQ.setStyle("-fx-alignment: CENTER;");
-        colUQ.setPrefWidth(50);
-        colUQ.setMaxWidth(60);
-
-        // --- AUTO INCREMENT ---
-        TableColumn<DialogColumnEntry, Boolean> colAI = new TableColumn<>("Auto Increment");
-        colAI.setCellValueFactory(data -> data.getValue().autoIncrementProperty());
-        colAI.setCellFactory(CheckBoxTableCell.forTableColumn(colAI));
-        colAI.setStyle("-fx-alignment: CENTER;");
-        colAI.setPrefWidth(50);
-        colAI.setMaxWidth(60);
-
-        this.tableColumns.getColumns().setAll(colName, colType, colPK, colNN, colUQ, colAI);
-    }
-
-    protected void addColumn() {
-        // TODO: sql type -> Column col = new Column("nouvelle_colonne", new VarcharSql(255).getRepr(CanvasController.schema.type));
-        Column col = new Column("nouvelle_colonne", "VARCHAR(255)");
-        this.resultTable.addAttribute(col);
-        this.columnData.add(new DialogColumnEntry(col));
-        
-        // Sélectionner la nouvelle ligne et démarrer l'édition du nom
-        int lastIndex = this.columnData.size() - 1;
-        this.tableColumns.getSelectionModel().select(lastIndex);
-        this.tableColumns.scrollTo(lastIndex);
-    }
-
-    protected void removeSelectedColumn() {
-        DialogColumnEntry selected = this.tableColumns.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            CanvasController.showWarningAlert("Aucune sélection", "Veuillez sélectionner une colonne à supprimer.");
-            return;
-        }
-        selected.removeFromTable(this.resultTable);
-        this.columnData.remove(selected);
     }
 
     /**
@@ -164,15 +85,17 @@ public abstract class EditorDialog {
     }
 
     /**
+     * Valide et sauvegarde les données
+     */
+    protected abstract boolean isValid();
+
+    /**
      * retourne la table créée / modifiée
      */
     public Table getResultTable() {
         return this.resultTable;
     }
 
-    /**
-     * Valide et sauvegarde les données
-     */
-    protected abstract boolean isValid();
+    protected abstract void buildTable();
     
 }
