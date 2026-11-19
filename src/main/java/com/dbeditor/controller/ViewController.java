@@ -1,17 +1,21 @@
 package com.dbeditor.controller;
 
 
+import java.util.function.Supplier;
+
 import com.dbeditor.controller.modifier.DbUpdate;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.controller.view.View;
 import com.dbeditor.manager.Singleton;
 import com.dbeditor.manager.ThemeManager;
+import com.dbeditor.model.DatabaseSchema;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
@@ -25,14 +29,15 @@ public class ViewController implements Visual, DbUpdate {
     @FXML private BorderPane root;
     @FXML private ToolBar toolbar;
     @FXML private ComboBox<String> cb;
-    // @FXML private Button btnSync;
+    @FXML private Button btnSync;
     @FXML private StackPane spPane;
 
     // private Pane parent;
+    // private final Pane viewPane;
     private View view;
-    // private Pane viewPane;
-    // private Consumer<ViewController> registerView; // callback pour enregistrer la vue dans CanvasController
-    // private Runnable sync;
+    // private final Consumer<ViewController> registerView; // callback pour enregistrer la vue dans CanvasController
+    // private final Consumer<DatabaseSchema> sync;
+    private final Supplier<DatabaseSchema> getSchema;
     // private Popup popup;
     private ObservableList<Node> baseItemToolbar;
 
@@ -46,12 +51,13 @@ public class ViewController implements Visual, DbUpdate {
      * la paire (controller, pane)
      */
     // public ViewController(Pane parent, Pane viewPane, ViewType viewType, Consumer<ViewController> registrar, Runnable sync) {
-    public ViewController(ViewType viewType) {    
+    public ViewController(ViewType viewType, Supplier<DatabaseSchema> getSchema) {
         // this.parent = parent;
         // this.viewPane = viewPane;
         this.view = viewType.getController();
         // this.registrar = registrar;
         // this.sync = sync;
+        this.getSchema = getSchema;
     }
 
     @FXML
@@ -71,15 +77,14 @@ public class ViewController implements Visual, DbUpdate {
         // this.viewPane = newPane;
 
         // initialiser la nouvelle vue
-        this.view.open();
+        this.view.open(this.getSchema.get());
 
         this.setupCombobox();
         // this.setupSplit();
 
         // this.btnSync.setOnMouseClicked(e -> {
         //     if (this.view instanceof McdController mcd) {
-        //         mcd.createSync();
-        //         this.sync.run();
+        //         this.sync.accept(mcd.createSync());
         //     }
         // });
     }
@@ -103,8 +108,8 @@ public class ViewController implements Visual, DbUpdate {
     }
 
     @Override
-    public void open() {
-        this.view.open();
+    public void open(DatabaseSchema schema) {
+        this.view.open(schema);
     }
 
     // @Override
@@ -135,9 +140,9 @@ public class ViewController implements Visual, DbUpdate {
 
         this.toolbar.getItems().setAll(this.baseItemToolbar);
 
-        // if (viewType != ViewType.MCD) {
-        //     this.toolbar.getItems().remove(this.btnSync);
-        // }
+        if (viewType != ViewType.MCD) {
+            this.toolbar.getItems().remove(this.btnSync);
+        }
 
         View newController = viewType.getController();
         newController.initialization(this.toolbar);
@@ -151,7 +156,7 @@ public class ViewController implements Visual, DbUpdate {
             this.view = newController;
             // this.viewPane = newPane;
 
-            newController.open();
+            newController.open(this.getSchema.get());
 
             // this.setupSplit();
         });

@@ -1,12 +1,11 @@
 package com.dbeditor.controller;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import com.dbeditor.controller.modifier.Draggable;
 import com.dbeditor.controller.modifier.Visual;
 import com.dbeditor.manager.Singleton;
 import com.dbeditor.manager.ThemeManager;
-import com.dbeditor.model.Attribute;
 import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 
@@ -43,9 +42,9 @@ public class TableController implements Visual, Draggable<TableController> {
     private final TableType type;
 
     // callbacks fournis par CanvasController
-    private BiConsumer<TableController, MouseEvent> onSelect;
-    private BiConsumer<TableController, MouseEvent> onDrag;
-    private BiConsumer<TableController, MouseEvent> onDragEnd;
+    private Consumer<MouseEvent> onSelect;
+    private Consumer<MouseEvent> onDrag;
+    private Consumer<MouseEvent> onDragEnd;
 
     public TableController(Table table, TableType type) {
         this.table = table;
@@ -101,12 +100,12 @@ public class TableController implements Visual, Draggable<TableController> {
         this.updateStyle();
     }
 
-    private void createGridLine(int i, Attribute attr, String type) {
-        Label colName = new Label(attr.name);
-        if (attr.isPrimaryKey || attr.isUnique) {
+    private void createGridLine(int i, Column col, String type) {
+        Label colName = new Label(col.name);
+        if (col.isPrimaryKey() || col.isUnique) {
             colName.setFont(Font.font("System", FontWeight.BOLD, 12));
             // uniquement pour les clés primaire
-            if (attr.isPrimaryKey) {
+            if (col.isPrimaryKey()) {
                 colName.setUnderline(true);
             }
         } else {
@@ -116,7 +115,7 @@ public class TableController implements Visual, Draggable<TableController> {
         GridPane.setMargin(colName, new Insets(1, 1, 1, 3));
 
         Label colType = new Label(type);
-        if (attr.isPrimaryKey || attr.isNotNull) {
+        if (col.isPrimaryKey() || col.isNotNull) {
             colType.setFont(Font.font("System", FontWeight.BOLD, 11));
         } else {
             colType.setFont(Font.font("System", 11));
@@ -174,7 +173,7 @@ public class TableController implements Visual, Draggable<TableController> {
             if (e.getButton() == MouseButton.PRIMARY) {
                 // informer CanvasController de la sélection
                 if (this.onSelect != null) {
-                    this.onSelect.accept(this, e);
+                    this.onSelect.accept(e);
                 }
 
                 // amener au front pour l'UX
@@ -188,7 +187,7 @@ public class TableController implements Visual, Draggable<TableController> {
             if (e.getButton() == MouseButton.PRIMARY) {
                 // déléguer le drag au CanvasController
                 if (this.onDrag != null) {
-                    this.onDrag.accept(this, e);
+                    this.onDrag.accept(e);
                 }
                 e.consume();
             }
@@ -197,7 +196,7 @@ public class TableController implements Visual, Draggable<TableController> {
         this.pane.setOnMouseReleased(e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
                 if (this.onDragEnd != null) {
-                    this.onDragEnd.accept(this, e);
+                    this.onDragEnd.accept(e);
                 }
                 e.consume();
             }
@@ -214,17 +213,17 @@ public class TableController implements Visual, Draggable<TableController> {
     }
 
     @Override
-    public void setOnSelect(BiConsumer<TableController, MouseEvent> onSelect) {
+    public void setOnSelect(Consumer<MouseEvent> onSelect) {
         this.onSelect = onSelect;
     }
 
     @Override
-    public void setOnDrag(BiConsumer<TableController, MouseEvent> onDrag) {
+    public void setOnDrag(Consumer<MouseEvent> onDrag) {
         this.onDrag = onDrag;
     }
 
     @Override
-    public void setOnDragEnd(BiConsumer<TableController, MouseEvent> onDragEnd) {
+    public void setOnDragEnd(Consumer<MouseEvent> onDragEnd) {
         this.onDragEnd = onDragEnd;
     }
 

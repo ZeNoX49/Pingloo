@@ -3,16 +3,12 @@ package com.dbeditor.controller.view.dialogs;
 import java.util.Collection;
 
 import com.dbeditor.controller.CanvasController;
+import com.dbeditor.controller.view.dialogs.dialog_builder.ColumnBuilder;
 import com.dbeditor.controller.view.dialogs.dialog_data.DialogColumnEntry;
-import com.dbeditor.manager.Singleton;
-import com.dbeditor.manager.ThemeManager;
-import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
@@ -20,86 +16,67 @@ import javafx.stage.Stage;
  */
 public class EntityEditorController extends EditorDialog {
 
-    private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
-
-    @FXML private Label lName;
-    @FXML private TextField tfTableName;
-    @FXML private Button btnAdd;
-    @FXML private Button btnDelete;
+    private final ColumnBuilder columnBuilder;
 
     /**
      * @param table la table à modifier, null pour créer une nouvelle
      */
     public EntityEditorController(Stage stage, Table table, Collection<String> existingNames) {
         super(stage, table, existingNames);
+        this.columnBuilder = new ColumnBuilder();
     }
 
     @FXML
     private void initialize() {
         super.initialization();
-
-        this.tfTableName.setText(super.resultTable.name);
-
-        // charger les données de la table
-        for (Column col : super.resultTable.getColumns()) {
-            super.columnData.add(new DialogColumnEntry(
-                    col.name,
-                    col.type, // TODO: sql type -> col.type.getRepr(CanvasController.schema.type),
-                    col.isPrimaryKey,
-                    col.isNotNull,
-                    col.isUnique,
-                    col.isAutoIncrementing
-            ));
-        }
-
-        this.btnAdd.setOnAction(e -> super.addColumn());
-        this.btnDelete.setOnAction(e -> super.removeSelectedColumn());
-
-        this.lName.setStyle("-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";");
-        this.tfTableName.setStyle(this.tfTableName.getStyle());
-        this.btnAdd.setStyle(this.btnAdd.getStyle());
-        this.btnDelete.setStyle(this.btnDelete.getStyle());
+        
+        super.lName.setText("Nom de la table");
+        super.tfName.setPromptText("Entrez le nom de la table");
+        
+        this.hboxBuilder.getChildren().add(this.columnBuilder.getContainer());
+        this.columnBuilder.addBaseColumns(super.resultTable.getColumns(), true);
     }
 
     @Override
-    protected boolean validateAndSave() {
-        String name = this.tfTableName.getText().trim();
+    protected boolean isValid() {
+        String name = this.tfName.getText().trim();
+
         if (name.isEmpty()) {
-            CanvasController.showWarningAlert("Erreur", "Le nom de la table ne peut pas être vide.");
+            CanvasController.showWarningAlert("Erreur", "Le nom de l'entité ne peut pas être vide");
             return false;
         }
+
         if (this.existingNames.contains(name)) {
-            CanvasController.showWarningAlert("Erreur", "Le nom de la table doit être unique.");
+            CanvasController.showWarningAlert("Erreur", "Le nom de l'entité doit être unique");
             return false;
         }
-        if (this.columnData.isEmpty()) {
-            CanvasController.showWarningAlert("Erreur", "La table doit contenir au moins une colonne.");
+
+        ObservableList<DialogColumnEntry> columnsData = this.columnBuilder.getColunmsData();
+        if (columnsData.isEmpty()) {
+            CanvasController.showWarningAlert("Erreur", "L'entité doit contenir au moins une colonne");
             return false;
         }
-        // Vérifier que toutes les colonnes ont un nom
-        for (DialogColumnEntry row : this.columnData) {
+
+        for (DialogColumnEntry row : columnsData) {
             if (row.getName().isBlank()) {
-                CanvasController.showWarningAlert("Erreur", "Toutes les colonnes doivent avoir un nom.");
+                CanvasController.showWarningAlert("Erreur", "Toutes les colonnes doivent avoir un nom");
                 return false;
             }
         }
+
+        long nbPK = columnsData.stream().filter(DialogColumnEntry::isPrimaryKey).count();
+        if (nbPK != 1) {
+            CanvasController.showWarningAlert("Erreur", "L'entité ne peut avoir qu'une seul clé primaire");
+            return false;
+        }
+        
         return true;
     }
-    
+
     @Override
     protected void buildTable() {
-        this.resultTable.name = this.tfTableName.getText().trim();
-        this.resultTable.clearAttributes();
-        
-        for (DialogColumnEntry row : this.columnData) {
-            // TODO: sql type -> Column col = new Column(row.getName(), __SqlType.get(row.getType(), CanvasController.schema.type));
-            Column col = new Column(row.getName(), row.getType());
-            col.isPrimaryKey = row.isPrimaryKey();
-            col.isNotNull = row.isNotNull();
-            col.isUnique = row.isUnique();
-            col.isAutoIncrementing = row.isAutoIncrement();
-            this.resultTable.addColumn(col);
-        }
+        super.resultTable.name = super.tfName.getText().trim();
+        this.columnBuilder.buildColumns(super.resultTable);
     }
 
 }

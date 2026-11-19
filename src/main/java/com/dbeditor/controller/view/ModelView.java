@@ -12,7 +12,6 @@ import com.dbeditor.controller.view.helpers.SelectionModel;
 import com.dbeditor.controller.view.helpers.ZoomPanHandler;
 import com.dbeditor.manager.Singleton;
 import com.dbeditor.manager.ThemeManager;
-import com.dbeditor.model.Table;
 
 import javafx.scene.Group;
 import javafx.scene.control.Label;
@@ -26,27 +25,36 @@ public abstract class ModelView extends View {
 
     protected static class Connection {
 
-        public final Table firstTable;
-        public final Table secondTable;
-        public final Line line;
-        // public final Label label;
+        private final TableController firstTable;
+        private final TableController secondTable;
+        private final Line line;
+        private final Label label;
 
         // /**
         //  * pour le MCD : entité, association, ...
         //  */
-        public Connection(Table firstTable, Table secondTable, Line line) {
+        public Connection(TableController firstTable, TableController secondTable, Line line, Label label) {
             this.firstTable = firstTable;
             this.secondTable = secondTable;
             this.line = line;
-            // this.label = label;
+            this.label = label;
         }
 
-        // public boolean involves(String tableName) {
-        //     return this.firstTable.equals(tableName) || this.secondTable.equals(tableName);
-        // }
-        // public void removeFrom(Group group) {
-        //     group.getChildren().removeAll(this.line, this.label);
-        // }
+        public boolean involves(TableController tcController) {
+            return this.firstTable.equals(tcController) || this.secondTable.equals(tcController);
+        }
+
+        public void removeFrom(Group group) {
+            group.getChildren().removeAll(this.line, this.label);
+        }
+
+        public TableController getTableController(int num) {
+            return switch (num) {
+                case 1 -> this.firstTable;
+                case 2 -> this.secondTable;
+                default -> null;
+            };
+        }
     }
 
     private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
@@ -107,16 +115,16 @@ public abstract class ModelView extends View {
             tc.updateStyle();
         }
 
-        // for (Connection c : this.connectionLines) {
-        //     if (c.label == null) {
-        //         continue;
-        //     }
-        //     c.label.setStyle(
-        //             "-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor() + "; "
-        //             + "-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";"
-        //             + "-fx-font-size: 15;"
-        //     );
-        // }
+        for (Connection c : this.connectionLines) {
+            if (c.label == null) {
+                continue;
+            }
+            c.label.setStyle(
+                    "-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor() + "; "
+                    + "-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";"
+                    + "-fx-font-size: 15;"
+            );
+        }
     }
 
     // @Override
@@ -125,6 +133,7 @@ public abstract class ModelView extends View {
     //         tc.updateType();
     //     }
     // }
+
     /**
      * Gère la sélection d'une entité
      */
@@ -149,4 +158,5 @@ public abstract class ModelView extends View {
     public Pane getRoot() {
         return this.pane;
     }
+
 }

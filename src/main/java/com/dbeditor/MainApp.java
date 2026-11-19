@@ -42,14 +42,14 @@ public class MainApp extends Application {
     }
 
     public static void main(String[] args) {
-        deleteUselessLog();
-        launch(args);
+        MainApp.deleteUselessLog();
+        MainApp.launch(args);
     }
 
     /**
-     * Supprime tous les logs inutiles de JavaFX -
-     * "javafx.fxml.FXMLLoader$ValueElement processValue" - "Loading FXML
-     * document with JavaFX API of version"
+     * Supprime tous les logs inutiles de JavaFX
+     * - "javafx.fxml.FXMLLoader$ValueElement processValue"
+     * - "Loading FXML document with JavaFX API of version"
      */
     private static void deleteUselessLog() {
         List<String> toDelete = List.of(

@@ -19,6 +19,7 @@ module com.dbeditor {
     exports com.dbeditor.controller.view;
     exports com.dbeditor.controller.view.helpers;
     exports com.dbeditor.controller.view.dialogs;
+    exports com.dbeditor.controller.view.dialogs.dialog_builder;
     exports com.dbeditor.controller.view.dialogs.dialog_data;
     exports com.dbeditor.manager;
     exports com.dbeditor.model;
