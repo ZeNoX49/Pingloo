@@ -115,15 +115,18 @@ public abstract class ModelView extends View {
             tc.updateStyle();
         }
 
+        for (TableController selected : this.selectionModel.getSelected()) {
+            selected.setSelected(true);
+        }
+
         for (Connection c : this.connectionLines) {
-            if (c.label == null) {
-                continue;
+            if (c.label != null) {
+                c.label.setStyle(
+                        "-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor() + "; "
+                        + "-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";"
+                        + "-fx-font-size: 15;"
+                );
             }
-            c.label.setStyle(
-                    "-fx-background-color: " + T_M.getCurrentTheme().getBackgroundColor() + "; "
-                    + "-fx-text-fill: " + T_M.getCurrentTheme().getTextColor() + ";"
-                    + "-fx-font-size: 15;"
-            );
         }
     }
 
