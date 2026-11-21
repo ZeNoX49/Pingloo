@@ -5,6 +5,7 @@ module com.dbeditor {
     // requires javafx.base;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
+    requires javafx.base;
 
     opens com.dbeditor to javafx.fxml;
     opens com.dbeditor.controller to javafx.fxml;
@@ -21,6 +22,7 @@ module com.dbeditor {
     exports com.dbeditor.controller.view.dialogs;
     exports com.dbeditor.controller.view.dialogs.dialog_builder;
     exports com.dbeditor.controller.view.dialogs.dialog_data;
+    exports com.dbeditor.fxml;
     exports com.dbeditor.manager;
     exports com.dbeditor.model;
     // exports com.dbeditor.model.mcd;
