@@ -3,11 +3,10 @@ package com.dbeditor.controller.view.dialogs;
 import java.util.Collection;
 
 import com.dbeditor.controller.CanvasController;
-import com.dbeditor.controller.view.dialogs.dialog_builder.ColumnBuilder;
-import com.dbeditor.controller.view.dialogs.dialog_data.DialogColumnEntry;
+import com.dbeditor.controller.view.dialogs.dialog_component.ColumnComponent;
+import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
 
@@ -16,14 +15,14 @@ import javafx.stage.Stage;
  */
 public class EntityEditorController extends EditorDialog {
 
-    private final ColumnBuilder columnBuilder;
+    private final ColumnComponent columnBuilder;
 
     /**
      * @param table la table à modifier, null pour créer une nouvelle
      */
     public EntityEditorController(Stage stage, Table table, Collection<String> existingNames) {
         super(stage, table, existingNames);
-        this.columnBuilder = new ColumnBuilder();
+        this.columnBuilder = new ColumnComponent();
     }
 
     @FXML
@@ -51,26 +50,27 @@ public class EntityEditorController extends EditorDialog {
             return false;
         }
 
-        ObservableList<DialogColumnEntry> columnsData = this.columnBuilder.getColunmsData();
-        if (columnsData.isEmpty()) {
-            CanvasController.showWarningAlert("Erreur", "L'entité doit contenir au moins une colonne");
-            return false;
-        }
-
-        for (DialogColumnEntry row : columnsData) {
-            if (row.getName().isBlank()) {
-                CanvasController.showWarningAlert("Erreur", "Toutes les colonnes doivent avoir un nom");
+        return this.columnBuilder.checkValidity(columnsData -> {
+            if (columnsData.isEmpty()) {
+                CanvasController.showWarningAlert("Erreur", "L'entité doit contenir au moins une colonne");
                 return false;
             }
-        }
 
-        long nbPK = columnsData.stream().filter(DialogColumnEntry::isPrimaryKey).count();
-        if (nbPK != 1) {
-            CanvasController.showWarningAlert("Erreur", "L'entité ne peut avoir qu'une seul clé primaire");
-            return false;
-        }
-        
-        return true;
+            for (Column row : columnsData) {
+                if (row.name.isBlank()) {
+                    CanvasController.showWarningAlert("Erreur", "Toutes les colonnes doivent avoir un nom");
+                    return false;
+                }
+            }
+
+            long nbPK = columnsData.stream().filter(Column::isPrimaryKey).count();
+            if (nbPK != 1) {
+                CanvasController.showWarningAlert("Erreur", "L'entité ne peut avoir qu'une seul clé primaire");
+                return false;
+            }
+
+            return true;
+        });
     }
 
     @Override

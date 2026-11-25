@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.dbeditor.controller.CanvasController;
-import com.dbeditor.controller.view.dialogs.dialog_builder.ColumnBuilder;
-import com.dbeditor.controller.view.dialogs.dialog_builder.ForeignKeyBuilder;
-import com.dbeditor.controller.view.dialogs.dialog_data.DialogColumnEntry;
+import com.dbeditor.controller.view.dialogs.dialog_component.ColumnComponent;
+import com.dbeditor.controller.view.dialogs.dialog_component.ForeignKeyComponent;
 import com.dbeditor.controller.view.dialogs.dialog_data.DialogForeignKey;
+import com.dbeditor.model.Column;
 import com.dbeditor.model.Table;
 
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Separator;
@@ -23,16 +22,16 @@ import javafx.stage.Stage;
  */
 public class AssociationEditorController extends EditorDialog {
 
-    private final ColumnBuilder columnBuilder;
-    private final ForeignKeyBuilder fkBuilder;
+    private final ColumnComponent columnBuilder;
+    private final ForeignKeyComponent fkBuilder;
 
     /**
      * @param table la table à modifier, null pour créer une nouvelle
      */
     public AssociationEditorController(Stage stage, Table table, List<String> entitiesName, Collection<String> existingNames, Function<String, Table> getTable) {
         super(stage, table, existingNames);
-        this.columnBuilder = new ColumnBuilder();
-        this.fkBuilder = new ForeignKeyBuilder(entitiesName, getTable);
+        this.columnBuilder = new ColumnComponent();
+        this.fkBuilder = new ForeignKeyComponent(entitiesName, getTable);
     }
 
     @FXML
@@ -83,17 +82,16 @@ public class AssociationEditorController extends EditorDialog {
             }
         }
 
-        ObservableList<DialogColumnEntry> columnsData = this.columnBuilder.getColunmsData();
-
-        // Vérifier que les noms d'attributs ne sont pas vides
-        for (DialogColumnEntry row : columnsData) {
-            if (row.getName().isBlank()) {
-                CanvasController.showWarningAlert("Attribut invalide", "Tous les attributs doivent avoir un nom.");
-                return false;
+        return this.columnBuilder.checkValidity(columnsData -> {
+            for (Column row : columnsData) {
+                if (row.name.isBlank()) {
+                    CanvasController.showWarningAlert("Attribut invalide", "Tous les attributs doivent avoir un nom.");
+                    return false;
+                }
             }
-        }
 
-        return true;
+            return true;
+        });
     }
 
     @Override

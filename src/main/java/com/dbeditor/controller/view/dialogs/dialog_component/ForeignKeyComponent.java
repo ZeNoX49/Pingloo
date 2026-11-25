@@ -1,4 +1,4 @@
-package com.dbeditor.controller.view.dialogs.dialog_builder;
+package com.dbeditor.controller.view.dialogs.dialog_component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class ForeignKeyBuilder {
+public class ForeignKeyComponent {
 
     // private static final ThemeManager T_M = Singleton.getInstance(ThemeManager.class);
 
@@ -60,7 +60,7 @@ public class ForeignKeyBuilder {
     private final Map<DialogForeignKey, Boolean> existingParticipations;
     private final List<DialogForeignKey> participationsToDelete;
 
-    public ForeignKeyBuilder(List<String> entitiesName, Function<String, Table> getTable) {
+    public ForeignKeyComponent(List<String> entitiesName, Function<String, Table> getTable) {
         this.entitiesName = entitiesName;
         this.getTable = getTable;
 

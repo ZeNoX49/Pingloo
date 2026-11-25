@@ -22,4 +22,6 @@ src/main/java/com/dbeditor/model/type/
 src/main/java/com/dbeditor/sql/db/
 src/main/java/com/dbeditor/sql/file/
 src/main/resources/fxml/parameter/dbParam.fxml
+
 *.loo
+src/main/java/com/dbeditor/fxml/*/
