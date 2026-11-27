@@ -14,6 +14,7 @@ import java.util.function.Function;
 import com.dbeditor.fxml.SheetCell.SheetBooleanCell;
 import com.dbeditor.fxml.SheetCell.SheetSelectionCell;
 import com.dbeditor.fxml.SheetCell.SheetTextCell;
+import com.dbeditor.fxml.SheetColumn.CellType;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -22,54 +23,25 @@ import javafx.scene.layout.StackPane;
 
 /**
  * Custom JavaFX sheet.
- *
- * Supported type: {@code Boolean}, {@code Character}, {@code String},
- * {@code Byte}, {@code Short},{@code Integer}, {@code Long}, {@code Float},
- * {@code Double}
  */
 public class Sheet extends ScrollPane {
-
-    private static final Set<Class<? extends Constable>> SUPPORTED_TYPES = Set.of(
-            Boolean.class, Character.class, String.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class
-    );
 
     // private static final String HEADER_STYLE = "-fx-background-color: #e9edf2; -fx-border-color: #c5cbd2; -fx-border-width: 0 1 1 0;";
     // private static final String SUBHEADER_STYLE = "-fx-background-color: #f3f5f7; -fx-border-color: #c5cbd2; -fx-border-width: 0 1 1 0;";
 
     private final GridPane grid = new GridPane();
 
-    private enum CellType {
-        BOOLEAN_CELL, TEXT_CELL, SELECTION_CELL;
-    }
-
-    private final List<Class<? extends Constable>> columnTypes = new ArrayList<>();
-    private final List<CellType> cellTypes = new ArrayList<>();
-
     private final List<SheetHeaderCell> headers = new ArrayList<>();
     private boolean hasHeader = false;
     private final List<SheetHeaderCell> subHeaders = new ArrayList<>();
     private boolean hasSubHeader = false;
 
-    private final List<List<SheetCell<? extends Constable>>> rows = new ArrayList<>();
-    private final Map<Integer, String[]> selectionCells = new HashMap<>();
-    private final List<Integer> nonNullColumns = new ArrayList<>();
-    private final List<Integer> uniqueColumns = new ArrayList<>();
-    private final Map<Integer, Function<Integer, Constable>> autoIncrementColumns = new HashMap<>();
-    private final Map<Integer, List<BiConsumer<Integer, Constable>>> listenerColumns = new HashMap<>();
-    private final List<Function<Constable, Boolean>> validators = new ArrayList<>();
-    private final Map<Integer, Constable> disabledColumns = new HashMap<>();
+    private final List<SheetColumn<? extends Constable>> sheetColumns = new ArrayList<>();
 
     // TODO: private final List<Double> widthPercent = new ArrayList<>();
 
-    public Sheet(Class<? extends Constable>... types) {
-        if (types == null || types.length == 0) {
-            throw new IllegalArgumentException("At least one column type is required.");
-        }
-
-        for (Class<? extends Constable> type : types) {
-            Sheet.validateSupportedType(type);
-            this.columnTypes.add(type);
-        }
+    public Sheet(SheetColumn<? extends Constable>... sheetColumns) {
+        this.sheetColumns.addAll(Arrays.asList(sheetColumns));
 
         // TODO: style
 
@@ -98,10 +70,9 @@ public class Sheet extends ScrollPane {
     // ****************************************************************
 
     private void initializeHeaders() {
-        for (Class<? extends Constable> type : this.columnTypes) {
-            this.headers.add(this.createHeader(type.getSimpleName(), true));
+        for (SheetColumn<?> column : this.sheetColumns) {
+            this.headers.add(this.createHeader(column.columnType.getSimpleName(), true));
             this.subHeaders.add(this.createHeader("", false));
-            this.cellTypes.add(type == Boolean.class ? CellType.BOOLEAN_CELL : CellType.TEXT_CELL);
         }
     }
 
@@ -119,7 +90,32 @@ public class Sheet extends ScrollPane {
     //     this.grid.setMinWidth(this.columnTypes.size() * 100.0);
     // }
 
+    private void render() {
+        this.grid.getChildren().clear();
+
+        for (int column = 0; column < this.sheetColumns.size(); column++) {
+            if (this.hasHeader) {
+                this.grid.add(this.headers.get(column).container, column, 0);
+            }
+
+            if (this.hasSubHeader) {
+                this.grid.add(this.subHeaders.get(column).container, column, this.hasHeader ? 1 : 0);
+            }
+        }
+
+        int firstRow = this.getFirstRowIndex();
+        // for (int row = 0; row < this.rows.size(); row++) {
+        //     for (int column = 0; column < this.columnTypes.size(); column++) {
+        //         StackPane container = this.rows.get(row).get(column).getContainer();
+        //         this.grid.add(container, column, firstRow + row);
+        //         // GridPane.setHgrow(container, Priority.ALWAYS);
+        //     }
+        // }
+    }
+
     private SheetHeaderCell createHeader(String text, boolean primary) {
+        // TODO: style
+
         Label label = new Label(text);
         // label.setMaxWidth(Double.MAX_VALUE);
         // label.setStyle(primary ? "-fx-font-weight: bold;" : "-fx-font-size: 11px; -fx-text-fill: #606a75;");
@@ -132,29 +128,6 @@ public class Sheet extends ScrollPane {
         // container.setStyle(primary ? Sheet.HEADER_STYLE : Sheet.SUBHEADER_STYLE);
 
         return new SheetHeaderCell(label, container);
-    }
-
-    private void render() {
-        this.grid.getChildren().clear();
-
-        for (int column = 0; column < this.columnTypes.size(); column++) {
-            if (this.hasHeader) {
-                this.grid.add(this.headers.get(column).container, column, 0);
-            }
-
-            if (this.hasSubHeader) {
-                this.grid.add(this.subHeaders.get(column).container, column, this.hasHeader ? 1 : 0);
-            }
-        }
-
-        int firstColumn = this.getFirstColumnIndex();
-        for (int row = 0; row < this.rows.size(); row++) {
-            for (int column = 0; column < this.columnTypes.size(); column++) {
-                StackPane container = this.rows.get(row).get(column).getContainer();
-                this.grid.add(container, column, firstColumn + row);
-                // GridPane.setHgrow(container, Priority.ALWAYS);
-            }
-        }
     }
 
     // *********************************************************
@@ -184,7 +157,7 @@ public class Sheet extends ScrollPane {
     }
 
     private void updateHeaderPos() {
-
+        // TODO:
     }
 
     // ******************************************************
@@ -533,14 +506,13 @@ public class Sheet extends ScrollPane {
         }
     }
 
-    private int getFirstColumnIndex() {
+    private int getFirstRowIndex() {
         return (this.hasHeader ? 1 : 0) + (this.hasSubHeader ? 1 : 0);
     }
 
     // ****************************************************************
     //                          internal class                         
     // ****************************************************************
-
     private class SheetHeaderCell {
 
         public final Label label;
